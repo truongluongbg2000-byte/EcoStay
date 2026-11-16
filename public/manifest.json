@@ -1,0 +1,21 @@
+{
+  "name": "EcoStay - Du Lịch Xanh",
+  "short_name": "EcoStay",
+  "description": "Ứng dụng du lịch xanh & tích lũy CACBON POINT",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1E4D3E",
+  "theme_color": "#1E4D3E",
+  "icons": [
+    {
+      "src": "/logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
