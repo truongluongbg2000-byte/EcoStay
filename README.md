@@ -13,7 +13,7 @@
 ## 📱 5 Tab Chức Năng Chính (Bottom Navigation)
 
 1. **Trang chủ (Home):**
-   - Header cá nhân hóa (Nguyễn Thị Phương Oanh - Phòng Suite Eco-402), thẻ số dư 54 điểm CACBON POINT (CB).
+   - Header cá nhân hóa (Trương Thế Lương - Phòng Suite Eco-402), thẻ số dư 54 điểm CACBON POINT (CB).
    - **Eco-Dashboard:** 3 chỉ số phát thải thời gian thực (kg CO₂ giảm được, Lít nước tiết kiệm, kWh Điện xanh).
    - **Băng chuyền Banner:** Chiến dịch trồng 1 vạn cây rừng, Tour Zero-Waste, Khách sạn Net Zero.
    - **Lưới 8 tiện ích nhanh:** Cẩm nang, Gửi ý kiến (+15 CB), Quà tặng, Ngày hội xanh, Đối tác, Đường tới EcoStay, Lịch sử điểm, Lịch sử mua sắm.

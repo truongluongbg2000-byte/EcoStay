@@ -1,8 +1,8 @@
 import { UserProfile, RewardItem, Voucher, ImpactLog, GreenMission } from './types';
 
 export const initialUserProfile: UserProfile = {
-  name: 'Nguyễn Thị Phương Oanh',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+  name: 'Trương Thế Lương',
+  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80',
   carbonPoints: 54,
   avnPoints: 120,
   expiryDate: '30/11/2027',

@@ -22,10 +22,10 @@ import { AboutModal } from '@/components/AboutModal';
 import { triggerEcoConfetti } from '@/components/Confetti';
 import { Sparkles, CheckCircle2, Wifi, Battery, Signal } from 'lucide-react';
 
-const STORAGE_KEY_USER = 'ecostay_user_profile_v2';
-const STORAGE_KEY_VOUCHERS = 'ecostay_vouchers_v2';
-const STORAGE_KEY_LOGS = 'ecostay_logs_v2';
-const STORAGE_KEY_MISSIONS = 'ecostay_missions_v2';
+const STORAGE_KEY_USER = 'ecostay_user_profile_v3';
+const STORAGE_KEY_VOUCHERS = 'ecostay_vouchers_v3';
+const STORAGE_KEY_LOGS = 'ecostay_logs_v3';
+const STORAGE_KEY_MISSIONS = 'ecostay_missions_v3';
 
 export default function EcoStayApp() {
   // Navigation
