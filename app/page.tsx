@@ -209,6 +209,73 @@ export default function EcoStayApp() {
     );
   };
 
+  // Handler: Real Live Camera QR Scan (jsQR)
+  const handleLiveQRScan = (decodedData: string) => {
+    const upper = decodedData.toUpperCase();
+    let title = '';
+    let points = 25;
+    let co2 = 1.0;
+    let water = 10;
+    let energy = 0.5;
+    let detail = `Mã quét: ${decodedData.slice(0, 32)}${decodedData.length > 32 ? '...' : ''}`;
+
+    if (upper.includes('ROOM') || upper.includes('SUITE') || upper.includes('HOTEL')) {
+      title = 'Quét mã Camera: Buồng phòng xanh';
+      points = 50;
+      co2 = 2.1;
+      water = 35;
+      energy = 1.5;
+      detail = 'Từ chối dọn phòng/thay ga hằng ngày.';
+    } else if (upper.includes('FOOD') || upper.includes('TABLE') || upper.includes('ZERO_WASTE') || upper.includes('BUFFET')) {
+      title = 'Quét mã Camera: Zero Food Waste';
+      points = 30;
+      co2 = 1.2;
+      water = 15;
+      energy = 0.8;
+      detail = 'Xác nhận ăn sạch đĩa không lãng phí thức ăn.';
+    } else if (upper.includes('XANH_SM') || upper.includes('VINFAST') || upper.includes('TNGO') || upper.includes('BIKE') || upper.includes('BUS')) {
+      title = 'Quét mã Camera: Di chuyển xanh';
+      points = 20;
+      co2 = 1.5;
+      water = 0;
+      energy = 0.5;
+      detail = 'Di chuyển bằng xe điện hoặc xe đạp công cộng.';
+    } else {
+      title = 'Quét mã Camera: Tiêu dùng xanh';
+      points = 25;
+      co2 = 1.1;
+      water = 10;
+      energy = 0.6;
+      detail = `Nhận diện mã: ${decodedData.slice(0, 30)}${decodedData.length > 30 ? '...' : ''}`;
+    }
+
+    setUser((prev) => ({
+      ...prev,
+      carbonPoints: prev.carbonPoints + points,
+      co2Saved: Number((prev.co2Saved + co2).toFixed(1)),
+      waterSaved: prev.waterSaved + water,
+      energySaved: Number((prev.energySaved + energy).toFixed(1)),
+    }));
+
+    const newLog: ImpactLog = {
+      id: `log-${Date.now()}`,
+      date: 'Vừa xong',
+      title,
+      points,
+      type: 'earn',
+      co2DeltaKg: co2,
+      waterDeltaL: water,
+      energyDeltaKwh: energy,
+      detail,
+    };
+    setLogs((prev) => [newLog, ...prev]);
+
+    showToast(
+      `Camera nhận diện thành công: +${points} CB!`,
+      <CheckCircle2 size={16} className="text-emerald-400" />
+    );
+  };
+
   // Handler: Redeem Reward
   const handleRedeemReward = (reward: RewardItem) => {
     if (user.carbonPoints < reward.points) return;
@@ -356,6 +423,7 @@ export default function EcoStayApp() {
             missions={missions}
             onToggleMission={handleToggleMission}
             onSimulateQRScan={handleSimulateQRScan}
+            onLiveQRScan={handleLiveQRScan}
           />
         )}
 
