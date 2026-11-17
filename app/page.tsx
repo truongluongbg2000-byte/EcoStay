@@ -34,6 +34,7 @@ import { AboutModal } from '@/components/AboutModal';
 import { AIChatModal } from '@/components/AIChatModal';
 import { MissionQRModal } from '@/components/MissionQRModal';
 import { AuthModal } from '@/components/AuthModal';
+import { LoginScreen } from '@/components/LoginScreen';
 import { triggerEcoConfetti } from '@/components/Confetti';
 import { Sparkles, CheckCircle2, UserCheck } from 'lucide-react';
 import { mockAccounts } from '@/data/mockData';
@@ -48,6 +49,7 @@ const STORAGE_KEY_ACTIVE_ACCOUNT = 'ecostay_active_account_v5';
 
 export default function EcoStayApp() {
   const [activeTab, setActiveTab] = useState<TabId>('home');
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   // Application Data States (Hydrated with LocalStorage v5)
   const [user, setUser] = useState<UserProfile>(initialUserProfile);
@@ -449,11 +451,11 @@ export default function EcoStayApp() {
 
   // Handler: Logout
   const handleLogout = () => {
-    setIsAuthOpen(true);
+    setIsLoggedIn(false);
     showToast(
       currentLang === 'en'
-        ? 'Signed out. Choose a profile to switch.'
-        : 'Đã đăng xuất. Vui lòng chọn tài khoản để tiếp tục.'
+        ? 'Signed out successfully.'
+        : 'Đã đăng xuất thành công.'
     );
   };
 
@@ -475,6 +477,42 @@ export default function EcoStayApp() {
       showToast('Đã khôi phục dữ liệu Demo thành công.');
     }
   };
+
+  // If not logged in, show Login Screen first!
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-slate-900/5 sm:bg-slate-900/20 flex items-center justify-center p-0 sm:p-4">
+        <LoginScreen
+          currentLang={currentLang}
+          onChangeLang={setCurrentLang}
+          onLoginSuccess={(acc) => {
+            handleSelectAccount(acc);
+            setIsLoggedIn(true);
+          }}
+          onRegisterSuccess={(data) => {
+            handleRegisterNewAccount(data);
+            setIsLoggedIn(true);
+          }}
+          onContinueAsGuest={() => {
+            setIsLoggedIn(true);
+            showToast(
+              currentLang === 'en'
+                ? `Welcome! Exploring as Guest (${user.name})`
+                : `Chào mừng! Trải nghiệm dạng Khách (${user.name})`
+            );
+          }}
+        />
+
+        {/* Floating Toast Notification */}
+        {toastMessage && (
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-2xl bg-slate-900/90 px-4 py-2.5 text-xs font-semibold text-white shadow-2xl backdrop-blur-md animate-fadeIn max-w-[90%] text-center">
+            {toastMessage.icon}
+            <span>{toastMessage.text}</span>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="relative mx-auto w-full max-w-md min-h-screen bg-[#F8FAF8] text-[#1B3B2B] pb-24 shadow-2xl font-sans rounded-none sm:rounded-[40px] overflow-hidden border-0 sm:border-8 sm:border-slate-800 flex flex-col justify-between">
