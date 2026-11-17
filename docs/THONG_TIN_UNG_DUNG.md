@@ -202,7 +202,7 @@ Hệ thống được cấu trúc xoay quanh **5 Tab điều hướng chân tran
 | Tiêu chí | Thông số kỹ thuật |
 | :--- | :--- |
 | **Môi trường triển khai** | Vercel Edge Network |
-| **Source Code Repository** | `https://github.com/vungocthien843-cyber/EcoStay.git` (Nhánh `main`) |
+| **Source Code Repository** | `https://github.com/truongluongbg2000-byte/EcoStay.git` (Nhánh `main`) |
 | **Kích thước gói tải ban đầu** | **87.3 kB** (Siêu nhẹ, tải trong < 0.8 giây) |
 | **Tiêu chuẩn thiết kế** | Responsive Mobile-First, PWA Standalone Ready |
 | **Cơ chế lưu trữ Client** | LocalStorage Engine v3 |
