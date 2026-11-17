@@ -12,7 +12,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ user, onOpenNotifications, onOpenProfile }) => {
   return (
-    <header className="sticky top-0 z-30 bg-[#1E4D3E] px-4 pt-3 pb-3 text-white shadow-md">
+    <header className="sticky top-0 z-30 bg-[#1E4D3E] px-4 pt-4 pb-3.5 text-white shadow-md">
       <div className="flex items-center justify-between">
         {/* User Info & Avatar */}
         <div

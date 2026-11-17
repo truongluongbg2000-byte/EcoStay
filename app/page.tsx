@@ -20,7 +20,7 @@ import { FeedbackModal } from '@/components/FeedbackModal';
 import { PartnersModal } from '@/components/PartnersModal';
 import { AboutModal } from '@/components/AboutModal';
 import { triggerEcoConfetti } from '@/components/Confetti';
-import { Sparkles, CheckCircle2, Wifi, Battery, Signal } from 'lucide-react';
+import { Sparkles, CheckCircle2 } from 'lucide-react';
 
 const STORAGE_KEY_USER = 'ecostay_user_profile_v3';
 const STORAGE_KEY_VOUCHERS = 'ecostay_vouchers_v3';
@@ -374,17 +374,6 @@ export default function EcoStayApp() {
   return (
     <div className="relative mx-auto w-full max-w-md min-h-screen bg-[#F8FAF8] text-[#1B3B2B] pb-24 shadow-2xl font-sans rounded-none sm:rounded-[40px] overflow-hidden border-0 sm:border-8 sm:border-slate-800 flex flex-col justify-between">
       
-      {/* Smartphone Status Bar (For authentic preview on desktop/mobile) */}
-      <div className="sticky top-0 z-40 bg-[#1E4D3E] px-6 pt-2 pb-1 text-white flex items-center justify-between text-[11px] select-none font-medium">
-        <span>9:41</span>
-        <div className="flex h-3 w-16 items-center justify-center rounded-full bg-black/30" />
-        <div className="flex items-center gap-1.5">
-          <Signal size={12} />
-          <Wifi size={12} />
-          <Battery size={13} />
-        </div>
-      </div>
-
       {/* Main Top Header */}
       <Header
         user={user}
