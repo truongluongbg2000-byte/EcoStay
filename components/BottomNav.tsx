@@ -1,20 +1,19 @@
 'use client';
 
 import React from 'react';
-import { Home, Gift, QrCode, Ticket, Menu } from 'lucide-react';
+import { Home, Gift, QrCode, Footprints, Menu } from 'lucide-react';
 
-export type TabId = 'home' | 'rewards' | 'scanner' | 'voucher' | 'more';
+export type TabId = 'home' | 'rewards' | 'scanner' | 'earn' | 'more';
 
 interface BottomNavProps {
   activeTab: TabId;
   onSelectTab: (tab: TabId) => void;
-  voucherCount?: number;
+  cartCount?: number;
 }
 
-export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onSelectTab, voucherCount = 0 }) => {
+export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onSelectTab, cartCount = 0 }) => {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 mx-auto max-w-md">
-      {/* Background card with top blur and border */}
       <nav className="relative flex items-center justify-between border-t border-emerald-900/10 bg-white/95 px-3 py-1.5 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] backdrop-blur-md">
         
         {/* Tab 1: Trang chủ */}
@@ -35,7 +34,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onSelectTab, vo
         {/* Tab 2: Quà tặng */}
         <button
           onClick={() => onSelectTab('rewards')}
-          className={`flex flex-1 flex-col items-center justify-center py-1 transition-all ${
+          className={`relative flex flex-1 flex-col items-center justify-center py-1 transition-all ${
             activeTab === 'rewards' ? 'text-[#1E4D3E]' : 'text-slate-400 hover:text-slate-600'
           }`}
         >
@@ -45,9 +44,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onSelectTab, vo
           <span className={`text-[10px] mt-0.5 ${activeTab === 'rewards' ? 'font-bold' : 'font-medium'}`}>
             Quà tặng
           </span>
+          {cartCount > 0 && (
+            <span className="absolute top-1 right-3 flex h-4 w-4 items-center justify-center rounded-full bg-[#D97736] text-[9px] font-bold text-white shadow">
+              {cartCount}
+            </span>
+          )}
         </button>
 
-        {/* Tab 3: Quét mã (Prominent Center Button) */}
+        {/* Tab 3: Quét mã (Nổi bật chính giữa) */}
         <div className="flex flex-1 flex-col items-center justify-center">
           <button
             onClick={() => onSelectTab('scanner')}
@@ -64,24 +68,19 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onSelectTab, vo
           </span>
         </div>
 
-        {/* Tab 4: Voucher */}
+        {/* Tab 4: Tích điểm (Dấu chân xanh) */}
         <button
-          onClick={() => onSelectTab('voucher')}
+          onClick={() => onSelectTab('earn')}
           className={`relative flex flex-1 flex-col items-center justify-center py-1 transition-all ${
-            activeTab === 'voucher' ? 'text-[#1E4D3E]' : 'text-slate-400 hover:text-slate-600'
+            activeTab === 'earn' ? 'text-[#1E4D3E]' : 'text-slate-400 hover:text-slate-600'
           }`}
         >
-          <div className={`p-1 rounded-xl transition-colors ${activeTab === 'voucher' ? 'bg-emerald-50' : ''}`}>
-            <Ticket size={20} className={activeTab === 'voucher' ? 'stroke-[2.5]' : 'stroke-[1.8]'} />
+          <div className={`p-1 rounded-xl transition-colors ${activeTab === 'earn' ? 'bg-emerald-50' : ''}`}>
+            <Footprints size={20} className={activeTab === 'earn' ? 'stroke-[2.5] text-emerald-700' : 'stroke-[1.8]'} />
           </div>
-          <span className={`text-[10px] mt-0.5 ${activeTab === 'voucher' ? 'font-bold' : 'font-medium'}`}>
-            Voucher
+          <span className={`text-[10px] mt-0.5 ${activeTab === 'earn' ? 'font-bold' : 'font-medium'}`}>
+            Tích điểm
           </span>
-          {voucherCount > 0 && (
-            <span className="absolute top-1 right-3 flex h-4 w-4 items-center justify-center rounded-full bg-[#D97736] text-[9px] font-bold text-white">
-              {voucherCount}
-            </span>
-          )}
         </button>
 
         {/* Tab 5: Khác */}

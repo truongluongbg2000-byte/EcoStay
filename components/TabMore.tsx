@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  Navigation,
+  Settings,
   Phone,
   FileQuestion,
   Share2,
@@ -16,14 +16,17 @@ import {
   LogOut,
   ChevronRight,
   Award,
-  Leaf
+  Leaf,
+  Check,
+  X
 } from 'lucide-react';
 import { UserProfile } from '@/data/types';
 
 interface TabMoreProps {
   user: UserProfile;
+  currentLang: 'vi' | 'en';
+  onChangeLang: (lang: 'vi' | 'en') => void;
   onOpenEcoImpact: () => void;
-  onOpenDirections: () => void;
   onOpenHandbook: () => void;
   onOpenHistory: (tab?: 'points' | 'orders') => void;
   onOpenFeedback: () => void;
@@ -33,14 +36,18 @@ interface TabMoreProps {
 
 export const TabMore: React.FC<TabMoreProps> = ({
   user,
+  currentLang,
+  onChangeLang,
   onOpenEcoImpact,
-  onOpenDirections,
   onOpenHandbook,
   onOpenHistory,
   onOpenFeedback,
   onOpenAbout,
   onResetData,
 }) => {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isLangModalOpen, setIsLangModalOpen] = useState(false);
+
   return (
     <div className="space-y-4 px-4 pt-3 pb-8 text-left">
       {/* 1. Header Profile Card */}
@@ -56,7 +63,7 @@ export const TabMore: React.FC<TabMoreProps> = ({
               <span>{user.rank}</span>
             </p>
             <p className="text-[10px] text-slate-400 mt-0.5">
-              Tài khoản đã định danh • {user.roomNumber}
+              Mã thành viên: {user.memberCode || 'ECO-TL-883921'}
             </p>
           </div>
         </div>
@@ -104,24 +111,24 @@ export const TabMore: React.FC<TabMoreProps> = ({
         </button>
       </div>
 
-      {/* 3. Settings & Information Menu List (Matching original image 6) */}
+      {/* 3. Settings & Information Menu List (Replaced "Đường tới ECOSTAY" with "Cài đặt") */}
       <div className="rounded-3xl bg-white p-2 shadow-sm border border-emerald-950/5 divide-y divide-slate-100">
         
-        {/* Đường tới ECOSTAY */}
+        {/* Cài đặt (Thay cho Đường tới EcoStay) */}
         <button
-          onClick={onOpenDirections}
+          onClick={() => setIsSettingsOpen(true)}
           className="flex w-full items-center justify-between p-3 hover:bg-slate-50 rounded-2xl transition-colors"
         >
           <div className="flex items-center gap-3">
             <div className="text-emerald-800">
-              <Navigation size={18} />
+              <Settings size={18} />
             </div>
-            <span className="text-xs font-semibold text-slate-700">Đường tới ECOSTAY</span>
+            <span className="text-xs font-semibold text-slate-700">Cài đặt ứng dụng</span>
           </div>
           <ChevronRight size={16} className="text-slate-300" />
         </button>
 
-        {/* Liên hệ */}
+        {/* Liên hệ & Hotline */}
         <button
           onClick={onOpenFeedback}
           className="flex w-full items-center justify-between p-3 hover:bg-slate-50 rounded-2xl transition-colors"
@@ -144,7 +151,7 @@ export const TabMore: React.FC<TabMoreProps> = ({
             <div className="text-emerald-800">
               <FileQuestion size={18} />
             </div>
-            <span className="text-xs font-semibold text-slate-700">Khảo sát ý kiến du khách (+15 CB)</span>
+            <span className="text-xs font-semibold text-slate-700">Khảo sát ý kiến du khách (+15 CP)</span>
           </div>
           <ChevronRight size={16} className="text-slate-300" />
         </button>
@@ -158,7 +165,7 @@ export const TabMore: React.FC<TabMoreProps> = ({
             <div className="text-emerald-800">
               <Share2 size={18} />
             </div>
-            <span className="text-xs font-semibold text-slate-700">Mời bạn bè sống xanh</span>
+            <span className="text-xs font-semibold text-slate-700">Mời bạn bè sống xanh (+50 CP)</span>
           </div>
           <ChevronRight size={16} className="text-slate-300" />
         </button>
@@ -177,7 +184,7 @@ export const TabMore: React.FC<TabMoreProps> = ({
           <ChevronRight size={16} className="text-slate-300" />
         </button>
 
-        {/* Thông tin pháp lý */}
+        {/* Thông tin pháp lý & ESG */}
         <button
           onClick={onOpenAbout}
           className="flex w-full items-center justify-between p-3 hover:bg-slate-50 rounded-2xl transition-colors"
@@ -233,20 +240,23 @@ export const TabMore: React.FC<TabMoreProps> = ({
           <ChevronRight size={16} className="text-slate-300" />
         </button>
 
-        {/* Ngôn ngữ */}
-        <div className="flex w-full items-center justify-between p-3">
+        {/* Ngôn ngữ (Chỉ Tiếng Việt và Tiếng Anh theo yêu cầu) */}
+        <button
+          onClick={() => setIsLangModalOpen(true)}
+          className="flex w-full items-center justify-between p-3 hover:bg-slate-50 rounded-2xl transition-colors"
+        >
           <div className="flex items-center gap-3">
             <div className="text-emerald-800">
               <Globe size={18} />
             </div>
             <span className="text-xs font-semibold text-slate-700">Ngôn ngữ hiển thị</span>
           </div>
-          <span className="text-xs font-bold text-[#1E4D3E] bg-emerald-50 px-2.5 py-1 rounded-xl">
-            Tiếng Việt (VN)
+          <span className="text-xs font-bold text-[#1E4D3E] bg-emerald-50 px-2.5 py-1 rounded-xl flex items-center gap-1 border border-emerald-200">
+            {currentLang === 'vi' ? '🇻🇳 Tiếng Việt' : '🇬🇧 English'}
           </span>
-        </div>
+        </button>
 
-        {/* Đăng xuất / Đặt lại dữ liệu mẫu */}
+        {/* Đặt lại dữ liệu mẫu */}
         <button
           onClick={onResetData}
           className="flex w-full items-center justify-between p-3 hover:bg-red-50 rounded-2xl transition-colors text-red-600"
@@ -262,9 +272,133 @@ export const TabMore: React.FC<TabMoreProps> = ({
 
       {/* App Version Info */}
       <div className="text-center pt-2 text-[10px] text-slate-400">
-        <p>EcoStay Mobile Web • v1.0.4 (Thăng Long Kỳ Tích)</p>
+        <p>EcoStay Mobile Web • v2.0 (Thăng Long Kỳ Tích)</p>
         <p className="mt-0.5">Phát triển bởi Nhóm Tinh Hà Say Hi - Lớp QI3703</p>
       </div>
+
+      {/* Language Selector Modal (Only Tiếng Việt and Tiếng Anh) */}
+      {isLangModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fadeIn">
+          <div className="relative w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl text-left">
+            <div className="flex items-center justify-between border-b pb-3 mb-3">
+              <div className="flex items-center gap-2">
+                <Globe size={18} className="text-emerald-700" />
+                <h4 className="text-sm font-bold text-slate-800">Chọn ngôn ngữ / Language</h4>
+              </div>
+              <button
+                onClick={() => setIsLangModalOpen(false)}
+                className="rounded-full bg-slate-100 p-1.5 text-slate-500 hover:bg-slate-200"
+              >
+                <X size={15} />
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <button
+                onClick={() => {
+                  onChangeLang('vi');
+                  setIsLangModalOpen(false);
+                }}
+                className={`w-full flex items-center justify-between p-3 rounded-2xl border transition-all ${
+                  currentLang === 'vi'
+                    ? 'border-emerald-500 bg-emerald-50 text-[#1E4D3E] font-bold'
+                    : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🇻🇳</span>
+                  <span className="text-xs">Tiếng Việt (Mặc định)</span>
+                </div>
+                {currentLang === 'vi' && <Check size={16} className="text-emerald-700" />}
+              </button>
+
+              <button
+                onClick={() => {
+                  onChangeLang('en');
+                  setIsLangModalOpen(false);
+                }}
+                className={`w-full flex items-center justify-between p-3 rounded-2xl border transition-all ${
+                  currentLang === 'en'
+                    ? 'border-emerald-500 bg-emerald-50 text-[#1E4D3E] font-bold'
+                    : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🇬🇧</span>
+                  <span className="text-xs">English (US/UK)</span>
+                </div>
+                {currentLang === 'en' && <Check size={16} className="text-emerald-700" />}
+              </button>
+            </div>
+
+            <button
+              onClick={() => setIsLangModalOpen(false)}
+              className="mt-4 w-full rounded-2xl bg-[#1E4D3E] py-2.5 text-xs font-bold text-white hover:bg-[#16392E]"
+            >
+              Xác nhận
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {isSettingsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fadeIn">
+          <div className="relative w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl text-left">
+            <div className="flex items-center justify-between border-b pb-3 mb-3">
+              <div className="flex items-center gap-2">
+                <Settings size={18} className="text-emerald-700" />
+                <h4 className="text-sm font-bold text-slate-800">Cài đặt ứng dụng</h4>
+              </div>
+              <button
+                onClick={() => setIsSettingsOpen(false)}
+                className="rounded-full bg-slate-100 p-1.5 text-slate-500 hover:bg-slate-200"
+              >
+                <X size={15} />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="flex items-center justify-between py-2 border-b border-slate-100">
+                <div>
+                  <p className="font-semibold text-slate-800">Thông báo cộng điểm</p>
+                  <p className="text-[10px] text-slate-400">Rung và thông báo khi hoàn thành nhiệm vụ</p>
+                </div>
+                <div className="h-5 w-9 bg-emerald-600 rounded-full flex items-center justify-end px-0.5">
+                  <div className="h-4 w-4 bg-white rounded-full shadow" />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between py-2 border-b border-slate-100">
+                <div>
+                  <p className="font-semibold text-slate-800">Chế độ tiết kiệm pin Camera</p>
+                  <p className="text-[10px] text-slate-400">Tự động tắt camera khi chuyển tab</p>
+                </div>
+                <div className="h-5 w-9 bg-emerald-600 rounded-full flex items-center justify-end px-0.5">
+                  <div className="h-4 w-4 bg-white rounded-full shadow" />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <p className="font-semibold text-slate-800">Tự động đồng bộ Offline</p>
+                  <p className="text-[10px] text-slate-400">Lưu dữ liệu vào bộ nhớ máy (LocalStorage)</p>
+                </div>
+                <div className="h-5 w-9 bg-emerald-600 rounded-full flex items-center justify-end px-0.5">
+                  <div className="h-4 w-4 bg-white rounded-full shadow" />
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsSettingsOpen(false)}
+              className="mt-4 w-full rounded-2xl bg-[#1E4D3E] py-2.5 text-xs font-bold text-white hover:bg-[#16392E]"
+            >
+              Lưu cài đặt
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

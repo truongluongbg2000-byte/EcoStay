@@ -1,52 +1,65 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { initialUserProfile, initialRewards, initialVouchers, initialImpactLogs, initialMissions } from '@/data/mockData';
-import { UserProfile, RewardItem, Voucher, ImpactLog, GreenMission } from '@/data/types';
+import {
+  initialUserProfile,
+  initialDestinations,
+  initialRewards,
+  initialVouchers,
+  initialImpactLogs,
+  initialMissions
+} from '@/data/mockData';
+import {
+  UserProfile,
+  GreenDestination,
+  RewardItem,
+  Voucher,
+  ImpactLog,
+  DetailedMission
+} from '@/data/types';
 import { Header } from '@/components/Header';
 import { BottomNav, TabId } from '@/components/BottomNav';
 import { TabHome } from '@/components/TabHome';
 import { TabRewards } from '@/components/TabRewards';
 import { TabScanner } from '@/components/TabScanner';
-import { TabVoucher } from '@/components/TabVoucher';
+import { TabEarnPoints } from '@/components/TabEarnPoints';
 import { TabMore } from '@/components/TabMore';
 import { EcoImpactModal } from '@/components/EcoImpactModal';
 import { VoucherDetailModal } from '@/components/VoucherDetailModal';
 import { NotificationModal } from '@/components/NotificationModal';
-import { DirectionsModal } from '@/components/DirectionsModal';
 import { HandbookModal } from '@/components/HandbookModal';
 import { HistoryModal } from '@/components/HistoryModal';
 import { FeedbackModal } from '@/components/FeedbackModal';
-import { PartnersModal } from '@/components/PartnersModal';
 import { AboutModal } from '@/components/AboutModal';
 import { triggerEcoConfetti } from '@/components/Confetti';
 import { Sparkles, CheckCircle2 } from 'lucide-react';
 
-const STORAGE_KEY_USER = 'ecostay_user_profile_v3';
-const STORAGE_KEY_VOUCHERS = 'ecostay_vouchers_v3';
-const STORAGE_KEY_LOGS = 'ecostay_logs_v3';
-const STORAGE_KEY_MISSIONS = 'ecostay_missions_v3';
+const STORAGE_KEY_USER = 'ecostay_user_profile_v4';
+const STORAGE_KEY_VOUCHERS = 'ecostay_vouchers_v4';
+const STORAGE_KEY_LOGS = 'ecostay_logs_v4';
+const STORAGE_KEY_MISSIONS = 'ecostay_missions_v4';
+const STORAGE_KEY_LANG = 'ecostay_lang_v4';
 
 export default function EcoStayApp() {
-  // Navigation
   const [activeTab, setActiveTab] = useState<TabId>('home');
 
-  // Application Data States (Hydrated with LocalStorage)
+  // Application Data States (Hydrated with LocalStorage v4)
   const [user, setUser] = useState<UserProfile>(initialUserProfile);
+  const [destinations] = useState<GreenDestination[]>(initialDestinations);
+  const [rewards] = useState<RewardItem[]>(initialRewards);
   const [vouchers, setVouchers] = useState<Voucher[]>(initialVouchers);
   const [logs, setLogs] = useState<ImpactLog[]>(initialImpactLogs);
-  const [missions, setMissions] = useState<GreenMission[]>(initialMissions);
+  const [missions, setMissions] = useState<DetailedMission[]>(initialMissions);
+  const [currentLang, setCurrentLang] = useState<'vi' | 'en'>('vi');
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Modals
   const [isEcoImpactOpen, setIsEcoImpactOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [isDirectionsOpen, setIsDirectionsOpen] = useState(false);
   const [isHandbookOpen, setIsHandbookOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [historyTab, setHistoryTab] = useState<'points' | 'orders'>('points');
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const [isPartnersOpen, setIsPartnersOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
 
@@ -60,7 +73,7 @@ export default function EcoStayApp() {
     }, 3500);
   };
 
-  // Load state from localStorage on initial render
+  // Load from LocalStorage
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem(STORAGE_KEY_USER);
@@ -74,6 +87,9 @@ export default function EcoStayApp() {
 
       const savedMissions = localStorage.getItem(STORAGE_KEY_MISSIONS);
       if (savedMissions) setMissions(JSON.parse(savedMissions));
+
+      const savedLang = localStorage.getItem(STORAGE_KEY_LANG);
+      if (savedLang === 'vi' || savedLang === 'en') setCurrentLang(savedLang);
     } catch (e) {
       console.warn('LocalStorage load failed', e);
     } finally {
@@ -81,7 +97,7 @@ export default function EcoStayApp() {
     }
   }, []);
 
-  // Save changes to localStorage
+  // Save to LocalStorage
   useEffect(() => {
     if (!isLoaded) return;
     try {
@@ -89,13 +105,14 @@ export default function EcoStayApp() {
       localStorage.setItem(STORAGE_KEY_VOUCHERS, JSON.stringify(vouchers));
       localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));
       localStorage.setItem(STORAGE_KEY_MISSIONS, JSON.stringify(missions));
+      localStorage.setItem(STORAGE_KEY_LANG, currentLang);
     } catch (e) {
       console.warn('LocalStorage save failed', e);
     }
-  }, [user, vouchers, logs, missions, isLoaded]);
+  }, [user, vouchers, logs, missions, currentLang, isLoaded]);
 
-  // Handler: Toggle Green Mission
-  const handleToggleMission = (missionId: string) => {
+  // Handler: Complete Mission in "Tích Điểm"
+  const handleCompleteMission = (missionId: string) => {
     const mission = missions.find((m) => m.id === missionId);
     if (!mission) return;
 
@@ -108,16 +125,10 @@ export default function EcoStayApp() {
     if (willComplete) {
       triggerEcoConfetti();
       const pointsAdded = mission.points;
-      const co2Added = mission.co2Kg;
-      const waterAdded = mission.waterL;
-      const energyAdded = mission.energyKwh;
 
       setUser((prev) => ({
         ...prev,
         carbonPoints: prev.carbonPoints + pointsAdded,
-        co2Saved: Number((prev.co2Saved + co2Added).toFixed(1)),
-        waterSaved: prev.waterSaved + waterAdded,
-        energySaved: Number((prev.energySaved + energyAdded).toFixed(1)),
       }));
 
       const newLog: ImpactLog = {
@@ -126,15 +137,12 @@ export default function EcoStayApp() {
         title: mission.title,
         points: pointsAdded,
         type: 'earn',
-        co2DeltaKg: co2Added,
-        waterDeltaL: waterAdded,
-        energyDeltaKwh: energyAdded,
-        detail: mission.impactNote,
+        detail: mission.subtitle || `Nhận ${pointsAdded} CP từ nhiệm vụ ${mission.categoryName}`,
       };
       setLogs((prev) => [newLog, ...prev]);
 
       showToast(
-        `Chúc mừng! Bạn nhận được +${pointsAdded} CB từ ${mission.title}`,
+        `Chúc mừng! Bạn nhận được +${pointsAdded} CP từ "${mission.title}"`,
         <Sparkles size={16} className="text-amber-400" />
       );
     } else {
@@ -142,119 +150,64 @@ export default function EcoStayApp() {
       setUser((prev) => ({
         ...prev,
         carbonPoints: Math.max(0, prev.carbonPoints - mission.points),
-        co2Saved: Number(Math.max(0, prev.co2Saved - mission.co2Kg).toFixed(1)),
-        waterSaved: Math.max(0, prev.waterSaved - mission.waterL),
-        energySaved: Number(Math.max(0, prev.energySaved - mission.energyKwh).toFixed(1)),
       }));
-      showToast(`Đã thu hồi ${mission.points} CB.`);
+      showToast(`Đã hủy hoàn thành nhiệm vụ (-${mission.points} CP).`);
     }
   };
 
-  // Handler: Simulate QR Scan
-  const handleSimulateQRScan = (type: 'room' | 'food' | 'transport') => {
-    let title = '';
-    let points = 0;
-    let co2 = 0;
-    let water = 0;
-    let energy = 0;
-    let detail = '';
-
-    if (type === 'room') {
-      title = 'Quét mã xác nhận Buồng phòng xanh';
-      points = 50;
-      co2 = 2.1;
-      water = 35;
-      energy = 1.5;
-      detail = 'Từ chối thay ga/khăn hằng ngày tại phòng 402.';
-    } else if (type === 'food') {
-      title = 'Quét mã xác nhận Zero Food Waste';
-      points = 30;
-      co2 = 1.2;
-      water = 15;
-      energy = 0.8;
-      detail = 'Hoàn thành suất ăn tại Nhà hàng Green Table.';
-    } else {
-      title = 'Quét mã sử dụng Xe điện Xanh SM';
-      points = 20;
-      co2 = 1.5;
-      water = 0;
-      energy = 0.5;
-      detail = 'Di chuyển bằng phương tiện điện thuần 100%.';
-    }
+  // Handler: Book Service in Green Destination Directory
+  const handleBookService = (destination: GreenDestination) => {
+    const pointsAdded = destination.pointsReward;
 
     setUser((prev) => ({
       ...prev,
-      carbonPoints: prev.carbonPoints + points,
-      co2Saved: Number((prev.co2Saved + co2).toFixed(1)),
-      waterSaved: prev.waterSaved + water,
-      energySaved: Number((prev.energySaved + energy).toFixed(1)),
+      carbonPoints: prev.carbonPoints + pointsAdded,
     }));
 
     const newLog: ImpactLog = {
       id: `log-${Date.now()}`,
       date: 'Vừa xong',
-      title,
-      points,
+      title: `Đặt dịch vụ: ${destination.name}`,
+      points: pointsAdded,
       type: 'earn',
-      co2DeltaKg: co2,
-      waterDeltaL: water,
-      energyDeltaKwh: energy,
-      detail,
+      detail: `Cơ sở xanh: ${destination.location} (${destination.greenBadge})`,
     };
     setLogs((prev) => [newLog, ...prev]);
 
     showToast(
-      `Quét mã thành công! Bạn nhận được +${points} CACBON POINT`,
+      `Đặt thành công ${destination.name}! Nhận ngay +${pointsAdded} CP!`,
       <CheckCircle2 size={16} className="text-emerald-400" />
     );
   };
 
-  // Handler: Real Live Camera QR Scan (jsQR)
+  // Handler: Live QR Scan (Camera jsQR)
   const handleLiveQRScan = (decodedData: string) => {
     const upper = decodedData.toUpperCase();
     let title = '';
     let points = 25;
-    let co2 = 1.0;
-    let water = 10;
-    let energy = 0.5;
-    let detail = `Mã quét: ${decodedData.slice(0, 32)}${decodedData.length > 32 ? '...' : ''}`;
+    let detail = `Mã: ${decodedData.slice(0, 30)}${decodedData.length > 30 ? '...' : ''}`;
 
     if (upper.includes('ROOM') || upper.includes('SUITE') || upper.includes('HOTEL')) {
-      title = 'Quét mã Camera: Buồng phòng xanh';
+      title = 'Quét mã Buồng phòng xanh';
       points = 50;
-      co2 = 2.1;
-      water = 35;
-      energy = 1.5;
-      detail = 'Từ chối dọn phòng/thay ga hằng ngày.';
+      detail = 'Xác nhận không thay ga/khăn hằng ngày.';
     } else if (upper.includes('FOOD') || upper.includes('TABLE') || upper.includes('ZERO_WASTE') || upper.includes('BUFFET')) {
-      title = 'Quét mã Camera: Zero Food Waste';
+      title = 'Quét mã Zero Food Waste';
       points = 30;
-      co2 = 1.2;
-      water = 15;
-      energy = 0.8;
       detail = 'Xác nhận ăn sạch đĩa không lãng phí thức ăn.';
     } else if (upper.includes('XANH_SM') || upper.includes('VINFAST') || upper.includes('TNGO') || upper.includes('BIKE') || upper.includes('BUS')) {
-      title = 'Quét mã Camera: Di chuyển xanh';
+      title = 'Quét mã Di chuyển xanh';
       points = 20;
-      co2 = 1.5;
-      water = 0;
-      energy = 0.5;
       detail = 'Di chuyển bằng xe điện hoặc xe đạp công cộng.';
     } else {
-      title = 'Quét mã Camera: Tiêu dùng xanh';
+      title = 'Quét mã Tiêu dùng xanh đối tác';
       points = 25;
-      co2 = 1.1;
-      water = 10;
-      energy = 0.6;
-      detail = `Nhận diện mã: ${decodedData.slice(0, 30)}${decodedData.length > 30 ? '...' : ''}`;
+      detail = `Nhận diện mã: ${decodedData.slice(0, 26)}...`;
     }
 
     setUser((prev) => ({
       ...prev,
       carbonPoints: prev.carbonPoints + points,
-      co2Saved: Number((prev.co2Saved + co2).toFixed(1)),
-      waterSaved: prev.waterSaved + water,
-      energySaved: Number((prev.energySaved + energy).toFixed(1)),
     }));
 
     const newLog: ImpactLog = {
@@ -263,20 +216,58 @@ export default function EcoStayApp() {
       title,
       points,
       type: 'earn',
-      co2DeltaKg: co2,
-      waterDeltaL: water,
-      energyDeltaKwh: energy,
       detail,
     };
     setLogs((prev) => [newLog, ...prev]);
 
     showToast(
-      `Camera nhận diện thành công: +${points} CB!`,
+      `Camera nhận diện thành công: +${points} CP!`,
       <CheckCircle2 size={16} className="text-emerald-400" />
     );
   };
 
-  // Handler: Redeem Reward
+  // Handler: Fallback Simulator QR Scan
+  const handleSimulateQRScan = (type: 'room' | 'food' | 'transport') => {
+    let title = '';
+    let points = 0;
+    let detail = '';
+
+    if (type === 'room') {
+      title = 'Quét mã Buồng phòng xanh';
+      points = 50;
+      detail = 'Từ chối thay ga/khăn hằng ngày tại phòng 402.';
+    } else if (type === 'food') {
+      title = 'Quét mã Zero Food Waste';
+      points = 30;
+      detail = 'Hoàn thành suất ăn sạch đĩa tại nhà hàng.';
+    } else {
+      title = 'Quét mã Xe điện Xanh SM';
+      points = 20;
+      detail = 'Di chuyển bằng taxi điện thuần 100%.';
+    }
+
+    setUser((prev) => ({
+      ...prev,
+      carbonPoints: prev.carbonPoints + points,
+    }));
+
+    const newLog: ImpactLog = {
+      id: `log-${Date.now()}`,
+      date: 'Vừa xong',
+      title,
+      points,
+      type: 'earn',
+      detail,
+    };
+    setLogs((prev) => [newLog, ...prev]);
+
+    showToast(
+      `Quét mã thành công! Bạn nhận được +${points} CP`,
+      <CheckCircle2 size={16} className="text-emerald-400" />
+    );
+  };
+
+  // Handler: Redeem Reward into "Giỏ hàng xanh"
   const handleRedeemReward = (reward: RewardItem) => {
     if (user.carbonPoints < reward.points) return;
 
@@ -303,7 +294,7 @@ export default function EcoStayApp() {
       isUsed: false,
       partner: reward.partner,
       description: reward.description,
-      qrValue: `ECOSTAY_${randomCode}_VAL_${reward.points}CB`,
+      qrValue: `ECOSTAY_${randomCode}_VAL_${reward.points}CP`,
     };
 
     setVouchers((prev) => [newVoucher, ...prev]);
@@ -314,17 +305,17 @@ export default function EcoStayApp() {
       title: `Đổi phần quà: ${reward.title}`,
       points: -reward.points,
       type: 'redeem',
-      detail: `Tạo thành công voucher ưu đãi ${randomCode}`,
+      detail: `Tạo thành công voucher ${randomCode} trong Giỏ hàng xanh`,
     };
     setLogs((prev) => [newLog, ...prev]);
 
     showToast(
-      `Đổi quà thành công! Đã thêm voucher ${randomCode} vào kho`,
+      `Đổi quà thành công! Đã thêm vào Giỏ hàng xanh`,
       <CheckCircle2 size={16} className="text-emerald-400" />
     );
   };
 
-  // Handler: Mark voucher used
+  // Handler: Mark Voucher Used
   const handleMarkVoucherUsed = (voucherId: string) => {
     setVouchers((prev) =>
       prev.map((v) => (v.id === voucherId ? { ...v, isUsed: true } : v))
@@ -351,22 +342,24 @@ export default function EcoStayApp() {
     setLogs((prev) => [newLog, ...prev]);
 
     showToast(
-      'Cảm ơn đánh giá quý báu! Bạn nhận được +15 CB',
+      'Cảm ơn đánh giá quý báu! Bạn nhận được +15 CP',
       <Sparkles size={16} className="text-amber-400" />
     );
   };
 
   // Handler: Reset Data to Default
   const handleResetData = () => {
-    if (confirm('Bạn có chắc muốn đặt lại toàn bộ dữ liệu mẫu ban đầu không?')) {
+    if (confirm('Bạn có chắc muốn đặt lại toàn bộ dữ liệu Demo ban đầu không?')) {
       localStorage.removeItem(STORAGE_KEY_USER);
       localStorage.removeItem(STORAGE_KEY_VOUCHERS);
       localStorage.removeItem(STORAGE_KEY_LOGS);
       localStorage.removeItem(STORAGE_KEY_MISSIONS);
+      localStorage.removeItem(STORAGE_KEY_LANG);
       setUser(initialUserProfile);
       setVouchers(initialVouchers);
       setLogs(initialImpactLogs);
       setMissions(initialMissions);
+      setCurrentLang('vi');
       showToast('Đã khôi phục dữ liệu Demo thành công.');
     }
   };
@@ -374,7 +367,7 @@ export default function EcoStayApp() {
   return (
     <div className="relative mx-auto w-full max-w-md min-h-screen bg-[#F8FAF8] text-[#1B3B2B] pb-24 shadow-2xl font-sans rounded-none sm:rounded-[40px] overflow-hidden border-0 sm:border-8 sm:border-slate-800 flex flex-col justify-between">
       
-      {/* Main Top Header */}
+      {/* Top Header */}
       <Header
         user={user}
         onOpenNotifications={() => setIsNotificationOpen(true)}
@@ -386,50 +379,47 @@ export default function EcoStayApp() {
         {activeTab === 'home' && (
           <TabHome
             user={user}
-            onNavigate={setActiveTab}
-            onOpenHandbook={() => setIsHandbookOpen(true)}
-            onOpenDirections={() => setIsDirectionsOpen(true)}
-            onOpenHistory={(tab) => {
-              setHistoryTab(tab || 'points');
-              setIsHistoryOpen(true);
-            }}
-            onOpenFeedback={() => setIsFeedbackOpen(true)}
-            onOpenPartners={() => setIsPartnersOpen(true)}
+            destinations={destinations}
+            onBookService={handleBookService}
+            onNavigateToEarn={() => setActiveTab('earn')}
           />
         )}
 
         {activeTab === 'rewards' && (
           <TabRewards
             userPoints={user.carbonPoints}
-            rewards={initialRewards}
+            rewards={rewards}
+            vouchers={vouchers}
             onRedeemReward={handleRedeemReward}
-            onNavigateToScanner={() => setActiveTab('scanner')}
+            onSelectVoucher={setSelectedVoucher}
+            onNavigateToEarn={() => setActiveTab('earn')}
           />
         )}
 
         {activeTab === 'scanner' && (
           <TabScanner
-            missions={missions}
-            onToggleMission={handleToggleMission}
+            user={user}
             onSimulateQRScan={handleSimulateQRScan}
             onLiveQRScan={handleLiveQRScan}
           />
         )}
 
-        {activeTab === 'voucher' && (
-          <TabVoucher
+        {activeTab === 'earn' && (
+          <TabEarnPoints
             user={user}
-            vouchers={vouchers}
-            onSelectVoucher={setSelectedVoucher}
-            onNavigate={setActiveTab}
+            missions={missions}
+            onCompleteMission={handleCompleteMission}
+            onNavigateToScanner={() => setActiveTab('scanner')}
+            onOpenEcoImpact={() => setIsEcoImpactOpen(true)}
           />
         )}
 
         {activeTab === 'more' && (
           <TabMore
             user={user}
+            currentLang={currentLang}
+            onChangeLang={setCurrentLang}
             onOpenEcoImpact={() => setIsEcoImpactOpen(true)}
-            onOpenDirections={() => setIsDirectionsOpen(true)}
             onOpenHandbook={() => setIsHandbookOpen(true)}
             onOpenHistory={(tab) => {
               setHistoryTab(tab || 'points');
@@ -442,11 +432,11 @@ export default function EcoStayApp() {
         )}
       </main>
 
-      {/* Fixed Bottom Navigation (5 tabs) */}
+      {/* Bottom Navigation Bar (5 tabs: Trang chủ, Quà tặng, Quét mã, Tích điểm, Khác) */}
       <BottomNav
         activeTab={activeTab}
         onSelectTab={setActiveTab}
-        voucherCount={vouchers.filter((v) => !v.isUsed).length}
+        cartCount={vouchers.filter((v) => !v.isUsed).length}
       />
 
       {/* Floating Toast Notification */}
@@ -457,7 +447,7 @@ export default function EcoStayApp() {
         </div>
       )}
 
-      {/* Interactive Modals */}
+      {/* Shared Modals */}
       <EcoImpactModal
         isOpen={isEcoImpactOpen}
         onClose={() => setIsEcoImpactOpen(false)}
@@ -473,11 +463,6 @@ export default function EcoStayApp() {
       <NotificationModal
         isOpen={isNotificationOpen}
         onClose={() => setIsNotificationOpen(false)}
-      />
-
-      <DirectionsModal
-        isOpen={isDirectionsOpen}
-        onClose={() => setIsDirectionsOpen(false)}
       />
 
       <HandbookModal
@@ -497,11 +482,6 @@ export default function EcoStayApp() {
         isOpen={isFeedbackOpen}
         onClose={() => setIsFeedbackOpen(false)}
         onSubmitFeedback={handleSubmitFeedback}
-      />
-
-      <PartnersModal
-        isOpen={isPartnersOpen}
-        onClose={() => setIsPartnersOpen(false)}
       />
 
       <AboutModal

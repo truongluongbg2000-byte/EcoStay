@@ -1,5 +1,35 @@
 export type CategoryType = 'all' | 'fashion' | 'food' | 'tree' | 'hotdeal' | 'service' | 'other';
 
+export type DestinationCategory = 'all' | 'food' | 'hotel' | 'activity' | 'transport';
+
+export interface GreenDestination {
+  id: string;
+  name: string;
+  category: DestinationCategory;
+  categoryName: string;
+  location: string; // e.g. 'Hội An', 'Ninh Bình', 'Cúc Phương', 'Đà Lạt', 'Nam Cát Tiên'
+  title: string;
+  image: string;
+  description: string;
+  greenBadge: string; // e.g. '100% Xanh', 'Zero Plastic Waste', 'Organic Farm'
+  pointsReward: number; // e.g. 300, 50, 150
+  priceEstimate?: string;
+  address?: string;
+}
+
+export interface DetailedMission {
+  id: string;
+  category: 'room' | 'food' | 'transport' | 'experience' | 'app';
+  categoryName: string;
+  title: string;
+  subtitle?: string;
+  points: number; // e.g. +10, +20, -5
+  isPenalty?: boolean;
+  completed: boolean;
+  actionType: 'toggle' | 'qr' | 'button';
+  iconName?: string;
+}
+
 export interface UserProfile {
   name: string;
   avatar: string;
@@ -13,6 +43,7 @@ export interface UserProfile {
   rank: string;
   roomNumber: string;
   hotelName: string;
+  memberCode: string;
 }
 
 export interface RewardItem {
@@ -60,18 +91,4 @@ export interface ImpactLog {
   waterDeltaL?: number;
   energyDeltaKwh?: number;
   detail: string;
-}
-
-export interface GreenMission {
-  id: string;
-  title: string;
-  subtitle: string;
-  impactNote: string;
-  points: number;
-  co2Kg: number;
-  waterL: number;
-  energyKwh: number;
-  isActive: boolean;
-  completed: boolean;
-  type: 'toggle' | 'action';
 }

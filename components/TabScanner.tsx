@@ -10,31 +10,30 @@ import {
   Sparkles,
   TreePine,
   CheckCircle2,
-  Footprints,
-  Thermometer,
-  UtensilsCrossed,
-  BedDouble,
-  ShieldCheck,
-  AlertTriangle,
+  ScanLine,
+  UserCheck,
   VideoOff,
-  ScanLine
+  Copy,
+  Check,
+  Building2
 } from 'lucide-react';
-import { GreenMission } from '@/data/types';
+import { UserProfile } from '@/data/types';
 import { triggerEcoConfetti } from './Confetti';
 
 interface TabScannerProps {
-  missions: GreenMission[];
-  onToggleMission: (missionId: string) => void;
+  user: UserProfile;
   onSimulateQRScan: (type: 'room' | 'food' | 'transport') => void;
   onLiveQRScan: (decodedData: string) => void;
 }
 
 export const TabScanner: React.FC<TabScannerProps> = ({
-  missions,
-  onToggleMission,
+  user,
   onSimulateQRScan,
   onLiveQRScan,
 }) => {
+  const [activeScannerTab, setActiveScannerTab] = useState<'camera' | 'my_qr'>('camera');
+  const [copiedCode, setCopiedCode] = useState(false);
+
   // Camera Refs & States
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -82,12 +81,10 @@ export const TabScanner: React.FC<TabScannerProps> = ({
 
         if (code && code.data) {
           const now = Date.now();
-          // Debounce same QR code within 3 seconds
           if (code.data !== lastScannedCodeRef.current || now - lastScannedTimeRef.current > 3000) {
             lastScannedTimeRef.current = now;
             lastScannedCodeRef.current = code.data;
 
-            // Haptic vibration feedback if supported
             if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
               navigator.vibrate([100, 50, 100]);
             }
@@ -96,7 +93,6 @@ export const TabScanner: React.FC<TabScannerProps> = ({
             setScanResult(`Đã nhận diện: ${code.data.slice(0, 36)}${code.data.length > 36 ? '...' : ''}`);
             onLiveQRScan(code.data);
 
-            // Clear result status after 4 seconds
             setTimeout(() => {
               setScanResult(null);
             }, 4000);
@@ -134,13 +130,12 @@ export const TabScanner: React.FC<TabScannerProps> = ({
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.setAttribute('playsinline', 'true'); // Required for iOS Safari
+        videoRef.current.setAttribute('playsinline', 'true');
         await videoRef.current.play();
         setCameraActive(true);
         animFrameIdRef.current = requestAnimationFrame(scanFrame);
       }
     } catch (err: unknown) {
-      console.warn('Camera access denied or failed:', err);
       const error = err as Error;
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
         setCameraPermissionError('Bạn đã từ chối quyền truy cập máy ảnh. Vui lòng cho phép quyền trong cài đặt trình duyệt để quét trực tiếp.');
@@ -155,15 +150,17 @@ export const TabScanner: React.FC<TabScannerProps> = ({
     }
   }, [facingMode, scanFrame, stopCamera]);
 
-  // Auto start camera when component mounts, clean up on unmount
   useEffect(() => {
-    startCamera();
+    if (activeScannerTab === 'camera') {
+      startCamera();
+    } else {
+      stopCamera();
+    }
     return () => {
       stopCamera();
     };
-  }, [startCamera, stopCamera]);
+  }, [activeScannerTab, startCamera, stopCamera]);
 
-  // Toggle Torch/Flashlight if supported
   const toggleFlashlight = async () => {
     if (!streamRef.current) return;
     const track = streamRef.current.getVideoTracks()[0];
@@ -176,7 +173,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
           });
           setFlashlightOn(!flashlightOn);
         } else {
-          setFlashlightOn(!flashlightOn); // Toggle state visual
+          setFlashlightOn(!flashlightOn);
         }
       } catch (e) {
         setFlashlightOn(!flashlightOn);
@@ -184,14 +181,12 @@ export const TabScanner: React.FC<TabScannerProps> = ({
     }
   };
 
-  // Flip Camera between front & back
   const flipCamera = () => {
     setFacingMode((prev) => (prev === 'environment' ? 'user' : 'environment'));
   };
 
-  // Fallback simulator scan handler
   const handleSimulateScan = (type: 'room' | 'food' | 'transport', title: string) => {
-    setScanResult(`Đang mô phỏng nhận diện: ${title}...`);
+    setScanResult(`Đang nhận diện: ${title}...`);
     setTimeout(() => {
       triggerEcoConfetti();
       onSimulateQRScan(type);
@@ -200,256 +195,252 @@ export const TabScanner: React.FC<TabScannerProps> = ({
     }, 700);
   };
 
-  const getMissionIcon = (id: string) => {
-    switch (id) {
-      case 'mis-1':
-        return <BedDouble size={20} className="text-emerald-700" />;
-      case 'mis-2':
-        return <UtensilsCrossed size={20} className="text-emerald-700" />;
-      case 'mis-3':
-        return <Thermometer size={20} className="text-emerald-700" />;
-      case 'mis-4':
-        return <Footprints size={20} className="text-emerald-700" />;
-      default:
-        return <TreePine size={20} className="text-emerald-700" />;
-    }
+  const handleCopyMemberCode = () => {
+    navigator.clipboard.writeText(user.memberCode || 'ECO-TL-883921');
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
   };
 
   return (
     <div className="space-y-4 px-4 pt-3 pb-8 text-left">
-      {/* Hidden canvas used by jsQR to sample frames */}
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* 1. Header & Title */}
-      <div className="border-b border-emerald-900/10 pb-2">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
-          <ScanLine size={16} />
-          <span>Camera Quét Mã Trực Tiếp</span>
-        </div>
-        <h3 className="mt-1 text-base font-bold text-slate-800">
-          Quét mã QR bằng Camera thật
-        </h3>
-        <p className="text-xs text-slate-500">
-          Đưa camera lại gần mã QR bất kỳ để tự động giải mã và tích lũy CACBON POINT
-        </p>
+      {/* 1. Mode Switcher: [ Quét mã QR ] vs [ MÃ QR CỦA TÔI ] */}
+      <div className="flex rounded-2xl bg-emerald-100/60 p-1">
+        <button
+          onClick={() => setActiveScannerTab('camera')}
+          className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            activeScannerTab === 'camera'
+              ? 'bg-[#1E4D3E] text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <ScanLine size={15} />
+          <span>Quét mã camera</span>
+        </button>
+        <button
+          onClick={() => setActiveScannerTab('my_qr')}
+          className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            activeScannerTab === 'my_qr'
+              ? 'bg-[#1E4D3E] text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <UserCheck size={15} />
+          <span>MÃ QR CỦA TÔI</span>
+        </button>
       </div>
 
-      {/* 2. Live Camera Viewfinder Screen */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-950 p-3 text-white shadow-xl">
-        {/* Camera HUD bar */}
-        <div className="flex items-center justify-between text-slate-400 mb-2 px-1">
-          <div className="flex items-center gap-1.5 text-[11px]">
-            <div className={`h-2 w-2 rounded-full ${cameraActive ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`} />
-            <span className="font-semibold text-white">
-              {cameraActive ? 'LIVE CAMERA (jsQR)' : 'CAMERA SẴN SÀNG'}
+      {activeScannerTab === 'camera' ? (
+        /* MODE 1: LIVE CAMERA QR SCANNER */
+        <div className="space-y-3">
+          <div className="border-b border-emerald-900/10 pb-2">
+            <h3 className="text-base font-bold text-slate-800">
+              Quét mã QR bằng Camera thật
+            </h3>
+            <p className="text-xs text-slate-500">
+              Đưa camera vào mã QR bất kỳ để tự động nhận diện và cộng CACBON POINT
+            </p>
+          </div>
+
+          <div className="relative overflow-hidden rounded-3xl bg-slate-950 p-3 text-white shadow-xl">
+            {/* Camera HUD bar */}
+            <div className="flex items-center justify-between text-slate-400 mb-2 px-1">
+              <div className="flex items-center gap-1.5 text-[11px]">
+                <div className={`h-2 w-2 rounded-full ${cameraActive ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`} />
+                <span className="font-semibold text-white">
+                  {cameraActive ? 'LIVE CAMERA (jsQR)' : 'CAMERA SẴN SÀNG'}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={toggleFlashlight}
+                  className={`rounded-full p-1.5 transition-colors ${
+                    flashlightOn ? 'bg-amber-400 text-slate-900' : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+                  title="Bật/Tắt Flash"
+                >
+                  <Flashlight size={14} />
+                </button>
+                <button
+                  onClick={flipCamera}
+                  className="rounded-full bg-white/10 p-1.5 text-white hover:bg-white/20 transition-colors"
+                  title="Đổi camera"
+                >
+                  <RefreshCw size={14} />
+                </button>
+              </div>
+            </div>
+
+            {/* Viewfinder Frame */}
+            <div className="relative mx-auto my-2 flex h-60 w-full max-w-[280px] items-center justify-center rounded-2xl border-2 border-emerald-400/40 bg-slate-900 overflow-hidden shadow-inner">
+              <video
+                ref={videoRef}
+                playsInline
+                muted
+                autoPlay
+                className={`h-full w-full object-cover transition-opacity duration-300 ${
+                  cameraActive ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+
+              {!cameraActive && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                  {cameraPermissionError ? (
+                    <>
+                      <VideoOff size={36} className="text-amber-400 mb-2" />
+                      <p className="text-[11px] text-amber-200 leading-snug">
+                        {cameraPermissionError}
+                      </p>
+                      <button
+                        onClick={startCamera}
+                        className="mt-3 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-500"
+                      >
+                        Thử lại Camera
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Camera size={36} className="text-emerald-400/60 animate-bounce mb-2" />
+                      <p className="text-xs font-medium text-slate-300">
+                        {isProcessing ? 'Đang mở máy ảnh...' : 'Nhấn nút để kích hoạt Camera'}
+                      </p>
+                      <button
+                        onClick={startCamera}
+                        className="mt-3 rounded-xl bg-[#1E4D3E] px-3.5 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-700"
+                      >
+                        Bật Camera Quét Thật
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Target Corner Guides */}
+              <div className="absolute top-3 left-3 h-7 w-7 border-t-4 border-l-4 border-emerald-400 rounded-tl-xl pointer-events-none" />
+              <div className="absolute top-3 right-3 h-7 w-7 border-t-4 border-r-4 border-emerald-400 rounded-tr-xl pointer-events-none" />
+              <div className="absolute bottom-3 left-3 h-7 w-7 border-b-4 border-l-4 border-emerald-400 rounded-bl-xl pointer-events-none" />
+              <div className="absolute bottom-3 right-3 h-7 w-7 border-b-4 border-r-4 border-emerald-400 rounded-br-xl pointer-events-none" />
+
+              {cameraActive && (
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_15px_#34d399] animate-scan-line pointer-events-none" />
+              )}
+            </div>
+
+            {scanResult && (
+              <div className="mt-2 rounded-2xl bg-emerald-500/25 border border-emerald-400/60 p-2.5 text-center text-xs font-bold text-emerald-300 animate-fadeIn">
+                ✨ {scanResult}
+              </div>
+            )}
+
+            {/* Quick Simulation Buttons */}
+            <div className="mt-3 text-center border-t border-white/10 pt-2.5">
+              <p className="text-[10px] uppercase tracking-wider text-emerald-300/80 font-semibold mb-2">
+                Hoặc chọn kịch bản mẫu nhanh:
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => handleSimulateScan('room', 'Thẻ Phòng Xanh')}
+                  className="rounded-xl bg-white/10 p-2 text-[11px] font-semibold text-white hover:bg-emerald-600/40 active:scale-95 transition-all border border-white/10"
+                >
+                  🏷️ Buồng phòng
+                </button>
+                <button
+                  onClick={() => handleSimulateScan('food', 'Bàn Ăn Zero Waste')}
+                  className="rounded-xl bg-white/10 p-2 text-[11px] font-semibold text-white hover:bg-emerald-600/40 active:scale-95 transition-all border border-white/10"
+                >
+                  🍽️ Ăn sạch đĩa
+                </button>
+                <button
+                  onClick={() => handleSimulateScan('transport', 'Xe Điện Xanh SM')}
+                  className="rounded-xl bg-white/10 p-2 text-[11px] font-semibold text-white hover:bg-emerald-600/40 active:scale-95 transition-all border border-white/10"
+                >
+                  🚗 Xe điện / Bus
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* MODE 2: MÃ QR CỦA TÔI (CHO NHÂN VIÊN/ĐỐI TÁC QUÉT) */
+        <div className="rounded-3xl bg-white p-5 shadow-sm border border-emerald-950/5 text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-[#1E4D3E]">
+              Thẻ Thành Viên EcoStay
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={toggleFlashlight}
-              className={`rounded-full p-1.5 transition-colors ${
-                flashlightOn ? 'bg-amber-400 text-slate-900' : 'bg-white/10 text-white hover:bg-white/20'
-              }`}
-              title="Bật/Tắt đèn Flash"
-            >
-              <Flashlight size={14} />
-            </button>
-            <button
-              onClick={flipCamera}
-              className="rounded-full bg-white/10 p-1.5 text-white hover:bg-white/20 transition-colors"
-              title="Đổi camera trước / sau"
-            >
-              <RefreshCw size={14} />
-            </button>
-          </div>
-        </div>
-
-        {/* Viewfinder Reticle Frame */}
-        <div className="relative mx-auto my-2 flex h-60 w-full max-w-[280px] items-center justify-center rounded-2xl border-2 border-emerald-400/40 bg-slate-900 overflow-hidden shadow-inner">
-          
-          {/* Live Video Feed */}
-          <video
-            ref={videoRef}
-            playsInline
-            muted
-            autoPlay
-            className={`h-full w-full object-cover transition-opacity duration-300 ${
-              cameraActive ? 'opacity-100' : 'opacity-0'
-            }`}
-          />
-
-          {/* Placeholder when Camera is loading / off */}
-          {!cameraActive && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-              {cameraPermissionError ? (
-                <>
-                  <VideoOff size={36} className="text-amber-400 mb-2" />
-                  <p className="text-[11px] text-amber-200 leading-snug">
-                    {cameraPermissionError}
-                  </p>
-                  <button
-                    onClick={startCamera}
-                    className="mt-3 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-500"
-                  >
-                    Thử lại Camera
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Camera size={36} className="text-emerald-400/60 animate-bounce mb-2" />
-                  <p className="text-xs font-medium text-slate-300">
-                    {isProcessing ? 'Đang mở máy ảnh...' : 'Nhấn nút để kích hoạt Camera'}
-                  </p>
-                  <button
-                    onClick={startCamera}
-                    className="mt-3 rounded-xl bg-[#1E4D3E] px-3.5 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-700"
-                  >
-                    Bật Camera Quét Thật
-                  </button>
-                </>
-              )}
+          <div className="mt-2 flex items-center justify-center gap-3">
+            <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-emerald-400">
+              <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
             </div>
-          )}
-
-          {/* Target Corner Guides */}
-          <div className="absolute top-3 left-3 h-7 w-7 border-t-4 border-l-4 border-emerald-400 rounded-tl-xl pointer-events-none" />
-          <div className="absolute top-3 right-3 h-7 w-7 border-t-4 border-r-4 border-emerald-400 rounded-tr-xl pointer-events-none" />
-          <div className="absolute bottom-3 left-3 h-7 w-7 border-b-4 border-l-4 border-emerald-400 rounded-bl-xl pointer-events-none" />
-          <div className="absolute bottom-3 right-3 h-7 w-7 border-b-4 border-r-4 border-emerald-400 rounded-br-xl pointer-events-none" />
-
-          {/* Animated Laser Scanning Line */}
-          {cameraActive && (
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_15px_#34d399] animate-scan-line pointer-events-none" />
-          )}
-
-          {/* Flashlight Overlay Simulation */}
-          {flashlightOn && (
-            <div className="absolute inset-0 bg-amber-100/15 pointer-events-none" />
-          )}
-        </div>
-
-        {/* Scan Status Toast Banner */}
-        {scanResult && (
-          <div className="mt-2 rounded-2xl bg-emerald-500/25 border border-emerald-400/60 p-2.5 text-center text-xs font-bold text-emerald-300 animate-fadeIn">
-            ✨ {scanResult}
+            <div className="text-left">
+              <h3 className="text-base font-bold text-slate-900">{user.name}</h3>
+              <p className="text-xs text-emerald-700 font-semibold">{user.rank}</p>
+            </div>
           </div>
-        )}
 
-        {/* Quick Simulator Scan Buttons (Fallback for PC / Demo) */}
-        <div className="mt-3 text-center border-t border-white/10 pt-2.5">
-          <p className="text-[10px] uppercase tracking-wider text-emerald-300/80 font-semibold mb-2">
-            Hoặc chọn kịch bản mẫu nhanh:
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              onClick={() => handleSimulateScan('room', 'Thẻ Phòng Xanh')}
-              className="rounded-xl bg-white/10 p-2 text-[11px] font-semibold text-white hover:bg-emerald-600/40 active:scale-95 transition-all border border-white/10"
-            >
-              🏷️ Buồng phòng
-            </button>
-            <button
-              onClick={() => handleSimulateScan('food', 'Bàn Ăn Zero Waste')}
-              className="rounded-xl bg-white/10 p-2 text-[11px] font-semibold text-white hover:bg-emerald-600/40 active:scale-95 transition-all border border-white/10"
-            >
-              🍽️ Ăn sạch đĩa
-            </button>
-            <button
-              onClick={() => handleSimulateScan('transport', 'Xe Điện Xanh SM')}
-              className="rounded-xl bg-white/10 p-2 text-[11px] font-semibold text-white hover:bg-emerald-600/40 active:scale-95 transition-all border border-white/10"
-            >
-              🚗 Xe điện / Bus
-            </button>
+          {/* Points display */}
+          <div className="mt-3 rounded-2xl bg-gradient-to-r from-[#1E4D3E] to-[#2D6A56] p-3 text-white">
+            <p className="text-[10px] text-emerald-200">SỐ DƯ HIỆN CÓ</p>
+            <p className="text-2xl font-black">{user.carbonPoints} CP</p>
           </div>
-        </div>
-      </div>
 
-      {/* 3. Quick Toggles: In-Stay Guest Green Commitments */}
-      <div className="rounded-3xl bg-white p-4 shadow-sm border border-emerald-950/5">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-1.5">
-            <ShieldCheck size={16} className="text-[#1E4D3E]" />
-            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              Công tắc Cam kết Xanh (Lưu trú)
-            </h4>
-          </div>
-          <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
-            Tự động tích điểm
-          </span>
-        </div>
+          {/* Member QR Code */}
+          <div className="mt-4 flex flex-col items-center">
+            <div className="relative flex h-48 w-48 items-center justify-center rounded-2xl bg-white p-3 shadow-md border-2 border-dashed border-emerald-300">
+              <svg viewBox="0 0 100 100" className="h-full w-full">
+                {/* 3 Corner Markers */}
+                <rect x="5" y="5" width="25" height="25" fill="#1E4D3E" rx="3" />
+                <rect x="9" y="9" width="17" height="17" fill="white" rx="1.5" />
+                <rect x="13" y="13" width="9" height="9" fill="#1E4D3E" />
 
-        <div className="space-y-3">
-          {missions.map((mission) => {
-            const isDone = mission.completed;
-            return (
-              <div
-                key={mission.id}
-                className={`rounded-2xl p-3 border transition-all ${
-                  isDone
-                    ? 'border-emerald-200 bg-emerald-50/60'
-                    : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50'
-                }`}
+                <rect x="70" y="5" width="25" height="25" fill="#1E4D3E" rx="3" />
+                <rect x="74" y="9" width="17" height="17" fill="white" rx="1.5" />
+                <rect x="78" y="13" width="9" height="9" fill="#1E4D3E" />
+
+                <rect x="5" y="70" width="25" height="25" fill="#1E4D3E" rx="3" />
+                <rect x="9" y="74" width="17" height="17" fill="white" rx="1.5" />
+                <rect x="13" y="78" width="9" height="9" fill="#1E4D3E" />
+
+                {/* Center Member Icon */}
+                <circle cx="50" cy="50" r="10" fill="#1E4D3E" />
+                <path d="M 46 50 L 49 53 L 55 47" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" />
+
+                {/* Pattern blocks */}
+                <rect x="36" y="8" width="8" height="6" fill="#1E4D3E" />
+                <rect x="50" y="8" width="12" height="6" fill="#1E4D3E" />
+                <rect x="36" y="20" width="6" height="10" fill="#1E4D3E" />
+                <rect x="48" y="22" width="14" height="6" fill="#1E4D3E" />
+                <rect x="10" y="38" width="14" height="6" fill="#1E4D3E" />
+                <rect x="80" y="40" width="12" height="8" fill="#1E4D3E" />
+                <rect x="36" y="66" width="10" height="8" fill="#1E4D3E" />
+                <rect x="52" y="66" width="14" height="8" fill="#1E4D3E" />
+                <rect x="72" y="72" width="18" height="14" fill="#1E4D3E" />
+              </svg>
+            </div>
+
+            {/* Member Code with Copy */}
+            <div className="mt-3 flex items-center justify-center gap-2">
+              <span className="font-mono text-sm font-extrabold tracking-wider text-[#1E4D3E] bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">
+                {user.memberCode || 'ECO-TL-883921'}
+              </span>
+              <button
+                onClick={handleCopyMemberCode}
+                className="rounded-xl bg-emerald-100 p-1.5 text-emerald-800 hover:bg-emerald-200 transition-colors"
+                title="Sao chép mã thành viên"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-2.5">
-                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm border border-emerald-100">
-                      {getMissionIcon(mission.id)}
-                    </div>
-                    <div>
-                      <h5 className="text-xs font-bold text-slate-800 leading-snug">
-                        {mission.title}
-                      </h5>
-                      <p className="mt-0.5 text-[11px] text-slate-500 leading-tight">
-                        {mission.subtitle}
-                      </p>
-                      <p className="mt-1 text-[10px] font-semibold text-emerald-700 flex items-center gap-1">
-                        <Sparkles size={11} className="text-amber-500" />
-                        <span>{mission.impactNote}</span>
-                      </p>
-                    </div>
-                  </div>
+                {copiedCode ? <Check size={16} className="text-emerald-700" /> : <Copy size={16} />}
+              </button>
+            </div>
 
-                  {/* Toggle / Action Trigger */}
-                  <div className="shrink-0 text-right">
-                    <span className="block text-xs font-extrabold text-[#1E4D3E] mb-1">
-                      +{mission.points} CB
-                    </span>
-
-                    {mission.type === 'toggle' ? (
-                      <button
-                        onClick={() => onToggleMission(mission.id)}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          isDone ? 'bg-[#1E4D3E]' : 'bg-slate-300'
-                        }`}
-                        role="switch"
-                        aria-checked={isDone}
-                      >
-                        <span
-                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                            isDone ? 'translate-x-5' : 'translate-x-0'
-                          }`}
-                        />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => onToggleMission(mission.id)}
-                        disabled={isDone}
-                        className={`rounded-xl px-2.5 py-1 text-[11px] font-bold transition-all shadow-sm active:scale-95 ${
-                          isDone
-                            ? 'bg-emerald-600 text-white cursor-default'
-                            : 'bg-[#D97736] text-white hover:bg-[#C26D45]'
-                        }`}
-                      >
-                        {isDone ? 'Đã nhận' : 'Xác nhận'}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+            <p className="mt-2 text-[11px] text-slate-500 max-w-xs">
+              Xuất trình mã này cho nhân viên lễ tân, buồng phòng hoặc quầy thu ngân đối tác để tích điểm hoặc áp dụng cấn trừ trực tiếp khi thanh toán.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
