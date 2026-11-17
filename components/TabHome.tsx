@@ -23,6 +23,7 @@ import {
 import { UserProfile, GreenDestination, DestinationCategory } from '@/data/types';
 import { triggerEcoConfetti } from './Confetti';
 import { destinationTranslations, destinationCategoryTranslations, mapLocationTranslations } from '@/data/translations';
+import { EcoMap } from './EcoMap';
 
 interface TabHomeProps {
   user: UserProfile;
@@ -201,138 +202,13 @@ export const TabHome: React.FC<TabHomeProps> = ({
         </div>
       </div>
 
-      {/* 3. Bản đồ Điểm đến Xanh Việt Nam (Fly-to Interactive Eco-Map matching mockup!) */}
-      <div className="rounded-3xl bg-white p-3.5 shadow-sm border border-emerald-950/5">
-        <div className="flex items-center justify-between mb-2.5">
-          <div className="flex items-center gap-1.5">
-            <MapPin size={16} className="text-[#1E4D3E]" />
-            <h3 className="text-xs font-bold text-slate-800">
-              {isEn ? 'Vietnam Green Destinations Map' : 'Bản đồ Điểm đến Xanh Việt Nam'}
-            </h3>
-          </div>
-          <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200/60">
-            {isEn ? 'Region:' : 'Khu vực:'}{' '}
-            {selectedLocation === 'all'
-              ? isEn
-                ? 'National'
-                : 'Toàn quốc'
-              : isEn
-              ? mapLocationTranslations[selectedLocation] || selectedLocation
-              : selectedLocation}
-          </span>
-        </div>
-
-        {/* Visual Map Canvas with Smooth Zoom/Fly effect */}
-        <div className="relative h-48 w-full overflow-hidden rounded-2xl bg-gradient-to-br from-[#E6F4EA] via-[#E8F8F5] to-[#D5EFE3] border border-emerald-100 p-2 select-none">
-          {/* Subtle Grid Dots */}
-          <div className="absolute inset-0 bg-[radial-gradient(#207D5A_1.2px,transparent_1.2px)] [background-size:18px_18px] opacity-15 pointer-events-none" />
-
-          {/* Compass / Leaf icon on top right */}
-          <div className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 text-emerald-700 shadow-xs pointer-events-none">
-            <Compass size={15} className="animate-[spin_20s_linear_infinite]" />
-          </div>
-
-          {/* S-curve path representation of Vietnam with animated stroke */}
-          <svg
-            className={`absolute inset-0 h-full w-full pointer-events-none transition-transform duration-700 ease-out ${
-              selectedLocation === 'Hội An'
-                ? 'scale-115 translate-x-[-10px] translate-y-[-10px]'
-                : selectedLocation === 'Cúc Phương'
-                ? 'scale-120 translate-x-[20px] translate-y-[20px]'
-                : selectedLocation === 'Đà Lạt'
-                ? 'scale-120 translate-x-[-25px] translate-y-[-20px]'
-                : selectedLocation === 'Nam Cát Tiên'
-                ? 'scale-125 translate-x-[-15px] translate-y-[-35px]'
-                : 'scale-100'
-            }`}
-            viewBox="0 0 320 170"
-          >
-            {/* Soft Green River Ribbon */}
-            <path
-              d="M 90 28 Q 120 45 155 75 T 185 115 T 160 152"
-              fill="none"
-              stroke="#A3D9B5"
-              strokeWidth="28"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              opacity="0.65"
-            />
-            <path
-              d="M 90 28 Q 120 45 155 75 T 185 115 T 160 152"
-              fill="none"
-              stroke="#247856"
-              strokeWidth="2"
-              strokeDasharray="4 4"
-            />
-          </svg>
-
-          {/* Interactive Map Nodes (Nodes matching mockup layout) */}
-          {/* Cúc Phương Node */}
-          <button
-            onClick={() => handleSelectMapPoint('Cúc Phương')}
-            className={`absolute top-4 left-14 flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold shadow transition-all ${
-              selectedLocation === 'Cúc Phương'
-                ? 'bg-[#1E4D3E] text-white ring-2 ring-emerald-300 scale-110 z-20'
-                : 'bg-white/95 text-slate-700 hover:bg-emerald-50 z-10'
-            }`}
-          >
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span>🌲 {isEn ? 'Cuc Phuong' : 'Cúc Phương'}</span>
-          </button>
-
-          {/* Hội An Node (Active Center Node) */}
-          <button
-            onClick={() => handleSelectMapPoint('Hội An')}
-            className={`absolute top-16 left-36 flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold shadow-md transition-all ${
-              selectedLocation === 'Hội An'
-                ? 'bg-[#1E4D3E] text-white ring-3 ring-amber-300 scale-115 z-20 animate-pulse'
-                : 'bg-white/95 text-slate-700 hover:bg-emerald-50 z-10'
-            }`}
-          >
-            <span className="h-2.5 w-2.5 rounded-full bg-amber-400 animate-ping" />
-            <span>🏮 {isEn ? 'Hoi An' : 'Hội An'}</span>
-          </button>
-
-          {/* Đà Lạt Node */}
-          <button
-            onClick={() => handleSelectMapPoint('Đà Lạt')}
-            className={`absolute top-26 right-12 flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold shadow transition-all ${
-              selectedLocation === 'Đà Lạt'
-                ? 'bg-[#1E4D3E] text-white ring-2 ring-emerald-300 scale-110 z-20'
-                : 'bg-white/95 text-slate-700 hover:bg-emerald-50 z-10'
-            }`}
-          >
-            <span className="h-2 w-2 rounded-full bg-pink-500" />
-            <span>🌸 {isEn ? 'Da Lat' : 'Đà Lạt'}</span>
-          </button>
-
-          {/* Nam Cát Tiên Node */}
-          <button
-            onClick={() => handleSelectMapPoint('Nam Cát Tiên')}
-            className={`absolute bottom-3 left-28 flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold shadow transition-all ${
-              selectedLocation === 'Nam Cát Tiên'
-                ? 'bg-[#1E4D3E] text-white ring-2 ring-emerald-300 scale-110 z-20'
-                : 'bg-white/95 text-slate-700 hover:bg-emerald-50 z-10'
-            }`}
-          >
-            <span className="h-2 w-2 rounded-full bg-emerald-600" />
-            <span>🦜 {isEn ? 'Nam Cat Tien' : 'Nam Cát Tiên'}</span>
-          </button>
-
-          {/* Floating "Tất cả" shortcut button at bottom right (matching mockup) */}
-          <button
-            onClick={() => handleSelectMapPoint('all')}
-            className={`absolute bottom-2.5 right-2.5 flex items-center gap-1 rounded-xl px-2.5 py-1 text-[10px] font-extrabold shadow-sm transition-all border ${
-              selectedLocation === 'all'
-                ? 'bg-[#1E4D3E] text-white border-transparent'
-                : 'bg-white/90 text-emerald-800 border-emerald-200 hover:bg-white'
-            }`}
-          >
-            <span>🌐</span>
-            <span>{isEn ? 'All' : 'Tất cả'}</span>
-          </button>
-        </div>
-      </div>
+      {/* 3. Bản đồ Điểm đến Xanh Việt Nam Chuyên nghiệp (Realistic Interactive Eco-Map with Satellite/Terrain) */}
+      <EcoMap
+        selectedLocation={selectedLocation}
+        onSelectLocation={handleSelectMapPoint}
+        currentLang={currentLang}
+        destinations={destinations}
+      />
 
       {/* 4. Danh Mục Dịch Vụ Xanh (Pills: Tất cả, Ăn uống, Khách sạn, Di chuyển, Vui chơi, Mua sắm) */}
       <div className="space-y-2">
