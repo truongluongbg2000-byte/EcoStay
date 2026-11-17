@@ -239,10 +239,12 @@ export const TabScanner: React.FC<TabScannerProps> = ({
         <div className="space-y-3">
           <div className="border-b border-emerald-900/10 pb-2">
             <h3 className="text-base font-bold text-slate-800">
-              Quét mã QR bằng Camera thật
+              {isEn ? 'Scan QR with Live Camera' : 'Quét mã QR bằng Camera thật'}
             </h3>
             <p className="text-xs text-slate-500">
-              Đưa camera vào mã QR bất kỳ để tự động nhận diện và cộng CACBON POINT
+              {isEn
+                ? 'Point camera at any QR code to automatically recognize and earn CARBON POINTS'
+                : 'Đưa camera vào mã QR bất kỳ để tự động nhận diện và cộng CACBON POINT'}
             </p>
           </div>
 
@@ -250,9 +252,19 @@ export const TabScanner: React.FC<TabScannerProps> = ({
             {/* Camera HUD bar */}
             <div className="flex items-center justify-between text-slate-400 mb-2 px-1">
               <div className="flex items-center gap-1.5 text-[11px]">
-                <div className={`h-2 w-2 rounded-full ${cameraActive ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`} />
+                <div
+                  className={`h-2 w-2 rounded-full ${
+                    cameraActive ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'
+                  }`}
+                />
                 <span className="font-semibold text-white">
-                  {cameraActive ? 'LIVE CAMERA (jsQR)' : 'CAMERA SẴN SÀNG'}
+                  {cameraActive
+                    ? isEn
+                      ? 'LIVE CAMERA (jsQR)'
+                      : 'CAMERA ĐANG CHẠY'
+                    : isEn
+                    ? 'CAMERA READY'
+                    : 'CAMERA SẴN SÀNG'}
                 </span>
               </div>
 
@@ -260,16 +272,18 @@ export const TabScanner: React.FC<TabScannerProps> = ({
                 <button
                   onClick={toggleFlashlight}
                   className={`rounded-full p-1.5 transition-colors ${
-                    flashlightOn ? 'bg-amber-400 text-slate-900' : 'bg-white/10 text-white hover:bg-white/20'
+                    flashlightOn
+                      ? 'bg-amber-400 text-slate-900'
+                      : 'bg-white/10 text-white hover:bg-white/20'
                   }`}
-                  title="Bật/Tắt Flash"
+                  title={isEn ? 'Toggle Flash' : 'Bật/Tắt Flash'}
                 >
                   <Flashlight size={14} />
                 </button>
                 <button
                   onClick={flipCamera}
                   className="rounded-full bg-white/10 p-1.5 text-white hover:bg-white/20 transition-colors"
-                  title="Đổi camera"
+                  title={isEn ? 'Flip Camera' : 'Đổi camera'}
                 >
                   <RefreshCw size={14} />
                 </button>
@@ -300,20 +314,26 @@ export const TabScanner: React.FC<TabScannerProps> = ({
                         onClick={startCamera}
                         className="mt-3 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-500"
                       >
-                        Thử lại Camera
+                        {isEn ? 'Retry Camera' : 'Thử lại Camera'}
                       </button>
                     </>
                   ) : (
                     <>
                       <Camera size={36} className="text-emerald-400/60 animate-bounce mb-2" />
                       <p className="text-xs font-medium text-slate-300">
-                        {isProcessing ? 'Đang mở máy ảnh...' : 'Nhấn nút để kích hoạt Camera'}
+                        {isProcessing
+                          ? isEn
+                            ? 'Starting camera...'
+                            : 'Đang mở máy ảnh...'
+                          : isEn
+                          ? 'Tap to activate live camera'
+                          : 'Nhấn nút để kích hoạt Camera'}
                       </p>
                       <button
                         onClick={startCamera}
                         className="mt-3 rounded-xl bg-[#1E4D3E] px-3.5 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-700"
                       >
-                        Bật Camera Quét Thật
+                        {isEn ? 'Turn On Live Camera' : 'Bật Camera Quét Thật'}
                       </button>
                     </>
                   )}
@@ -340,26 +360,41 @@ export const TabScanner: React.FC<TabScannerProps> = ({
             {/* Quick Simulation Buttons */}
             <div className="mt-3 text-center border-t border-white/10 pt-2.5">
               <p className="text-[10px] uppercase tracking-wider text-emerald-300/80 font-semibold mb-2">
-                Hoặc chọn kịch bản mẫu nhanh:
+                {isEn ? 'Or choose test scenarios:' : 'Hoặc chọn kịch bản mẫu nhanh:'}
               </p>
               <div className="grid grid-cols-3 gap-2">
                 <button
-                  onClick={() => handleSimulateScan('room', 'Thẻ Phòng Xanh')}
+                  onClick={() =>
+                    handleSimulateScan(
+                      'room',
+                      isEn ? 'In-Room Eco Card' : 'Thẻ Phòng Xanh'
+                    )
+                  }
                   className="rounded-xl bg-white/10 p-2 text-[11px] font-semibold text-white hover:bg-emerald-600/40 active:scale-95 transition-all border border-white/10"
                 >
-                  🏷️ Buồng phòng
+                  {isEn ? '🏷️ In-Room' : '🏷️ Buồng phòng'}
                 </button>
                 <button
-                  onClick={() => handleSimulateScan('food', 'Bàn Ăn Zero Waste')}
+                  onClick={() =>
+                    handleSimulateScan(
+                      'food',
+                      isEn ? 'Clean Plate Zero Waste' : 'Bàn Ăn Zero Waste'
+                    )
+                  }
                   className="rounded-xl bg-white/10 p-2 text-[11px] font-semibold text-white hover:bg-emerald-600/40 active:scale-95 transition-all border border-white/10"
                 >
-                  🍽️ Ăn sạch đĩa
+                  {isEn ? '🍽️ Clean Plate' : '🍽️ Ăn sạch đĩa'}
                 </button>
                 <button
-                  onClick={() => handleSimulateScan('transport', 'Xe Điện Xanh SM')}
+                  onClick={() =>
+                    handleSimulateScan(
+                      'transport',
+                      isEn ? 'Green E-Bike Ride' : 'Xe Điện Xanh SM'
+                    )
+                  }
                   className="rounded-xl bg-white/10 p-2 text-[11px] font-semibold text-white hover:bg-emerald-600/40 active:scale-95 transition-all border border-white/10"
                 >
-                  🚗 Xe điện / Bus
+                  {isEn ? '🚗 E-Bike / Bus' : '🚗 Xe điện / Bus'}
                 </button>
               </div>
             </div>
@@ -370,7 +405,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
         <div className="rounded-3xl bg-white p-5 shadow-sm border border-emerald-950/5 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-[#1E4D3E]">
-              Thẻ Thành Viên EcoStay
+              {isEn ? 'EcoStay Member Card' : 'Thẻ Thành Viên EcoStay'}
             </span>
           </div>
 
@@ -380,13 +415,17 @@ export const TabScanner: React.FC<TabScannerProps> = ({
             </div>
             <div className="text-left">
               <h3 className="text-base font-bold text-slate-900">{user.name}</h3>
-              <p className="text-xs text-emerald-700 font-semibold">{user.rank}</p>
+              <p className="text-xs text-emerald-700 font-semibold">
+                {isEn ? 'Green Member • Sprout Tier' : user.rank}
+              </p>
             </div>
           </div>
 
           {/* Points display */}
           <div className="mt-3 rounded-2xl bg-gradient-to-r from-[#1E4D3E] to-[#2D6A56] p-3 text-white">
-            <p className="text-[10px] text-emerald-200">SỐ DƯ HIỆN CÓ</p>
+            <p className="text-[10px] text-emerald-200">
+              {isEn ? 'CURRENT BALANCE' : 'SỐ DƯ HIỆN CÓ'}
+            </p>
             <p className="text-2xl font-black">{user.carbonPoints} CP</p>
           </div>
 
@@ -409,7 +448,13 @@ export const TabScanner: React.FC<TabScannerProps> = ({
 
                 {/* Center Member Icon */}
                 <circle cx="50" cy="50" r="10" fill="#1E4D3E" />
-                <path d="M 46 50 L 49 53 L 55 47" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" />
+                <path
+                  d="M 46 50 L 49 53 L 55 47"
+                  stroke="white"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                />
 
                 {/* Pattern blocks */}
                 <rect x="36" y="8" width="8" height="6" fill="#1E4D3E" />
@@ -432,14 +477,20 @@ export const TabScanner: React.FC<TabScannerProps> = ({
               <button
                 onClick={handleCopyMemberCode}
                 className="rounded-xl bg-emerald-100 p-1.5 text-emerald-800 hover:bg-emerald-200 transition-colors"
-                title="Sao chép mã thành viên"
+                title={isEn ? 'Copy member code' : 'Sao chép mã thành viên'}
               >
-                {copiedCode ? <Check size={16} className="text-emerald-700" /> : <Copy size={16} />}
+                {copiedCode ? (
+                  <Check size={16} className="text-emerald-700" />
+                ) : (
+                  <Copy size={16} />
+                )}
               </button>
             </div>
 
             <p className="mt-2 text-[11px] text-slate-500 max-w-xs">
-              Xuất trình mã này cho nhân viên lễ tân, buồng phòng hoặc quầy thu ngân đối tác để tích điểm hoặc áp dụng cấn trừ trực tiếp khi thanh toán.
+              {isEn
+                ? 'Present this QR code to hotel receptionist, housekeeping or cashier to earn points or apply discounts upon checkout.'
+                : 'Xuất trình mã này cho nhân viên lễ tân, buồng phòng hoặc quầy thu ngân đối tác để tích điểm hoặc áp dụng cấn trừ trực tiếp khi thanh toán.'}
             </p>
           </div>
         </div>

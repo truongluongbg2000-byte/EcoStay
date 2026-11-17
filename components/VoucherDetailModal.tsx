@@ -8,10 +8,17 @@ interface VoucherDetailModalProps {
   voucher: Voucher | null;
   onClose: () => void;
   onMarkUsed?: (voucherId: string) => void;
+  currentLang?: 'vi' | 'en';
 }
 
-export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({ voucher, onClose, onMarkUsed }) => {
+export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({
+  voucher,
+  onClose,
+  onMarkUsed,
+  currentLang = 'vi',
+}) => {
   const [copied, setCopied] = useState(false);
+  const isEn = currentLang === 'en';
 
   if (!voucher) return null;
 
@@ -27,7 +34,7 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({ voucher,
         <button
           onClick={onClose}
           className="absolute right-4 top-4 z-20 rounded-full bg-slate-100 p-2 text-slate-600 hover:bg-slate-200 transition-colors"
-          aria-label="Đóng"
+          aria-label={isEn ? 'Close' : 'Đóng'}
         >
           <X size={18} />
         </button>
@@ -41,13 +48,17 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({ voucher,
           <h3 className="mt-2 text-base font-bold text-slate-800 leading-snug">{voucher.title}</h3>
           <div className="mt-1 flex items-center justify-center gap-1.5 text-xs text-slate-500">
             <Building2 size={13} />
-            <span>Đối tác: {voucher.partner}</span>
+            <span>
+              {isEn ? 'Partner:' : 'Đối tác:'} {voucher.partner}
+            </span>
           </div>
         </div>
 
         {/* Voucher Digital Ticket */}
         <div className="mt-4 rounded-2xl border-2 border-dashed border-emerald-300 bg-gradient-to-b from-emerald-50/70 to-white p-4 text-center">
-          <p className="text-xs font-medium text-slate-500">Mã ưu đãi của bạn</p>
+          <p className="text-xs font-medium text-slate-500">
+            {isEn ? 'Your Eco Voucher Code' : 'Mã ưu đãi của bạn'}
+          </p>
           <div className="mt-1 flex items-center justify-center gap-2">
             <span className="font-mono text-xl font-extrabold tracking-widest text-[#1E4D3E]">
               {voucher.code}
@@ -55,7 +66,7 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({ voucher,
             <button
               onClick={handleCopyCode}
               className="rounded-lg bg-emerald-100 p-1.5 text-emerald-800 hover:bg-emerald-200 transition-colors"
-              title="Sao chép mã"
+              title={isEn ? 'Copy Code' : 'Sao chép mã'}
             >
               {copied ? <Check size={14} className="text-emerald-700" /> : <Copy size={14} />}
             </button>
@@ -80,7 +91,6 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({ voucher,
           {/* QR Code Graphic Simulation */}
           <div className="mt-4 flex flex-col items-center">
             <div className="relative flex h-32 w-32 items-center justify-center rounded-xl bg-white p-2 shadow-inner border border-slate-200">
-              {/* SVG-based clean QR representation */}
               <svg viewBox="0 0 100 100" className="h-full w-full">
                 {/* Corner markers */}
                 <rect x="5" y="5" width="25" height="25" fill="#1E4D3E" rx="2" />
@@ -115,7 +125,7 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({ voucher,
               </svg>
             </div>
             <p className="mt-1 text-[11px] font-medium text-emerald-800">
-              Quét mã tại quầy để áp dụng
+              {isEn ? 'Scan at counter to redeem' : 'Quét mã tại quầy để áp dụng'}
             </p>
           </div>
 
@@ -123,7 +133,7 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({ voucher,
           <div className="mt-3 flex items-center justify-between border-t border-emerald-200/60 pt-2.5 text-xs text-slate-500">
             <span className="flex items-center gap-1">
               <Calendar size={12} />
-              Hạn dùng:
+              {isEn ? 'Expires:' : 'Hạn dùng:'}
             </span>
             <span className="font-semibold text-slate-800">{voucher.expiryDate}</span>
           </div>
@@ -133,10 +143,12 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({ voucher,
         <div className="mt-3 rounded-xl bg-slate-50 p-2.5 text-left text-xs text-slate-600">
           <div className="flex items-center gap-1.5 font-semibold text-slate-700 mb-1">
             <ShieldCheck size={14} className="text-emerald-600" />
-            <span>Hướng dẫn sử dụng:</span>
+            <span>{isEn ? 'Usage Instructions:' : 'Hướng dẫn sử dụng:'}</span>
           </div>
           <p className="text-[11px] leading-relaxed">
-            Xuất trình mã này cho nhân viên lễ tân, buồng phòng hoặc quầy thu ngân nhà hàng trước khi thanh toán. Mỗi mã chỉ có giá trị sử dụng một lần.
+            {isEn
+              ? 'Present this code to hotel front desk, housekeeping or dining cashier before payment. Each voucher is single-use only.'
+              : 'Xuất trình mã này cho nhân viên lễ tân, buồng phòng hoặc quầy thu ngân nhà hàng trước khi thanh toán. Mỗi mã chỉ có giá trị sử dụng một lần.'}
           </p>
         </div>
 
@@ -146,7 +158,7 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({ voucher,
             onClick={onClose}
             className="w-full rounded-2xl bg-[#1E4D3E] py-3 text-sm font-semibold text-white shadow-md hover:bg-[#16392E] transition-colors"
           >
-            Đóng
+            {isEn ? 'Close' : 'Đóng'}
           </button>
           {onMarkUsed && !voucher.isUsed && (
             <button
@@ -156,7 +168,7 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({ voucher,
               }}
               className="shrink-0 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors"
             >
-              Đã dùng
+              {isEn ? 'Mark as Used' : 'Đã dùng'}
             </button>
           )}
         </div>

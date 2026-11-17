@@ -7,6 +7,7 @@ import { triggerEcoConfetti } from './Confetti';
 
 interface MissionQRModalProps {
   mission: DetailedMission | null;
+  currentLang?: 'vi' | 'en';
   onClose: () => void;
   onSuccess: (missionId: string) => void;
   onOpenLiveScanner: () => void;
@@ -14,11 +15,13 @@ interface MissionQRModalProps {
 
 export const MissionQRModal: React.FC<MissionQRModalProps> = ({
   mission,
+  currentLang = 'vi',
   onClose,
   onSuccess,
   onOpenLiveScanner,
 }) => {
   const [isScanning, setIsScanning] = useState(false);
+  const isEn = currentLang === 'en';
 
   if (!mission) return null;
 
@@ -42,7 +45,9 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
               <QrCode size={18} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-800">Quét QR Nhiệm Vụ Xanh</h3>
+              <h3 className="text-sm font-bold text-slate-800">
+                {isEn ? 'Scan Eco Mission QR' : 'Quét QR Nhiệm Vụ Xanh'}
+              </h3>
               <p className="text-[10px] text-emerald-700 font-semibold">{mission.categoryName}</p>
             </div>
           </div>
@@ -69,7 +74,11 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
           {mission.isPenalty && (
             <div className="mt-2 flex items-center gap-1 text-[10px] text-amber-700 font-medium">
               <AlertTriangle size={12} className="shrink-0" />
-              <span>Nếu quán đối tác phản ánh lãng phí thức ăn sẽ bị trừ 5 CP.</span>
+              <span>
+                {isEn
+                  ? 'If partner reports food waste, a 5 CP penalty will be applied.'
+                  : 'Nếu quán đối tác phản ánh lãng phí thức ăn sẽ bị trừ 5 CP.'}
+              </span>
             </div>
           )}
         </div>
@@ -97,7 +106,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
             <div className="absolute inset-0 bg-emerald-950/80 flex items-center justify-center backdrop-blur-xs">
               <div className="flex items-center gap-2 text-white text-xs font-bold animate-pulse">
                 <Sparkles size={16} className="text-amber-400" />
-                <span>Đang xác nhận mã QR...</span>
+                <span>{isEn ? 'Verifying QR code...' : 'Đang xác nhận mã QR...'}</span>
               </div>
             </div>
           )}
@@ -105,7 +114,11 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
 
         {/* Location / Instructions */}
         <p className="mt-2 text-center text-[11px] text-slate-500 leading-relaxed px-1">
-          📍 {mission.qrInstruction || 'Hướng camera vào mã QR dán tại địa điểm đối tác để tích điểm.'}
+          📍{' '}
+          {mission.qrInstruction ||
+            (isEn
+              ? 'Point camera at partner venue QR code to earn points.'
+              : 'Hướng camera vào mã QR dán tại địa điểm đối tác để tích điểm.')}
         </p>
 
         {/* Action Buttons */}
@@ -116,7 +129,11 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#1E4D3E] to-[#2D6A56] py-3 text-xs font-bold text-white shadow-md hover:from-[#16392E] hover:to-[#225242] active:scale-98 transition-all"
           >
             <Zap size={15} className="text-amber-300" />
-            <span>⚡ Quét nhanh mã test (+{mission.points} CP)</span>
+            <span>
+              {isEn
+                ? `⚡ Quick Scan Demo (+${mission.points} CP)`
+                : `⚡ Quét nhanh mã test (+${mission.points} CP)`}
+            </span>
           </button>
 
           <button
@@ -127,7 +144,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
             className="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-emerald-200 bg-white py-2.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-50 transition-colors"
           >
             <Camera size={14} />
-            <span>Mở Camera quét thật</span>
+            <span>{isEn ? 'Open Live Camera' : 'Mở Camera quét thật'}</span>
           </button>
         </div>
       </div>

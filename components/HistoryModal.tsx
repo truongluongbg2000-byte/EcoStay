@@ -10,6 +10,7 @@ interface HistoryModalProps {
   logs: ImpactLog[];
   vouchers: Voucher[];
   initialTab?: 'points' | 'orders';
+  currentLang?: 'vi' | 'en';
 }
 
 export const HistoryModal: React.FC<HistoryModalProps> = ({
@@ -18,8 +19,10 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
   logs,
   vouchers,
   initialTab = 'points',
+  currentLang = 'vi',
 }) => {
   const [activeTab, setActiveTab] = useState<'points' | 'orders'>(initialTab);
+  const isEn = currentLang === 'en';
 
   if (!isOpen) return null;
 
@@ -31,7 +34,9 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
               <History size={18} />
             </div>
-            <h3 className="text-base font-bold text-slate-800">Nhật ký hoạt động</h3>
+            <h3 className="text-base font-bold text-slate-800">
+              {isEn ? 'Activity & Points History' : 'Nhật ký hoạt động'}
+            </h3>
           </div>
           <button
             onClick={onClose}
@@ -47,21 +52,21 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
             onClick={() => setActiveTab('points')}
             className={`flex-1 rounded-xl py-2 text-xs font-semibold transition-all ${
               activeTab === 'points'
-                ? 'bg-white text-[#1E4D3E] shadow-sm'
+                ? 'bg-white text-[#1E4D3E] shadow-sm font-bold'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            Lịch sử điểm ({logs.length})
+            {isEn ? `Points (${logs.length})` : `Lịch sử điểm (${logs.length})`}
           </button>
           <button
             onClick={() => setActiveTab('orders')}
             className={`flex-1 rounded-xl py-2 text-xs font-semibold transition-all ${
               activeTab === 'orders'
-                ? 'bg-white text-[#1E4D3E] shadow-sm'
+                ? 'bg-white text-[#1E4D3E] shadow-sm font-bold'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            Lịch sử đổi quà ({vouchers.length})
+            {isEn ? `Redeemed (${vouchers.length})` : `Lịch sử đổi quà (${vouchers.length})`}
           </button>
         </div>
 
@@ -69,7 +74,9 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
         <div className="mt-3 flex-1 overflow-y-auto divide-y divide-slate-100 space-y-2">
           {activeTab === 'points' ? (
             logs.length === 0 ? (
-              <p className="text-center py-8 text-xs text-slate-400">Chưa có lịch sử điểm</p>
+              <p className="text-center py-8 text-xs text-slate-400">
+                {isEn ? 'No points activity recorded yet' : 'Chưa có lịch sử điểm'}
+              </p>
             ) : (
               logs.map((item) => (
                 <div key={item.id} className="pt-2 flex items-center justify-between text-left">
@@ -97,14 +104,16 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                         item.type === 'earn' ? 'text-emerald-700' : 'text-amber-700'
                       }`}
                     >
-                      {item.type === 'earn' ? `+${item.points}` : item.points} CB
+                      {item.type === 'earn' ? `+${item.points}` : item.points} CP
                     </span>
                   </div>
                 </div>
               ))
             )
           ) : vouchers.length === 0 ? (
-            <p className="text-center py-8 text-xs text-slate-400">Chưa đổi voucher nào</p>
+            <p className="text-center py-8 text-xs text-slate-400">
+              {isEn ? 'No redeemed vouchers yet' : 'Chưa đổi voucher nào'}
+            </p>
           ) : (
             vouchers.map((v) => (
               <div key={v.id} className="pt-2 flex items-center justify-between text-left">
@@ -115,13 +124,13 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                   <div>
                     <p className="text-xs font-bold text-slate-800 line-clamp-1">{v.title}</p>
                     <p className="text-[10px] text-slate-400">
-                      Mã: {v.code} • Ngày: {v.issueDate}
+                      {isEn ? 'Code:' : 'Mã:'} {v.code} • {isEn ? 'Date:' : 'Ngày:'} {v.issueDate}
                     </p>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
                   <span className="text-[11px] font-semibold text-slate-700">
-                    -{v.pointsUsed} CB
+                    -{v.pointsUsed} CP
                   </span>
                 </div>
               </div>
@@ -133,7 +142,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
           onClick={onClose}
           className="mt-4 w-full rounded-2xl bg-[#1E4D3E] py-2.5 text-xs font-semibold text-white hover:bg-[#16392E]"
         >
-          Đóng
+          {isEn ? 'Close' : 'Đóng'}
         </button>
       </div>
     </div>

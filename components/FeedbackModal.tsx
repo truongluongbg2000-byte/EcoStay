@@ -7,12 +7,20 @@ interface FeedbackModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmitFeedback: (comment: string, rating: number) => void;
+  currentLang?: 'vi' | 'en';
 }
 
-export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmitFeedback }) => {
+export const FeedbackModal: React.FC<FeedbackModalProps> = ({
+  isOpen,
+  onClose,
+  onSubmitFeedback,
+  currentLang = 'vi',
+}) => {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  const isEn = currentLang === 'en';
 
   if (!isOpen) return null;
 
@@ -41,9 +49,13 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
               <CheckCircle2 size={32} />
             </div>
-            <h3 className="mt-3 text-base font-bold text-slate-800">Cảm ơn bạn!</h3>
+            <h3 className="mt-3 text-base font-bold text-slate-800">
+              {isEn ? 'Thank you!' : 'Cảm ơn bạn!'}
+            </h3>
             <p className="mt-1 text-xs text-slate-600">
-              Ý kiến của bạn đã được ghi nhận. Bạn được cộng <strong className="text-emerald-700">+15 Điểm CB</strong>!
+              {isEn
+                ? 'Your feedback has been recorded. You received +15 Carbon Points (CP)!'
+                : 'Ý kiến của bạn đã được ghi nhận. Bạn được cộng +15 Điểm CP!'}
             </p>
           </div>
         ) : (
@@ -53,16 +65,22 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
                 <MessageSquareQuote size={18} />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-800">Gửi Ý Kiến & Khảo Sát</h3>
+                <h3 className="text-sm font-bold text-slate-800">
+                  {isEn ? 'Guest Survey & Feedback' : 'Gửi Ý Kiến & Khảo Sát'}
+                </h3>
                 <p className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
                   <Sparkles size={11} className="text-amber-500" />
-                  Nhận ngay +15 Điểm CACBON POINT
+                  {isEn
+                    ? 'Earn +15 CARBON POINTS immediately'
+                    : 'Nhận ngay +15 Điểm CACBON POINT'}
                 </p>
               </div>
             </div>
 
             <div className="mt-4">
-              <label className="text-xs font-bold text-slate-700">Mức độ hài lòng:</label>
+              <label className="text-xs font-bold text-slate-700">
+                {isEn ? 'Overall Satisfaction:' : 'Mức độ hài lòng:'}
+              </label>
               <div className="mt-1 flex gap-1.5 justify-center py-2 bg-emerald-50/50 rounded-2xl border border-emerald-100">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -82,11 +100,17 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
             </div>
 
             <div className="mt-3">
-              <label className="text-xs font-bold text-slate-700">Đóng góp của bạn:</label>
+              <label className="text-xs font-bold text-slate-700">
+                {isEn ? 'Your Feedback:' : 'Đóng góp của bạn:'}
+              </label>
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Chia sẻ trải nghiệm dịch vụ xanh, phòng nghỉ hoặc bữa ăn tại resort..."
+                placeholder={
+                  isEn
+                    ? 'Share your experience with eco-services, rooms, or organic dining...'
+                    : 'Chia sẻ trải nghiệm dịch vụ xanh, phòng nghỉ hoặc bữa ăn tại resort...'
+                }
                 rows={3}
                 required
                 className="mt-1 w-full rounded-2xl border border-slate-200 p-3 text-xs text-slate-800 focus:border-[#1E4D3E] focus:outline-none"
@@ -97,7 +121,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, o
               type="submit"
               className="mt-4 w-full rounded-2xl bg-[#1E4D3E] py-2.5 text-xs font-bold text-white shadow hover:bg-[#16392E]"
             >
-              Gửi đánh giá & Nhận 15 CB
+              {isEn ? 'Submit & Earn 15 CP' : 'Gửi đánh giá & Nhận 15 CP'}
             </button>
           </form>
         )}

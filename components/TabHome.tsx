@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { UserProfile, GreenDestination, DestinationCategory } from '@/data/types';
 import { triggerEcoConfetti } from './Confetti';
+import { destinationTranslations, destinationCategoryTranslations } from '@/data/translations';
 
 interface TabHomeProps {
   user: UserProfile;
@@ -381,60 +382,78 @@ export const TabHome: React.FC<TabHomeProps> = ({
             </button>
           </div>
         ) : (
-          filtered.map((item) => (
-            <div
-              key={item.id}
-              className="rounded-3xl bg-white p-4 shadow-sm border border-emerald-950/5 hover:border-emerald-200 hover:shadow-md transition-all text-left"
-            >
-              {/* Top row: 100% Xanh pill on left & +300 CP on right (matching mockup) */}
-              <div className="flex items-center justify-between">
-                <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200/80 flex items-center gap-1">
-                  <CheckCircle2 size={11} className="text-emerald-600" />
-                  <span>100% Xanh</span>
-                </span>
+          filtered.map((item) => {
+            const trans = isEn ? destinationTranslations[item.id] : null;
+            const displayCategoryName = isEn
+              ? destinationCategoryTranslations[item.category] || item.categoryName
+              : item.categoryName;
+            const displayTitle = trans?.title || item.title;
+            const displayDesc = trans?.desc || item.description;
+            const displayBadge = trans?.badge || item.greenBadge;
 
-                <span className="rounded-full bg-[#1E4D3E] px-2.5 py-0.5 text-xs font-black text-white shadow-xs">
-                  +{item.pointsReward} CP
-                </span>
-              </div>
+            const translatedItem: GreenDestination = {
+              ...item,
+              categoryName: displayCategoryName,
+              title: displayTitle,
+              description: displayDesc,
+              greenBadge: displayBadge,
+            };
 
-              {/* Title & Category with Icon */}
-              <div className="mt-2.5 flex items-start gap-2.5">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-100 shadow-2xs">
-                  {getCategoryIconBox(item.category)}
+            return (
+              <div
+                key={item.id}
+                className="rounded-3xl bg-white p-4 shadow-sm border border-emerald-950/5 hover:border-emerald-200 hover:shadow-md transition-all text-left"
+              >
+                {/* Top row: 100% Xanh pill on left & +300 CP on right (matching mockup) */}
+                <div className="flex items-center justify-between">
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200/80 flex items-center gap-1">
+                    <CheckCircle2 size={11} className="text-emerald-600" />
+                    <span>{isEn ? '100% Green' : '100% Xanh'}</span>
+                  </span>
+
+                  <span className="rounded-full bg-[#1E4D3E] px-2.5 py-0.5 text-xs font-black text-white shadow-xs">
+                    +{item.pointsReward} CP
+                  </span>
                 </div>
 
-                <div>
-                  <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-wide">
-                    {item.categoryName} • {item.location}
-                  </p>
-                  <h4 className="mt-0.5 text-sm font-extrabold text-slate-900 leading-snug">
-                    {item.name}
-                  </h4>
+                {/* Title & Category with Icon */}
+                <div className="mt-2.5 flex items-start gap-2.5">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-100 shadow-2xs">
+                    {getCategoryIconBox(item.category)}
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-wide">
+                      {displayCategoryName} • {item.location}
+                    </p>
+                    <h4 className="mt-0.5 text-sm font-extrabold text-slate-900 leading-snug">
+                      {item.name}
+                    </h4>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className="mt-2 text-xs text-slate-600 leading-relaxed line-clamp-2">
+                  {displayDesc}
+                </p>
+
+                {/* Bottom Row: Green Certificate Badge + Action Button */}
+                <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-semibold text-slate-500 line-clamp-1 flex items-center gap-1">
+                    <ShieldCheck size={12} className="text-emerald-700 shrink-0" />
+                    <span>{displayBadge}</span>
+                  </span>
+
+                  <button
+                    onClick={() => setViewingDestination(translatedItem)}
+                    className="shrink-0 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#1E4D3E] hover:bg-emerald-100 active:scale-95 transition-all shadow-2xs border border-emerald-200/60"
+                  >
+                    {isEn ? 'View & Book' : 'Xem & Đặt dịch vụ'}
+                  </button>
                 </div>
               </div>
-
-              {/* Description */}
-              <p className="mt-2 text-xs text-slate-600 leading-relaxed line-clamp-2">
-                {item.description}
-              </p>
-
-              {/* Bottom Row: Green Certificate Badge + Action Button */}
-              <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                <span className="text-[10px] font-semibold text-slate-500 line-clamp-1 flex items-center gap-1">
-                  <ShieldCheck size={12} className="text-emerald-700 shrink-0" />
-                  <span>{item.greenBadge}</span>
-                </span>
-
-                <button
-                  onClick={() => setViewingDestination(item)}
-                  className="shrink-0 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#1E4D3E] hover:bg-emerald-100 active:scale-95 transition-all shadow-2xs border border-emerald-200/60"
-                >
-                  {isEn ? 'View & Book' : 'Xem & Đặt dịch vụ'}
-                </button>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 

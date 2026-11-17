@@ -38,21 +38,22 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
   onSelectVoucher,
   onNavigateToEarn,
 }) => {
-  const isEn = currentLang === 'en';
   const [activeSubTab, setActiveSubTab] = useState<'store' | 'cart'>('store');
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>('all');
   const [selectedRegion, setSelectedRegion] = useState('Miền Bắc');
   const [confirmReward, setConfirmReward] = useState<RewardItem | null>(null);
   const [insufficientReward, setInsufficientReward] = useState<RewardItem | null>(null);
 
+  const isEn = currentLang === 'en';
+
   const categories: { id: CategoryType; label: string; icon: string }[] = [
-    { id: 'all', label: 'Tất cả', icon: '🌿' },
-    { id: 'tree', label: 'Trồng cây', icon: '🌲' },
-    { id: 'food', label: 'Ẩm thực', icon: '🥗' },
-    { id: 'fashion', label: 'Thời trang', icon: '👜' },
-    { id: 'hotdeal', label: 'Hot deal', icon: '🔥' },
-    { id: 'service', label: 'Dịch vụ', icon: '💆' },
-    { id: 'other', label: 'Khác', icon: '🎁' },
+    { id: 'all', label: isEn ? 'All' : 'Tất cả', icon: '🌿' },
+    { id: 'tree', label: isEn ? 'Plant Trees' : 'Trồng cây', icon: '🌲' },
+    { id: 'food', label: isEn ? 'Dining' : 'Ẩm thực', icon: '🥗' },
+    { id: 'fashion', label: isEn ? 'Eco Fashion' : 'Thời trang', icon: '👜' },
+    { id: 'hotdeal', label: isEn ? 'Hot Deals' : 'Hot deal', icon: '🔥' },
+    { id: 'service', label: isEn ? 'Services' : 'Dịch vụ', icon: '💆' },
+    { id: 'other', label: isEn ? 'Others' : 'Khác', icon: '🎁' },
   ];
 
   const filteredRewards = rewards.filter((item) => {
@@ -75,7 +76,6 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
       triggerEcoConfetti();
       onRedeemReward(confirmReward);
       setConfirmReward(null);
-      // Auto switch to cart to show the newly added item
       setActiveSubTab('cart');
     }
   };
@@ -118,19 +118,29 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
             <div>
               <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
                 <Gift size={15} />
-                <span>Kho quà sinh thái EcoStay</span>
+                <span>
+                  {isEn ? 'EcoStay Eco-Rewards Store' : 'Kho quà sinh thái EcoStay'}
+                </span>
               </div>
               <div className="mt-1 flex items-center gap-1">
-                <span className="text-sm font-bold text-slate-800">Khu vực:</span>
+                <span className="text-sm font-bold text-slate-800">
+                  {isEn ? 'Region:' : 'Khu vực:'}
+                </span>
                 <div className="relative inline-block">
                   <select
                     value={selectedRegion}
                     onChange={(e) => setSelectedRegion(e.target.value)}
                     className="appearance-none rounded-xl bg-emerald-100/70 px-2.5 py-1 pr-6 text-xs font-bold text-[#1E4D3E] focus:outline-none cursor-pointer"
                   >
-                    <option value="Miền Bắc">Miền Bắc (Ninh Bình - Cúc Phương)</option>
-                    <option value="Miền Trung">Miền Trung (Quảng Nam - Hội An)</option>
-                    <option value="Miền Nam">Miền Nam (Nam Cát Tiên - Côn Đảo)</option>
+                    <option value="Miền Bắc">
+                      {isEn ? 'Northern (Ninh Binh - Cuc Phuong)' : 'Miền Bắc (Ninh Bình - Cúc Phương)'}
+                    </option>
+                    <option value="Miền Trung">
+                      {isEn ? 'Central (Quang Nam - Hoi An)' : 'Miền Trung (Quảng Nam - Hội An)'}
+                    </option>
+                    <option value="Miền Nam">
+                      {isEn ? 'Southern (Cat Tien - Con Dao)' : 'Miền Nam (Nam Cát Tiên - Côn Đảo)'}
+                    </option>
                   </select>
                   <ChevronDown
                     size={14}
@@ -142,7 +152,9 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
 
             {/* Current Balance */}
             <div className="text-right">
-              <p className="text-[10px] text-slate-400">Số dư hiện tại</p>
+              <p className="text-[10px] text-slate-400">
+                {isEn ? 'Current Balance' : 'Số dư hiện tại'}
+              </p>
               <div className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-extrabold text-[#1E4D3E] border border-emerald-200">
                 <Sparkles size={12} className="text-amber-500" />
                 <span>{userPoints} CP</span>
@@ -195,7 +207,7 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
                     </div>
 
                     <div className="absolute bottom-2.5 right-2.5 rounded-xl bg-black/60 px-2.5 py-1 text-xs font-bold text-white backdrop-blur-md">
-                      Trị giá: {reward.originalPriceVnd.toLocaleString('vi-VN')}đ
+                      {isEn ? 'Value:' : 'Trị giá:'} {reward.originalPriceVnd.toLocaleString('vi-VN')}đ
                     </div>
                   </div>
 
@@ -218,7 +230,9 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
 
                     <div className="mt-3 flex items-center justify-between pt-1">
                       <div>
-                        <span className="text-xs text-slate-400">Yêu cầu:</span>
+                        <span className="text-xs text-slate-400">
+                          {isEn ? 'Required:' : 'Yêu cầu:'}
+                        </span>
                         <div className="flex items-baseline gap-1">
                           <span className="text-lg font-black text-[#1E4D3E]">{reward.points}</span>
                           <span className="text-xs font-bold text-emerald-600">CP</span>
@@ -230,11 +244,17 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
                         className={`flex items-center gap-1.5 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all shadow-sm active:scale-95 ${
                           canAfford
                             ? 'bg-[#1E4D3E] text-white hover:bg-[#16392E]'
-                            : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                         }`}
                       >
-                        <Sparkles size={14} className={canAfford ? 'text-amber-300' : 'text-emerald-600'} />
-                        <span>{canAfford ? 'Đổi quà ngay' : 'Chưa đủ điểm'}</span>
+                        {canAfford ? (
+                          <>
+                            <Sparkles size={14} className="text-amber-400" />
+                            <span>{isEn ? 'Redeem Now' : 'Đổi ngay'}</span>
+                          </>
+                        ) : (
+                          <span>{isEn ? 'Insufficient CP' : 'Không đủ điểm'}</span>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -244,30 +264,35 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
           </div>
         </>
       ) : (
-        /* Subtab 2: GIỎ HÀNG XANH */
-        <div className="space-y-3.5">
-          <div className="rounded-2xl bg-emerald-50/80 p-3 border border-emerald-200/60">
-            <h4 className="text-xs font-bold text-[#1E4D3E] flex items-center gap-1.5">
-              <ShoppingBag size={15} />
-              <span>Vật phẩm & Voucher đã đổi</span>
-            </h4>
-            <p className="mt-0.5 text-[11px] text-slate-600">
-              Xuất trình mã QR/Barcode trong từng voucher cho nhân viên khách sạn hoặc nhà hàng để áp dụng.
+        /* SUBTAB 2: GIỎ HÀNG XANH (GREEN CART) */
+        <div className="space-y-3">
+          <div className="border-b border-emerald-900/10 pb-2">
+            <h3 className="text-base font-bold text-slate-800">
+              {isEn ? 'Green Cart (Redeemed Rewards)' : 'Giỏ hàng xanh của bạn'}
+            </h3>
+            <p className="text-xs text-slate-500">
+              {isEn
+                ? 'Unused vouchers, trees & activities redeemed with Carbon Points'
+                : 'Voucher, vật phẩm & hoạt động bạn đã đổi điểm Cacbon nhưng chưa sử dụng'}
             </p>
           </div>
 
           {activeVouchers.length === 0 ? (
-            <div className="rounded-3xl bg-white p-8 text-center border border-slate-100">
-              <Ticket size={36} className="mx-auto text-slate-300 mb-2" />
-              <p className="text-xs font-medium text-slate-600">Giỏ hàng xanh đang trống</p>
-              <p className="text-[11px] text-slate-400 mt-1">
-                Bạn chưa dùng điểm carbon để đổi voucher hoặc vật phẩm nào.
+            <div className="rounded-3xl bg-white p-8 text-center border border-slate-100 shadow-sm">
+              <ShoppingBag size={40} className="mx-auto text-slate-300 mb-2" />
+              <h4 className="text-sm font-bold text-slate-700">
+                {isEn ? 'Your Green Cart is empty' : 'Giỏ hàng xanh đang trống'}
+              </h4>
+              <p className="mt-1 text-xs text-slate-400">
+                {isEn
+                  ? 'Redeem your Carbon Points for organic dining, green gifts or planting trees!'
+                  : 'Hãy dùng điểm Cacbon để đổi quà tặng hữu cơ, voucher nghỉ dưỡng hoặc trồng cây nhé!'}
               </p>
               <button
                 onClick={() => setActiveSubTab('store')}
-                className="mt-4 rounded-2xl bg-[#1E4D3E] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#16392E]"
+                className="mt-4 rounded-2xl bg-[#1E4D3E] px-4 py-2.5 text-xs font-bold text-white shadow hover:bg-[#16392E]"
               >
-                Khám phá kho đổi quà
+                {isEn ? 'Explore Rewards Store' : 'Khám phá kho đổi quà'}
               </button>
             </div>
           ) : (
@@ -314,14 +339,14 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
                     <div className="mt-3 flex items-center justify-between border-t border-dashed border-slate-200 pt-2">
                       <span className="text-[10px] text-slate-400 flex items-center gap-1">
                         <Calendar size={11} />
-                        Hạn: {voucher.expiryDate}
+                        {isEn ? 'Exp:' : 'Hạn:'} {voucher.expiryDate}
                       </span>
                       <button
                         onClick={() => onSelectVoucher(voucher)}
                         className="flex items-center gap-1 rounded-xl bg-[#1E4D3E] px-3 py-1.5 text-[11px] font-bold text-white shadow hover:bg-[#16392E] active:scale-95 transition-all"
                       >
                         <QrCode size={12} />
-                        <span>Sử dụng ngay</span>
+                        <span>{isEn ? 'Use Now' : 'Sử dụng ngay'}</span>
                       </button>
                     </div>
                   </div>
@@ -340,17 +365,25 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
               <TreePine size={28} />
             </div>
 
-            <h3 className="mt-3 text-base font-bold text-slate-800">Xác nhận đổi quà</h3>
+            <h3 className="mt-3 text-base font-bold text-slate-800">
+              {isEn ? 'Confirm Redemption' : 'Xác nhận đổi quà'}
+            </h3>
             <p className="mt-1 text-xs text-slate-600">
-              Bạn có chắc muốn dùng <strong className="text-emerald-700">{confirmReward.points} Điểm CP</strong> để đổi:
+              {isEn ? 'Are you sure you want to use' : 'Bạn có chắc muốn dùng'}{' '}
+              <strong className="text-emerald-700">{confirmReward.points} CP</strong>{' '}
+              {isEn ? 'to redeem:' : 'để đổi:'}
             </p>
 
             <div className="mt-3 rounded-2xl bg-emerald-50/70 p-3 text-left border border-emerald-100">
               <p className="text-xs font-bold text-emerald-950">{confirmReward.title}</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">Đối tác: {confirmReward.partner}</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {isEn ? 'Partner:' : 'Đối tác:'} {confirmReward.partner}
+              </p>
               {confirmReward.treeDetails && (
                 <div className="mt-2 text-[10px] text-emerald-800 bg-white/80 p-2 rounded-xl">
-                  🌲 <strong>Cây trồng:</strong> {confirmReward.treeDetails.treeType} tại {confirmReward.treeDetails.forestName}
+                  🌲 <strong>{isEn ? 'Tree planted:' : 'Cây trồng:'}</strong>{' '}
+                  {confirmReward.treeDetails.treeType} {isEn ? 'at' : 'tại'}{' '}
+                  {confirmReward.treeDetails.forestName}
                 </div>
               )}
             </div>
@@ -360,13 +393,13 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
                 onClick={() => setConfirmReward(null)}
                 className="flex-1 rounded-2xl border border-slate-200 bg-white py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
               >
-                Hủy bỏ
+                {isEn ? 'Cancel' : 'Hủy bỏ'}
               </button>
               <button
                 onClick={handleConfirmRedeem}
                 className="flex-1 rounded-2xl bg-[#1E4D3E] py-2.5 text-xs font-bold text-white shadow hover:bg-[#16392E]"
               >
-                Xác nhận đổi
+                {isEn ? 'Confirm' : 'Xác nhận đổi'}
               </button>
             </div>
           </div>
@@ -381,9 +414,13 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
               <AlertCircle size={28} />
             </div>
 
-            <h3 className="mt-3 text-base font-bold text-slate-800">Chưa đủ điểm tích lũy</h3>
+            <h3 className="mt-3 text-base font-bold text-slate-800">
+              {isEn ? 'Insufficient Carbon Points' : 'Chưa đủ điểm tích lũy'}
+            </h3>
             <p className="mt-1 text-xs text-slate-600">
-              Phần quà này cần <strong>{insufficientReward.points} Điểm CP</strong>, bạn hiện có <strong>{userPoints} Điểm CP</strong> (còn thiếu {insufficientReward.points - userPoints} CP).
+              {isEn
+                ? `This reward requires ${insufficientReward.points} CP. You currently have ${userPoints} CP (need ${insufficientReward.points - userPoints} CP more).`
+                : `Phần quà này cần ${insufficientReward.points} Điểm CP, bạn hiện có ${userPoints} Điểm CP (còn thiếu ${insufficientReward.points - userPoints} CP).`}
             </p>
 
             <div className="mt-4 flex gap-2">
@@ -391,7 +428,7 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
                 onClick={() => setInsufficientReward(null)}
                 className="flex-1 rounded-2xl border border-slate-200 bg-white py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
               >
-                Để sau
+                {isEn ? 'Later' : 'Để sau'}
               </button>
               <button
                 onClick={() => {
@@ -400,7 +437,7 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
                 }}
                 className="flex-1 rounded-2xl bg-[#D97736] py-2.5 text-xs font-bold text-white shadow hover:bg-[#C26D45]"
               >
-                Làm nhiệm vụ xanh ngay
+                {isEn ? 'Earn Points Now' : 'Làm nhiệm vụ xanh ngay'}
               </button>
             </div>
           </div>

@@ -9,12 +9,20 @@ interface EcoImpactModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: UserProfile;
+  currentLang?: 'vi' | 'en';
 }
 
-export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({ isOpen, onClose, user }) => {
+export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({
+  isOpen,
+  onClose,
+  user,
+  currentLang = 'vi',
+}) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const isEn = currentLang === 'en';
 
   if (!isOpen) return null;
 
@@ -41,14 +49,20 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({ isOpen, onClose,
 
   const handleShare = () => {
     if (navigator.share) {
-      navigator.share({
-        title: 'Hộ Chiếu Sinh Thái EcoStay',
-        text: `Tôi vừa giảm được ${user.co2Saved} kg CO₂ và đóng góp ${user.treesPlanted} cây xanh cùng EcoStay!`,
-        url: window.location.href,
-      }).catch(() => {});
+      navigator
+        .share({
+          title: isEn ? 'EcoStay Green Passport' : 'Hộ Chiếu Sinh Thái EcoStay',
+          text: isEn
+            ? `I reduced ${user.co2Saved} kg CO₂ and planted ${user.treesPlanted} native trees with EcoStay!`
+            : `Tôi vừa giảm được ${user.co2Saved} kg CO₂ và đóng góp ${user.treesPlanted} cây xanh cùng EcoStay!`,
+          url: window.location.href,
+        })
+        .catch(() => {});
     } else {
       navigator.clipboard.writeText(
-        `🌿 Tôi vừa đồng hành cùng EcoStay giảm ${user.co2Saved} kg CO₂ và đóng góp ${user.treesPlanted} cây xanh cho Trái Đất! Trải nghiệm du lịch xanh tại: ${window.location.origin}`
+        isEn
+          ? `🌿 I just reduced ${user.co2Saved} kg CO₂ and contributed ${user.treesPlanted} trees with EcoStay! Join eco-tourism at: ${window.location.origin}`
+          : `🌿 Tôi vừa đồng hành cùng EcoStay giảm ${user.co2Saved} kg CO₂ và đóng góp ${user.treesPlanted} cây xanh cho Trái Đất! Trải nghiệm du lịch xanh tại: ${window.location.origin}`
       );
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
@@ -61,7 +75,7 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({ isOpen, onClose,
         <button
           onClick={onClose}
           className="absolute right-4 top-4 z-20 rounded-full bg-black/20 p-2 text-white hover:bg-black/30 transition-colors"
-          aria-label="Đóng"
+          aria-label={isEn ? 'Close' : 'Đóng'}
         >
           <X size={18} />
         </button>
@@ -82,8 +96,12 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({ isOpen, onClose,
                 <TreePine className="h-5 w-5 text-emerald-400" />
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wider text-emerald-300 font-semibold">EcoStay Official</p>
-                <p className="text-[10px] text-white/60">Chứng Nhận Tác Động Xanh</p>
+                <p className="text-xs uppercase tracking-wider text-emerald-300 font-semibold">
+                  EcoStay Official
+                </p>
+                <p className="text-[10px] text-white/60">
+                  {isEn ? 'Certified Green Impact' : 'Chứng Nhận Tác Động Xanh'}
+                </p>
               </div>
             </div>
             <div className="rounded-full bg-emerald-500/20 px-3 py-1 text-[11px] font-medium text-emerald-300 border border-emerald-500/30">
@@ -94,15 +112,23 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({ isOpen, onClose,
           {/* User Section */}
           <div className="mt-5 text-center">
             <div className="mx-auto h-16 w-16 overflow-hidden rounded-full border-2 border-emerald-400/60 p-0.5 shadow-lg">
-              <img src={user.avatar} alt={user.name} className="h-full w-full rounded-full object-cover" />
+              <img
+                src={user.avatar}
+                alt={user.name}
+                className="h-full w-full rounded-full object-cover"
+              />
             </div>
             <h3 className="mt-3 text-lg font-bold text-white tracking-wide">{user.name}</h3>
             <div className="inline-flex items-center gap-1.5 mt-1 rounded-full bg-white/10 px-3 py-0.5 text-xs text-emerald-200">
               <Award className="h-3.5 w-3.5 text-amber-400" />
-              <span>Hạng: {user.rank}</span>
+              <span>
+                {isEn ? 'Tier: Sprout Tier' : `Hạng: ${user.rank}`}
+              </span>
             </div>
             <p className="mt-2 text-xs text-emerald-100/70 italic">
-              "Đã đồng hành thực hành lối sống bền vững trong kỳ lưu trú tại {user.hotelName}"
+              {isEn
+                ? `"Proudly practiced sustainable habits during stay at ${user.hotelName}"`
+                : `"Đã đồng hành thực hành lối sống bền vững trong kỳ lưu trú tại ${user.hotelName}"`}
             </p>
           </div>
 
@@ -113,21 +139,27 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({ isOpen, onClose,
                 <ShieldCheck size={18} />
               </div>
               <p className="text-base font-extrabold text-white">{user.co2Saved}</p>
-              <p className="text-[10px] text-emerald-200/80">kg CO₂ giảm</p>
+              <p className="text-[10px] text-emerald-200/80">
+                {isEn ? 'kg CO₂ saved' : 'kg CO₂ giảm'}
+              </p>
             </div>
             <div className="rounded-xl bg-white/5 border border-white/10 p-2.5 backdrop-blur-md">
               <div className="flex justify-center text-cyan-300 mb-1">
                 <Droplets size={18} />
               </div>
               <p className="text-base font-extrabold text-white">{user.waterSaved}L</p>
-              <p className="text-[10px] text-cyan-200/80">Nước tiết kiệm</p>
+              <p className="text-[10px] text-cyan-200/80">
+                {isEn ? 'Water saved' : 'Nước tiết kiệm'}
+              </p>
             </div>
             <div className="rounded-xl bg-white/5 border border-white/10 p-2.5 backdrop-blur-md">
               <div className="flex justify-center text-amber-400 mb-1">
                 <Zap size={18} />
               </div>
               <p className="text-base font-extrabold text-white">{user.energySaved}</p>
-              <p className="text-[10px] text-amber-200/80">kWh Điện sạch</p>
+              <p className="text-[10px] text-amber-200/80">
+                {isEn ? 'kWh clean' : 'kWh Điện sạch'}
+              </p>
             </div>
           </div>
 
@@ -137,35 +169,59 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({ isOpen, onClose,
               <TreePine size={22} />
             </div>
             <div className="text-left">
-              <p className="text-xs font-semibold text-white">Đóng góp: {user.treesPlanted} Cây Bách Xanh</p>
-              <p className="text-[10px] text-emerald-200/70">VQG Cúc Phương (Tọa độ: 20.3188° N, 105.6042° E)</p>
+              <p className="text-xs font-semibold text-white">
+                {isEn
+                  ? `Contributed: ${user.treesPlanted} Native Trees`
+                  : `Đóng góp: ${user.treesPlanted} Cây Bách Xanh`}
+              </p>
+              <p className="text-[10px] text-emerald-200/70">
+                Cuc Phuong NP (Coord: 20.3188° N, 105.6042° E)
+              </p>
             </div>
           </div>
 
           {/* Card Footer */}
           <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-3 text-[10px] text-white/50">
-            <span>Mã xác thực: ECO-{Date.now().toString().slice(-6)}</span>
+            <span>
+              {isEn ? 'Auth Code:' : 'Mã xác thực:'} ECO-{Date.now().toString().slice(-6)}
+            </span>
             <span>ecostay.vn/verify</span>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="mt-4 space-y-2">
+        {/* Action Controls */}
+        <div className="mt-4 flex gap-2">
           <button
             onClick={handleDownload}
             disabled={downloading}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1E4D3E] py-3 text-sm font-semibold text-white shadow-md hover:bg-[#16392E] transition-all disabled:opacity-60"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-white py-3 text-xs font-bold text-[#1E4D3E] shadow-sm hover:bg-emerald-50 active:scale-95 transition-all border border-slate-200"
           >
-            <Download size={16} />
-            {downloading ? 'Đang xuất hình ảnh...' : 'Lưu ảnh & Chia sẻ Story (PNG)'}
+            <Download size={15} />
+            <span>
+              {downloading
+                ? isEn
+                  ? 'Saving...'
+                  : 'Đang tải...'
+                : isEn
+                ? 'Download Image'
+                : 'Tải Ảnh Infographic (PNG)'}
+            </span>
           </button>
 
           <button
             onClick={handleShare}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#1E4D3E]/30 bg-white py-2.5 text-xs font-semibold text-[#1E4D3E] hover:bg-emerald-50 transition-colors"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-[#1E4D3E] py-3 text-xs font-bold text-white shadow-md hover:bg-[#16392E] active:scale-95 transition-all"
           >
-            {copied ? <CheckCircle2 size={15} className="text-emerald-600" /> : <Share2 size={15} />}
-            {copied ? 'Đã sao chép liên kết!' : 'Sao chép thông điệp chia sẻ'}
+            <Share2 size={15} />
+            <span>
+              {copied
+                ? isEn
+                  ? 'Copied Link!'
+                  : 'Đã copy link!'
+                : isEn
+                ? 'Share to Story'
+                : 'Chia Sẻ Lên Story'}
+            </span>
           </button>
         </div>
       </div>

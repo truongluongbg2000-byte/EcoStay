@@ -6,10 +6,12 @@ import { X, TreePine, ShieldCheck, Scale, Award } from 'lucide-react';
 interface AboutModalProps {
   isOpen: boolean;
   onClose: () => void;
+  currentLang?: 'vi' | 'en';
 }
 
-export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
+export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, currentLang = 'vi' }) => {
   if (!isOpen) return null;
+  const isEn = currentLang === 'en';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fadeIn">
@@ -19,7 +21,9 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
               <TreePine size={18} />
             </div>
-            <h3 className="text-base font-bold text-slate-800">Về CACBON POINT</h3>
+            <h3 className="text-base font-bold text-slate-800">
+              {isEn ? 'About CARBON POINTS' : 'Về CACBON POINT'}
+            </h3>
           </div>
           <button
             onClick={onClose}
@@ -33,37 +37,56 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           <div className="rounded-2xl bg-emerald-50/70 p-3 border border-emerald-100">
             <h4 className="font-bold text-[#1E4D3E] flex items-center gap-1.5 mb-1">
               <Award size={14} className="text-amber-500" />
-              <span>Chương trình Du lịch Xanh Tiên Phong</span>
+              <span>{isEn ? 'Pioneering Green Tourism Program' : 'Chương trình Du lịch Xanh Tiên Phong'}</span>
             </h4>
             <p className="text-[11px]">
-              Tài khoản EcoStay / CACBON POINT là sáng kiến thuộc đề án phát triển bởi Nhóm MVP - Trường Đại học Thăng Long.
+              {isEn
+                ? 'The EcoStay / CARBON POINTS platform is an initiative developed by MVP Team - Thang Long University.'
+                : 'Tài khoản EcoStay / CACBON POINT là sáng kiến thuộc đề án phát triển bởi Nhóm MVP - Trường Đại học Thăng Long.'}
             </p>
           </div>
 
           <div>
             <h5 className="font-bold text-slate-800 flex items-center gap-1 mb-1">
               <Scale size={13} className="text-emerald-700" />
-              <span>Quy tắc chuyển đổi điểm thưởng:</span>
+              <span>{isEn ? 'Reward points conversion rules:' : 'Quy tắc chuyển đổi điểm thưởng:'}</span>
             </h5>
             <ul className="list-disc pl-4 space-y-1 text-[11px]">
-              <li><strong>1 CACBON POINT (CP)</strong> là đơn vị ghi nhận đóng góp sống xanh và bảo vệ môi trường.</li>
-              <li>Điểm có hiệu lực <strong>12 tháng</strong> kể từ ngày phát sinh giao dịch.</li>
-              <li>Điểm tích lũy có thể quy đổi sang quà tặng, voucher dịch vụ đối tác hoặc trồng cây xanh tại rừng phòng hộ.</li>
+              <li>
+                <strong>{isEn ? '1 CARBON POINT (CP)' : '1 CACBON POINT (CP)'}</strong>{' '}
+                {isEn
+                  ? 'is the unit measuring and rewarding your eco-actions and planet protection.'
+                  : 'là đơn vị ghi nhận đóng góp sống xanh và bảo vệ môi trường.'}
+              </li>
+              <li>
+                {isEn
+                  ? 'Points are valid for 12 months from the transaction date.'
+                  : 'Điểm có hiệu lực 12 tháng kể từ ngày phát sinh giao dịch.'}
+              </li>
+              <li>
+                {isEn
+                  ? 'Accumulated points can be redeemed for gifts, partner service vouchers, or planting trees in conservation reserves.'
+                  : 'Điểm tích lũy có thể quy đổi sang quà tặng, voucher dịch vụ đối tác hoặc trồng cây xanh tại rừng phòng hộ.'}
+              </li>
             </ul>
           </div>
 
           <div>
             <h5 className="font-bold text-slate-800 flex items-center gap-1 mb-1">
               <ShieldCheck size={13} className="text-emerald-700" />
-              <span>Chuẩn mực đo lường quốc tế:</span>
+              <span>{isEn ? 'International measurement standards:' : 'Chuẩn mực đo lường quốc tế:'}</span>
             </h5>
             <p className="text-[11px]">
-              Hệ số quy đổi phát thải khí nhà kính dựa trên hướng dẫn của Ủy ban Liên chính phủ về Biến đổi Khí hậu (IPCC), tiêu chuẩn kiểm kê ISO 14064 và dữ liệu của Bộ Tài nguyên & Môi trường Việt Nam.
+              {isEn
+                ? 'GHG emission reduction factors are aligned with IPCC guidelines, ISO 14064 standards, and Vietnam Ministry of Natural Resources & Environment data.'
+                : 'Hệ số quy đổi phát thải khí nhà kính dựa trên hướng dẫn của Ủy ban Liên chính phủ về Biến đổi Khí hậu (IPCC), tiêu chuẩn kiểm kê ISO 14064 và dữ liệu của Bộ Tài nguyên & Môi trường Việt Nam.'}
             </p>
           </div>
 
           <div className="border-t pt-2 text-[10px] text-slate-400">
-            Bản quyền đề án thuộc về Nhóm MVP (Trương Thế Lương & các thành viên).
+            {isEn
+              ? 'Copyright belongs to MVP Team (Truong The Luong & members).'
+              : 'Bản quyền đề án thuộc về Nhóm MVP (Trương Thế Lương & các thành viên).'}
           </div>
         </div>
 
@@ -71,7 +94,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           onClick={onClose}
           className="mt-4 w-full rounded-2xl bg-[#1E4D3E] py-2.5 text-xs font-semibold text-white hover:bg-[#16392E]"
         >
-          Đóng
+          {isEn ? 'Close' : 'Đóng'}
         </button>
       </div>
     </div>

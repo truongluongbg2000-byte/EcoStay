@@ -458,6 +458,7 @@ export default function EcoStayApp() {
       {/* Mission QR Modal (100% QR Scanner for missions) */}
       <MissionQRModal
         mission={selectedMissionForQR}
+        currentLang={currentLang}
         onClose={() => setSelectedMissionForQR(null)}
         onSuccess={(missionId) => handleCompleteMission(missionId)}
         onOpenLiveScanner={() => setActiveTab('scanner')}
@@ -476,10 +477,12 @@ export default function EcoStayApp() {
         isOpen={isEcoImpactOpen}
         onClose={() => setIsEcoImpactOpen(false)}
         user={user}
+        currentLang={currentLang}
       />
 
       <VoucherDetailModal
         voucher={selectedVoucher}
+        currentLang={currentLang}
         onClose={() => setSelectedVoucher(null)}
         onMarkUsed={handleMarkVoucherUsed}
       />
@@ -487,11 +490,13 @@ export default function EcoStayApp() {
       <NotificationModal
         isOpen={isNotificationOpen}
         onClose={() => setIsNotificationOpen(false)}
+        currentLang={currentLang}
       />
 
       <HandbookModal
         isOpen={isHandbookOpen}
         onClose={() => setIsHandbookOpen(false)}
+        currentLang={currentLang}
       />
 
       <HistoryModal
@@ -500,17 +505,20 @@ export default function EcoStayApp() {
         logs={logs}
         vouchers={vouchers}
         initialTab={historyTab}
+        currentLang={currentLang}
       />
 
       <FeedbackModal
         isOpen={isFeedbackOpen}
         onClose={() => setIsFeedbackOpen(false)}
         onSubmitFeedback={handleSubmitFeedback}
+        currentLang={currentLang}
       />
 
       <AboutModal
         isOpen={isAboutOpen}
         onClose={() => setIsAboutOpen(false)}
+        currentLang={currentLang}
       />
     </div>
   );

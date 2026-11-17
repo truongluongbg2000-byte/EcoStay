@@ -15,6 +15,7 @@ import {
   Check
 } from 'lucide-react';
 import { DetailedMission, UserProfile } from '@/data/types';
+import { missionTranslations } from '@/data/translations';
 
 interface TabEarnPointsProps {
   user: UserProfile;
@@ -129,6 +130,20 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
       <div className="space-y-2.5">
         {filteredMissions.map((item) => {
           const isDone = item.completed;
+          const trans = isEn ? missionTranslations[item.id] : null;
+          const displayTitle = trans?.title || item.title;
+          const displaySubtitle = trans?.subtitle || item.subtitle;
+          const displayCategoryName = trans?.categoryName || item.categoryName;
+          const displayQrInstruction = trans?.qrInstruction || item.qrInstruction;
+
+          const translatedMissionItem: DetailedMission = {
+            ...item,
+            title: displayTitle,
+            subtitle: displaySubtitle,
+            categoryName: displayCategoryName,
+            qrInstruction: displayQrInstruction,
+          };
+
           return (
             <div
               key={item.id}
@@ -147,7 +162,7 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
                   <div>
                     <div className="flex items-center gap-1.5">
                       <span className="rounded-md bg-emerald-100 px-1.5 py-0.2 text-[9px] font-bold text-emerald-800">
-                        {item.categoryName}
+                        {displayCategoryName}
                       </span>
                       {item.isPenalty && (
                         <span className="rounded-md bg-amber-100 px-1.5 py-0.2 text-[9px] font-bold text-amber-800 flex items-center gap-0.5">
@@ -158,19 +173,19 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
                     </div>
 
                     <h4 className="mt-1 text-xs font-bold text-slate-900 leading-snug">
-                      {item.title}
+                      {displayTitle}
                     </h4>
 
-                    {item.subtitle && (
+                    {displaySubtitle && (
                       <p className="mt-0.5 text-[11px] text-slate-500 leading-tight">
-                        {item.subtitle}
+                        {displaySubtitle}
                       </p>
                     )}
 
-                    {item.qrInstruction && (
+                    {displayQrInstruction && (
                       <p className="mt-1 text-[10px] text-emerald-700 font-medium flex items-center gap-1">
                         <span>📍</span>
-                        <span>{item.qrInstruction}</span>
+                        <span>{displayQrInstruction}</span>
                       </p>
                     )}
                   </div>
@@ -184,7 +199,7 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
 
                   {isDone ? (
                     <button
-                      onClick={() => onOpenMissionQR(item)}
+                      onClick={() => onOpenMissionQR(translatedMissionItem)}
                       className="flex items-center gap-1 rounded-xl bg-emerald-600 px-2.5 py-1.5 text-[11px] font-bold text-white shadow-sm hover:bg-emerald-700 active:scale-95 transition-all"
                     >
                       <Check size={12} className="stroke-[3]" />
@@ -192,7 +207,7 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
                     </button>
                   ) : (
                     <button
-                      onClick={() => onOpenMissionQR(item)}
+                      onClick={() => onOpenMissionQR(translatedMissionItem)}
                       className="flex items-center gap-1 rounded-xl bg-gradient-to-r from-[#1E4D3E] to-[#2D6A56] px-2.5 py-1.5 text-[11px] font-bold text-white shadow-sm hover:from-[#16392E] hover:to-[#225242] active:scale-95 transition-all"
                     >
                       <QrCode size={13} className="text-amber-300" />
