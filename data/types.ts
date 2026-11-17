@@ -15,6 +15,8 @@ export interface GreenDestination {
   pointsReward: number; // e.g. 300, 50, 150
   priceEstimate?: string;
   address?: string;
+  lat?: number;
+  lng?: number;
 }
 
 export interface DetailedMission {

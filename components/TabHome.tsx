@@ -202,12 +202,13 @@ export const TabHome: React.FC<TabHomeProps> = ({
         </div>
       </div>
 
-      {/* 3. Bản đồ Điểm đến Xanh Việt Nam Chuyên nghiệp (Realistic Interactive Eco-Map with Satellite/Terrain) */}
+      {/* 3. Bản đồ Điểm đến Xanh Việt Nam Chuyên nghiệp (Realistic Interactive Street Eco-Map with Leaflet) */}
       <EcoMap
         selectedLocation={selectedLocation}
         onSelectLocation={handleSelectMapPoint}
         currentLang={currentLang}
         destinations={destinations}
+        onSelectVenue={setViewingDestination}
       />
 
       {/* 4. Danh Mục Dịch Vụ Xanh (Pills: Tất cả, Ăn uống, Khách sạn, Di chuyển, Vui chơi, Mua sắm) */}

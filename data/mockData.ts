@@ -30,6 +30,8 @@ export const initialDestinations: GreenDestination[] = [
     pointsReward: 300,
     priceEstimate: 'Từ 2.200.000đ/đêm',
     address: '01 Đống Đa, Cẩm An, Hội An, Quảng Nam',
+    lat: 15.9038,
+    lng: 108.3496,
   },
   {
     id: 'dest-2',
@@ -44,6 +46,8 @@ export const initialDestinations: GreenDestination[] = [
     pointsReward: 50,
     priceEstimate: 'Từ 65.000đ/món',
     address: 'Thôn Trà Quế, Cẩm Hà, Hội An',
+    lat: 15.8974,
+    lng: 108.3345,
   },
   {
     id: 'dest-3',
@@ -58,6 +62,8 @@ export const initialDestinations: GreenDestination[] = [
     pointsReward: 150,
     priceEstimate: '150.000đ/vé',
     address: 'Cẩm Thanh, Hội An, Quảng Nam',
+    lat: 15.8710,
+    lng: 108.3750,
   },
   {
     id: 'dest-4',
@@ -72,6 +78,8 @@ export const initialDestinations: GreenDestination[] = [
     pointsReward: 50,
     priceEstimate: 'Miễn phí 2h đầu cho khách EcoStay',
     address: '50 điểm khóa xe toàn khu phố cổ',
+    lat: 15.8794,
+    lng: 108.3283,
   },
   {
     id: 'dest-5',
@@ -86,6 +94,8 @@ export const initialDestinations: GreenDestination[] = [
     pointsReward: 250,
     priceEstimate: 'Từ 1.800.000đ/đêm',
     address: 'Xã Gia Vân, Gia Viễn, Ninh Bình',
+    lat: 20.3540,
+    lng: 105.8640,
   },
   {
     id: 'dest-6',
@@ -100,6 +110,8 @@ export const initialDestinations: GreenDestination[] = [
     pointsReward: 40,
     priceEstimate: 'Từ 90.000đ/món',
     address: 'Bến thuyền Vân Long, Gia Viễn, Ninh Bình',
+    lat: 20.3580,
+    lng: 105.8690,
   },
   {
     id: 'dest-7',
@@ -114,6 +126,8 @@ export const initialDestinations: GreenDestination[] = [
     pointsReward: 350,
     priceEstimate: 'Từ 3.500.000đ/đêm',
     address: 'Bản Lếch, Thanh Bình, Sa Pa, Lào Cai',
+    lat: 22.2530,
+    lng: 103.9050,
   },
   {
     id: 'dest-8',
@@ -128,6 +142,8 @@ export const initialDestinations: GreenDestination[] = [
     pointsReward: 200,
     priceEstimate: '120.000đ/vé',
     address: 'VQG Cúc Phương, Nho Quan, Ninh Bình',
+    lat: 20.3167,
+    lng: 105.6069,
   },
   {
     id: 'dest-9',
@@ -142,6 +158,8 @@ export const initialDestinations: GreenDestination[] = [
     pointsReward: 40,
     priceEstimate: 'Từ 50.000đ/món',
     address: 'Làng gốm Thanh Hà, Hội An, Quảng Nam',
+    lat: 15.8820,
+    lng: 108.3050,
   },
   {
     id: 'dest-10',
@@ -156,6 +174,8 @@ export const initialDestinations: GreenDestination[] = [
     pointsReward: 280,
     priceEstimate: 'Từ 1.950.000đ/đêm',
     address: 'Đường Hoa Hồng, Hồ Tuyền Lâm, Đà Lạt',
+    lat: 11.8920,
+    lng: 108.4340,
   },
   {
     id: 'dest-11',
@@ -170,6 +190,8 @@ export const initialDestinations: GreenDestination[] = [
     pointsReward: 35,
     priceEstimate: 'Từ 85.000đ/hộp',
     address: 'Thôn Cầu Đất, Xuân Trường, Đà Lạt',
+    lat: 11.8540,
+    lng: 108.5420,
   },
   {
     id: 'dest-12',
@@ -184,6 +206,8 @@ export const initialDestinations: GreenDestination[] = [
     pointsReward: 300,
     priceEstimate: 'Từ 1.600.000đ/đêm',
     address: 'Ấp 4, Nam Cát Tiên, Tân Phú, Đồng Nai',
+    lat: 11.4230,
+    lng: 107.4310,
   },
   {
     id: 'dest-13',
@@ -198,6 +222,8 @@ export const initialDestinations: GreenDestination[] = [
     pointsReward: 180,
     priceEstimate: '250.000đ/người',
     address: 'Trụ sở VQG Cát Tiên, Đồng Nai',
+    lat: 11.4280,
+    lng: 107.4360,
   },
 ];
 
