@@ -117,6 +117,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const tileLayerRef = useRef<any>(null);
+  const labelLayerRef = useRef<any>(null);
   const markersLayerRef = useRef<any>(null);
   const [mapMode, setMapMode] = useState<'street' | 'satellite'>('street');
   const [activeVenue, setActiveVenue] = useState<GreenDestination | null>(null);
@@ -125,6 +126,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
   // Initialize Leaflet Map (Client Side only to prevent SSR issues)
   useEffect(() => {
     let isMounted = true;
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
 
     const initMap = async () => {
       if (typeof window === 'undefined' || !mapContainerRef.current) return;
@@ -136,20 +138,28 @@ export const EcoMap: React.FC<EcoMapProps> = ({
 
         if (!isMounted || !mapContainerRef.current) return;
 
+        // Determine initial center based on selectedLocation
+        const q = selectedLocation.toLowerCase().trim();
+        const initialRegion = REGION_TARGETS.find(
+          (r) =>
+            r.id === q ||
+            r.name.toLowerCase().includes(q) ||
+            r.nameEn.toLowerCase().includes(q)
+        );
+
         // Create Leaflet Map Instance
         const map = L.map(mapContainerRef.current, {
-          center: [15.888, 108.342], // Default to Hoi An street center
-          zoom: 14,
+          center: initialRegion ? [initialRegion.lat, initialRegion.lng] : [15.888, 108.342],
+          zoom: initialRegion ? initialRegion.zoom : 14,
           zoomControl: false,
           attributionControl: false,
         });
 
-        // CartoDB Voyager Tile Layer (Identical look to Google Maps street view)
+        // Official OpenStreetMap Street Tile Layer (100% Free, No API Key, Full Vietnamese Street & River Detail)
         const streetTiles = L.tileLayer(
-          'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           {
-            maxZoom: 20,
-            subdomains: 'abcd',
+            maxZoom: 19,
           }
         );
 
@@ -161,6 +171,13 @@ export const EcoMap: React.FC<EcoMapProps> = ({
         markersLayerRef.current = markersGroup;
         mapInstanceRef.current = map;
 
+        // Ensure tiles render cleanly across full container dimensions
+        resizeTimer = setTimeout(() => {
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.invalidateSize();
+          }
+        }, 250);
+
         setIsMapReady(true);
       } catch (err) {
         console.warn('Leaflet map initialization error:', err);
@@ -171,6 +188,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
 
     return () => {
       isMounted = false;
+      if (resizeTimer) clearTimeout(resizeTimer);
       if (mapInstanceRef.current) {
         try {
           mapInstanceRef.current.remove();
@@ -182,7 +200,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
     };
   }, []);
 
-  // Toggle Map Tiles: Street (Google Maps style) vs Satellite (Esri Imagery)
+  // Toggle Map Tiles: Street (OpenStreetMap - No API Key) vs Satellite (Esri World Imagery + Labels)
   useEffect(() => {
     if (!mapInstanceRef.current || !isMapReady) return;
 
@@ -193,28 +211,40 @@ export const EcoMap: React.FC<EcoMapProps> = ({
 
       if (tileLayerRef.current) {
         map.removeLayer(tileLayerRef.current);
+        tileLayerRef.current = null;
+      }
+      if (labelLayerRef.current) {
+        map.removeLayer(labelLayerRef.current);
+        labelLayerRef.current = null;
       }
 
-      let newTileLayer;
       if (mapMode === 'satellite') {
-        newTileLayer = L.tileLayer(
+        const satLayer = L.tileLayer(
           'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
           {
             maxZoom: 19,
           }
         );
-      } else {
-        newTileLayer = L.tileLayer(
-          'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        const labelsOverlay = L.tileLayer(
+          'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
           {
-            maxZoom: 20,
-            subdomains: 'abcd',
+            maxZoom: 19,
           }
         );
+        satLayer.addTo(map);
+        labelsOverlay.addTo(map);
+        tileLayerRef.current = satLayer;
+        labelLayerRef.current = labelsOverlay;
+      } else {
+        const osmLayer = L.tileLayer(
+          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          {
+            maxZoom: 19,
+          }
+        );
+        osmLayer.addTo(map);
+        tileLayerRef.current = osmLayer;
       }
-
-      newTileLayer.addTo(map);
-      tileLayerRef.current = newTileLayer;
     });
   }, [mapMode, isMapReady]);
 
@@ -274,7 +304,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
               }
             </div>
             <!-- Pin Pointer Triangle -->
-            <div class="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px]" style="border-t-color: ${categoryColor};"></div>
+            <div class="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px]" style="border-top-color: ${categoryColor};"></div>
           </div>
         `;
 
@@ -407,18 +437,26 @@ export const EcoMap: React.FC<EcoMapProps> = ({
             }`}
             title={isEn ? 'Toggle Satellite view' : 'Bật/Tắt chế độ Vệ tinh'}
           >
-            <span>{mapMode === 'satellite' ? '🛰️ Vệ tinh' : '🗺️ Đường phố'}</span>
+            <span>
+              {mapMode === 'satellite'
+                ? isEn
+                  ? '🛰️ Satellite'
+                  : '🛰️ Vệ tinh'
+                : isEn
+                ? '🗺️ Street'
+                : '🗺️ Đường phố'}
+            </span>
           </button>
         </div>
       </div>
 
       {/* 2. Real Leaflet Map Viewport */}
-      <div className="relative h-64 w-full overflow-hidden rounded-2xl border border-slate-200 shadow-inner bg-slate-100">
+      <div className="relative h-64 w-full overflow-hidden rounded-2xl border border-slate-200 shadow-inner bg-slate-100 isolate z-0">
         {/* Leaflet DOM Node */}
         <div ref={mapContainerRef} className="h-full w-full z-10" />
 
         {/* Floating Controls: Recenter, Zoom +, Zoom - */}
-        <div className="absolute top-2.5 right-2.5 z-20 flex flex-col gap-1.5">
+        <div className="absolute top-2.5 right-2.5 z-[500] flex flex-col gap-1.5">
           <button
             onClick={handleRecenter}
             className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/95 text-slate-700 shadow-md border border-slate-200 hover:bg-emerald-50 active:scale-95 transition-all"
@@ -445,7 +483,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
         </div>
 
         {/* Floating Location Spotlight Callout at Bottom-Left */}
-        <div className="absolute bottom-2.5 left-2.5 z-20 pointer-events-auto">
+        <div className="absolute bottom-2.5 left-2.5 z-[500] pointer-events-auto">
           <div className="rounded-xl bg-white/95 px-2.5 py-1 text-[10px] font-bold text-slate-800 shadow-md border border-slate-200 flex items-center gap-1.5 backdrop-blur-xs">
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>
