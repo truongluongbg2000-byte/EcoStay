@@ -94,3 +94,14 @@ export interface ImpactLog {
   energyDeltaKwh?: number;
   detail: string;
 }
+
+export interface MockAccount {
+  id: string;
+  email: string;
+  phone: string;
+  roleBadge: string;
+  roleBadgeEn: string;
+  profile: UserProfile;
+  initialVouchers: Voucher[];
+  initialLogs: ImpactLog[];
+}

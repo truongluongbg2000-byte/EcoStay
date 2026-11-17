@@ -394,3 +394,10 @@ export const mapLocationTranslations: Record<string, string> = {
   'Toàn quốc': 'National',
   all: 'National',
 };
+
+export const rankTranslations: Record<string, string> = {
+  'Thành viên Xanh • Hạng Mầm Xanh': 'Green Member • Sprout Tier',
+  'Thành viên Cổ Thụ Xanh (VIP)': 'Ancient Tree VIP Member',
+  'Thành viên Lá Non': 'Green Leaf Member',
+  'Thành viên Khởi Động': 'Eco Starter Member',
+};

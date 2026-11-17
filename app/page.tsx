@@ -33,20 +33,25 @@ import { FeedbackModal } from '@/components/FeedbackModal';
 import { AboutModal } from '@/components/AboutModal';
 import { AIChatModal } from '@/components/AIChatModal';
 import { MissionQRModal } from '@/components/MissionQRModal';
+import { AuthModal } from '@/components/AuthModal';
 import { triggerEcoConfetti } from '@/components/Confetti';
-import { Sparkles, CheckCircle2 } from 'lucide-react';
+import { Sparkles, CheckCircle2, UserCheck } from 'lucide-react';
+import { mockAccounts } from '@/data/mockData';
+import { MockAccount } from '@/data/types';
 
 const STORAGE_KEY_USER = 'ecostay_user_profile_v5';
 const STORAGE_KEY_VOUCHERS = 'ecostay_vouchers_v5';
 const STORAGE_KEY_LOGS = 'ecostay_logs_v5';
 const STORAGE_KEY_MISSIONS = 'ecostay_missions_v5';
 const STORAGE_KEY_LANG = 'ecostay_lang_v5';
+const STORAGE_KEY_ACTIVE_ACCOUNT = 'ecostay_active_account_v5';
 
 export default function EcoStayApp() {
   const [activeTab, setActiveTab] = useState<TabId>('home');
 
   // Application Data States (Hydrated with LocalStorage v5)
   const [user, setUser] = useState<UserProfile>(initialUserProfile);
+  const [currentAccountId, setCurrentAccountId] = useState<string>('user-1');
   const [destinations] = useState<GreenDestination[]>(initialDestinations);
   const [rewards] = useState<RewardItem[]>(initialRewards);
   const [vouchers, setVouchers] = useState<Voucher[]>(initialVouchers);
@@ -56,6 +61,7 @@ export default function EcoStayApp() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Modals
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isEcoImpactOpen, setIsEcoImpactOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isHandbookOpen, setIsHandbookOpen] = useState(false);
@@ -80,6 +86,9 @@ export default function EcoStayApp() {
   // Load from LocalStorage
   useEffect(() => {
     try {
+      const savedAccount = localStorage.getItem(STORAGE_KEY_ACTIVE_ACCOUNT);
+      if (savedAccount) setCurrentAccountId(savedAccount);
+
       const savedUser = localStorage.getItem(STORAGE_KEY_USER);
       if (savedUser) setUser(JSON.parse(savedUser));
 
@@ -105,6 +114,7 @@ export default function EcoStayApp() {
   useEffect(() => {
     if (!isLoaded) return;
     try {
+      localStorage.setItem(STORAGE_KEY_ACTIVE_ACCOUNT, currentAccountId);
       localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
       localStorage.setItem(STORAGE_KEY_VOUCHERS, JSON.stringify(vouchers));
       localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));
@@ -113,7 +123,7 @@ export default function EcoStayApp() {
     } catch (e) {
       console.warn('LocalStorage save failed', e);
     }
-  }, [user, vouchers, logs, missions, currentLang, isLoaded]);
+  }, [user, vouchers, logs, missions, currentLang, currentAccountId, isLoaded]);
 
   // Handler: Complete Mission in "Tích Điểm" via QR Scan
   const handleCompleteMission = (missionId: string) => {
@@ -349,14 +359,114 @@ export default function EcoStayApp() {
     );
   };
 
+  // Handler: Select Mock Account
+  const handleSelectAccount = (account: MockAccount) => {
+    setCurrentAccountId(account.id);
+    setUser(account.profile);
+    setVouchers(account.initialVouchers);
+    setLogs(account.initialLogs);
+
+    try {
+      localStorage.setItem(STORAGE_KEY_ACTIVE_ACCOUNT, account.id);
+      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(account.profile));
+      localStorage.setItem(STORAGE_KEY_VOUCHERS, JSON.stringify(account.initialVouchers));
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(account.initialLogs));
+    } catch (e) {
+      console.warn('LocalStorage save failed', e);
+    }
+
+    showToast(
+      currentLang === 'en'
+        ? `Logged in as ${account.profile.name} (${account.profile.carbonPoints} CP)`
+        : `Đã đăng nhập: ${account.profile.name} (${account.profile.carbonPoints} CP)`,
+      <UserCheck size={16} className="text-emerald-400" />
+    );
+  };
+
+  // Handler: Register New Account (+50 CP Bonus)
+  const handleRegisterNewAccount = (data: {
+    name: string;
+    phone: string;
+    email: string;
+    hotel: string;
+    room: string;
+  }) => {
+    const newId = `user-${Date.now()}`;
+    const newProfile: UserProfile = {
+      name: data.name,
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      carbonPoints: 50,
+      avnPoints: 0,
+      expiryDate: '31/12/2027',
+      co2Saved: 0.0,
+      waterSaved: 0,
+      energySaved: 0.0,
+      treesPlanted: 0,
+      rank: 'Thành viên Khởi Động',
+      roomNumber: data.room || 'Room Eco-101',
+      hotelName: data.hotel,
+      memberCode: `ECO-NW-${Math.floor(100000 + Math.random() * 900000)}`,
+    };
+
+    const newLogs: ImpactLog[] = [
+      {
+        id: `log-${Date.now()}`,
+        date: currentLang === 'en' ? 'Just now' : 'Vừa xong',
+        title:
+          currentLang === 'en'
+            ? 'New Member Welcome Bonus (+50 CP)'
+            : 'Thưởng chào mừng thành viên mới (+50 CP)',
+        points: 50,
+        type: 'earn',
+        detail:
+          currentLang === 'en'
+            ? 'Welcome to EcoStay Net Zero travel community!'
+            : 'Chào mừng bạn đến với cộng đồng du lịch Net Zero EcoStay!',
+      },
+    ];
+
+    setCurrentAccountId(newId);
+    setUser(newProfile);
+    setVouchers([]);
+    setLogs(newLogs);
+
+    try {
+      localStorage.setItem(STORAGE_KEY_ACTIVE_ACCOUNT, newId);
+      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(newProfile));
+      localStorage.setItem(STORAGE_KEY_VOUCHERS, JSON.stringify([]));
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(newLogs));
+    } catch (e) {
+      console.warn('LocalStorage save failed', e);
+    }
+
+    showToast(
+      currentLang === 'en'
+        ? `Welcome ${data.name}! +50 Carbon Points added!`
+        : `Chào mừng ${data.name}! Đã nhận +50 Điểm Cacbon!`,
+      <Sparkles size={16} className="text-amber-400" />
+    );
+  };
+
+  // Handler: Logout
+  const handleLogout = () => {
+    setIsAuthOpen(true);
+    showToast(
+      currentLang === 'en'
+        ? 'Signed out. Choose a profile to switch.'
+        : 'Đã đăng xuất. Vui lòng chọn tài khoản để tiếp tục.'
+    );
+  };
+
   // Handler: Reset Data to Default
   const handleResetData = () => {
     if (confirm('Bạn có chắc muốn đặt lại toàn bộ dữ liệu Demo ban đầu không?')) {
+      localStorage.removeItem(STORAGE_KEY_ACTIVE_ACCOUNT);
       localStorage.removeItem(STORAGE_KEY_USER);
       localStorage.removeItem(STORAGE_KEY_VOUCHERS);
       localStorage.removeItem(STORAGE_KEY_LOGS);
       localStorage.removeItem(STORAGE_KEY_MISSIONS);
       localStorage.removeItem(STORAGE_KEY_LANG);
+      setCurrentAccountId('user-1');
       setUser(initialUserProfile);
       setVouchers(initialVouchers);
       setLogs(initialImpactLogs);
@@ -374,6 +484,7 @@ export default function EcoStayApp() {
         currentLang={currentLang}
         onOpenNotifications={() => setIsNotificationOpen(true)}
         onOpenProfile={() => setActiveTab('more')}
+        onOpenAuth={() => setIsAuthOpen(true)}
       />
 
       {/* Main Content Rendered by Tab */}
@@ -435,6 +546,8 @@ export default function EcoStayApp() {
             onOpenFeedback={() => setIsFeedbackOpen(true)}
             onOpenAbout={() => setIsAboutOpen(true)}
             onResetData={handleResetData}
+            onOpenAuth={() => setIsAuthOpen(true)}
+            onLogout={handleLogout}
           />
         )}
       </main>
@@ -470,6 +583,16 @@ export default function EcoStayApp() {
         onClose={() => setIsAIChatOpen(false)}
         user={user}
         currentLang={currentLang}
+      />
+
+      {/* Auth & Account Switcher Modal (4 Mock Accounts) */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        currentUserId={currentAccountId}
+        currentLang={currentLang}
+        onSelectAccount={handleSelectAccount}
+        onRegisterNewAccount={handleRegisterNewAccount}
       />
 
       {/* Shared Modals */}

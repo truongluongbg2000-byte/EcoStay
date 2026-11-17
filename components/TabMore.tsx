@@ -17,9 +17,11 @@ import {
   Award,
   Leaf,
   Check,
-  X
+  X,
+  UserCheck
 } from 'lucide-react';
 import { UserProfile } from '@/data/types';
+import { rankTranslations } from '@/data/translations';
 
 interface TabMoreProps {
   user: UserProfile;
@@ -31,6 +33,8 @@ interface TabMoreProps {
   onOpenFeedback: () => void;
   onOpenAbout: () => void;
   onResetData: () => void;
+  onOpenAuth?: () => void;
+  onLogout?: () => void;
 }
 
 export const TabMore: React.FC<TabMoreProps> = ({
@@ -43,11 +47,14 @@ export const TabMore: React.FC<TabMoreProps> = ({
   onOpenFeedback,
   onOpenAbout,
   onResetData,
+  onOpenAuth,
+  onLogout,
 }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
 
   const isEn = currentLang === 'en';
+  const displayRank = isEn ? rankTranslations[user.rank] || user.rank : user.rank;
 
   return (
     <div className="space-y-4 px-4 pt-3 pb-8 text-left">
@@ -61,7 +68,7 @@ export const TabMore: React.FC<TabMoreProps> = ({
             <h3 className="text-sm font-bold text-slate-900">{user.name}</h3>
             <p className="text-xs text-emerald-800 font-medium flex items-center gap-1 mt-0.5">
               <Award size={13} className="text-amber-500" />
-              <span>{isEn ? 'Green Member • Sprout Tier' : user.rank}</span>
+              <span>{displayRank}</span>
             </p>
             <p className="text-[10px] text-slate-400 mt-0.5">
               {isEn ? 'Member ID:' : 'Mã thành viên:'} {user.memberCode || 'ECO-TL-883921'}
@@ -69,13 +76,26 @@ export const TabMore: React.FC<TabMoreProps> = ({
           </div>
         </div>
 
-        <button
-          onClick={onOpenEcoImpact}
-          className="rounded-xl bg-emerald-50 p-2 text-emerald-800 hover:bg-emerald-100 transition-colors"
-          title={isEn ? 'View Eco Impact' : 'Xem tác động'}
-        >
-          <Leaf size={18} />
-        </button>
+        <div className="flex items-center gap-1.5">
+          {onOpenAuth && (
+            <button
+              onClick={onOpenAuth}
+              className="rounded-xl bg-emerald-100/70 px-2.5 py-1.5 text-[11px] font-bold text-[#1E4D3E] hover:bg-emerald-200 transition-colors flex items-center gap-1"
+              title={isEn ? 'Switch Account' : 'Đổi tài khoản'}
+            >
+              <UserCheck size={14} className="text-emerald-700" />
+              <span>{isEn ? 'Switch' : 'Đổi TK'}</span>
+            </button>
+          )}
+
+          <button
+            onClick={onOpenEcoImpact}
+            className="rounded-xl bg-emerald-50 p-2 text-emerald-800 hover:bg-emerald-100 transition-colors"
+            title={isEn ? 'View Eco Impact' : 'Xem tác động'}
+          >
+            <Leaf size={18} />
+          </button>
+        </div>
       </div>
 
       {/* 2. Special Highlight: Green Passport Banner */}
@@ -263,6 +283,40 @@ export const TabMore: React.FC<TabMoreProps> = ({
             {currentLang === 'vi' ? '🇻🇳 Tiếng Việt' : '🇬🇧 English'}
           </span>
         </button>
+
+        {/* Đổi tài khoản (4 TK mẫu) */}
+        {onOpenAuth && (
+          <button
+            onClick={onOpenAuth}
+            className="flex w-full items-center justify-between p-3 hover:bg-emerald-50/60 rounded-2xl transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="text-emerald-800">
+                <UserCheck size={18} />
+              </div>
+              <span className="text-xs font-semibold text-slate-700">
+                {isEn ? 'Switch Account (4 Demo Profiles)' : 'Đổi tài khoản (4 TK mẫu)'}
+              </span>
+            </div>
+            <ChevronRight size={16} className="text-slate-300" />
+          </button>
+        )}
+
+        {/* Đăng xuất tài khoản */}
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            className="flex w-full items-center justify-between p-3 hover:bg-amber-50 rounded-2xl transition-colors text-amber-800"
+          >
+            <div className="flex items-center gap-3">
+              <LogOut size={18} />
+              <span className="text-xs font-bold">
+                {isEn ? 'Sign Out / Switch User' : 'Đăng xuất tài khoản'}
+              </span>
+            </div>
+            <ChevronRight size={16} className="text-amber-300" />
+          </button>
+        )}
 
         {/* Đặt lại dữ liệu mẫu */}
         <button

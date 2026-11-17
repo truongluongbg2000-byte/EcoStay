@@ -1,14 +1,16 @@
 'use client';
 
 import React from 'react';
-import { Bell, Sparkles } from 'lucide-react';
+import { Bell, Sparkles, UserCheck } from 'lucide-react';
 import { UserProfile } from '@/data/types';
+import { rankTranslations } from '@/data/translations';
 
 interface HeaderProps {
   user: UserProfile;
   currentLang?: 'vi' | 'en';
   onOpenNotifications: () => void;
   onOpenProfile: () => void;
+  onOpenAuth?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,16 +18,19 @@ export const Header: React.FC<HeaderProps> = ({
   currentLang = 'vi',
   onOpenNotifications,
   onOpenProfile,
+  onOpenAuth,
 }) => {
   const isEn = currentLang === 'en';
+  const displayRank = isEn ? rankTranslations[user.rank] || user.rank : user.rank;
 
   return (
     <header className="sticky top-0 z-30 bg-[#1E4D3E] px-4 pt-4 pb-3.5 text-white shadow-md">
       <div className="flex items-center justify-between">
         {/* User Info & Avatar */}
         <div
-          onClick={onOpenProfile}
+          onClick={onOpenAuth || onOpenProfile}
           className="flex items-center gap-3 cursor-pointer group"
+          title={isEn ? 'Click to switch account' : 'Nhấn để đổi tài khoản'}
         >
           <div className="relative">
             <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-emerald-300 shadow-sm transition-transform group-hover:scale-105">
@@ -47,13 +52,24 @@ export const Header: React.FC<HeaderProps> = ({
               {user.name}
             </h2>
             <p className="text-[10px] text-emerald-200/80 font-medium line-clamp-1">
-              {isEn ? 'Green Member • Sprout Tier' : user.rank}
+              {displayRank}
             </p>
           </div>
         </div>
 
-        {/* Right side: Points pill + Bell */}
-        <div className="flex items-center gap-2">
+        {/* Right side: Switch button + Points pill + Bell */}
+        <div className="flex items-center gap-1.5">
+          {onOpenAuth && (
+            <button
+              onClick={onOpenAuth}
+              className="flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-[10px] font-bold text-emerald-200 border border-white/10 hover:bg-white/20 transition-colors shadow-2xs"
+              title={isEn ? 'Switch Account' : 'Đổi tài khoản'}
+            >
+              <UserCheck size={12} className="text-amber-300" />
+              <span>{isEn ? 'Switch' : 'Đổi TK'}</span>
+            </button>
+          )}
+
           <div className="flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-xs font-bold text-emerald-300 border border-white/10 backdrop-blur-sm">
             <Sparkles size={13} className="text-amber-400 animate-spin" style={{ animationDuration: '6s' }} />
             <span>{user.carbonPoints} CP</span>
