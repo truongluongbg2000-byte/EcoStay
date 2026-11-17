@@ -36,7 +36,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               <span>Chương trình Du lịch Xanh Tiên Phong</span>
             </h4>
             <p className="text-[11px]">
-              Tài khoản EcoStay / CACBON POINT là sáng kiến thuộc đề án tham dự cuộc thi ThangLong Business & Marketing Challenge Season 5 “Kỳ Tích”, được phát triển bởi nhóm sinh viên Tinh Hà Say Hi - Trường Đại học Thăng Long.
+              Tài khoản EcoStay / CACBON POINT là sáng kiến thuộc đề án phát triển bởi Nhóm MVP - Trường Đại học Thăng Long.
             </p>
           </div>
 
@@ -46,9 +46,9 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               <span>Quy tắc chuyển đổi điểm thưởng:</span>
             </h5>
             <ul className="list-disc pl-4 space-y-1 text-[11px]">
-              <li><strong>1 CACBON POINT (CB) = 1.000 VNĐ</strong> giá trị đổi dịch vụ nội khu.</li>
+              <li><strong>1 CACBON POINT (CP)</strong> là đơn vị ghi nhận đóng góp sống xanh và bảo vệ môi trường.</li>
               <li>Điểm có hiệu lực <strong>12 tháng</strong> kể từ ngày phát sinh giao dịch.</li>
-              <li>Điểm tích lũy không có giá trị quy đổi thành tiền mặt nhưng có thể quy đổi sang cây xanh trồng tại rừng phòng hộ hoặc voucher dịch vụ đối tác.</li>
+              <li>Điểm tích lũy có thể quy đổi sang quà tặng, voucher dịch vụ đối tác hoặc trồng cây xanh tại rừng phòng hộ.</li>
             </ul>
           </div>
 
@@ -63,7 +63,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           <div className="border-t pt-2 text-[10px] text-slate-400">
-            Bản quyền đề án thuộc về Nhóm Tinh Hà Say Hi (Hà Thị Yến Nhi, Nguyễn Thị Phương Oanh, Mạc Văn Huy, Trương Thế Lương, Ngô Hoàng Nguyên).
+            Bản quyền đề án thuộc về Nhóm MVP (Trương Thế Lương & các thành viên).
           </div>
         </div>
 

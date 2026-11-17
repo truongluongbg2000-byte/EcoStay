@@ -1,7 +1,7 @@
 # EcoStay - Ứng Dụng Du Lịch Xanh & Tích Lũy CACBON POINT
 
 > Dự án tham dự cuộc thi: **ThangLong Business & Marketing Challenge Season 5 “Kỳ Tích”**
-> Đơn vị thực hiện: **Nhóm Tinh Hà Say Hi - Lớp QI3703, Trường Đại học Thăng Long**
+> Đơn vị thực hiện: **Nhóm MVP, Trường Đại học Thăng Long**
 
 ---
 

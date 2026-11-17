@@ -11,7 +11,7 @@ Thư mục này chứa toàn bộ tài liệu học tập, báo cáo môn học 
    - Chi tiết 5 tab chức năng chính, hệ thống Gamification, cơ chế đổi quà kép và xuất Hộ Chiếu Xanh (Green Passport).
 
 2. **[Ndung thuyết trình QTCL.docx](./Ndung%20thuy%E1%BA%BFt%20tr%C3%ACnh%20QTCL.docx)**:
-   - Tài liệu Word đề án dự thi chính thức của nhóm **Tinh Hà Say Hi** (Trường Đại học Thăng Long) tại cuộc thi *ThangLong Business & Marketing Challenge Season 5 “Kỳ Tích”*.
+   - Tài liệu Word đề án dự thi chính thức của **Nhóm MVP** (Trường Đại học Thăng Long) tại cuộc thi *ThangLong Business & Marketing Challenge Season 5 “Kỳ Tích”*.
 
 ---
-*Dự án thuộc quyền sở hữu của Nhóm Tinh Hà Say Hi - Lớp QI3703.*
+*Dự án thuộc quyền sở hữu của Nhóm MVP.*

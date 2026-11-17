@@ -12,17 +12,15 @@ import {
   CheckCircle2,
   AlertTriangle,
   QrCode,
-  Share2,
-  Star,
-  Users
+  Check
 } from 'lucide-react';
 import { DetailedMission, UserProfile } from '@/data/types';
-import { triggerEcoConfetti } from './Confetti';
 
 interface TabEarnPointsProps {
   user: UserProfile;
   missions: DetailedMission[];
-  onCompleteMission: (missionId: string) => void;
+  currentLang?: 'vi' | 'en';
+  onOpenMissionQR: (mission: DetailedMission) => void;
   onNavigateToScanner: () => void;
   onOpenEcoImpact: () => void;
 }
@@ -30,19 +28,22 @@ interface TabEarnPointsProps {
 export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
   user,
   missions,
-  onCompleteMission,
+  currentLang = 'vi',
+  onOpenMissionQR,
   onNavigateToScanner,
   onOpenEcoImpact,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
+  const isEn = currentLang === 'en';
+
   const categories = [
-    { id: 'all', label: 'Tất cả', icon: <Footprints size={15} /> },
-    { id: 'room', label: 'Trong phòng', icon: <BedDouble size={15} /> },
-    { id: 'food', label: 'Ăn uống', icon: <UtensilsCrossed size={15} /> },
-    { id: 'transport', label: 'Di chuyển', icon: <Bike size={15} /> },
-    { id: 'experience', label: 'Trải nghiệm', icon: <Compass size={15} /> },
-    { id: 'app', label: 'Tương tác app', icon: <Smartphone size={15} /> },
+    { id: 'all', label: isEn ? 'All' : 'Tất cả', icon: <Footprints size={15} /> },
+    { id: 'room', label: isEn ? 'In-Room' : 'Trong phòng', icon: <BedDouble size={15} /> },
+    { id: 'food', label: isEn ? 'Dining' : 'Ăn uống', icon: <UtensilsCrossed size={15} /> },
+    { id: 'transport', label: isEn ? 'Transit' : 'Di chuyển', icon: <Bike size={15} /> },
+    { id: 'experience', label: isEn ? 'Eco-Tours' : 'Trải nghiệm', icon: <Compass size={15} /> },
+    { id: 'app', label: isEn ? 'App Tasks' : 'Tương tác app', icon: <Smartphone size={15} /> },
   ];
 
   const filteredMissions = missions.filter((m) => {
@@ -79,13 +80,21 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
               <Footprints size={20} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">Nhiệm Vụ Tích Điểm</h3>
-              <p className="text-[10px] text-emerald-200">Thực hành hành vi xanh để nhận CACBON POINT</p>
+              <h3 className="text-sm font-bold text-white">
+                {isEn ? 'Eco Missions & QR Earn' : 'Nhiệm Vụ Tích Điểm Xanh'}
+              </h3>
+              <p className="text-[10px] text-emerald-200">
+                {isEn
+                  ? 'Scan QR to collect EcoStay CARBON POINTS'
+                  : 'Quét mã QR tại điểm đối tác để nhận CACBON POINT'}
+              </p>
             </div>
           </div>
           <div className="text-right">
-            <span className="text-[10px] text-emerald-200">Đã xong:</span>
-            <p className="text-xs font-extrabold text-amber-300">{completedCount}/{missions.length}</p>
+            <span className="text-[10px] text-emerald-200">{isEn ? 'Completed:' : 'Đã xong:'}</span>
+            <p className="text-xs font-extrabold text-amber-300">
+              {completedCount}/{missions.length}
+            </p>
           </div>
         </div>
 
@@ -116,7 +125,7 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
         ))}
       </div>
 
-      {/* 3. Detailed Mission List by Category */}
+      {/* 3. Detailed Mission List by Category (100% QR Scan Powered) */}
       <div className="space-y-2.5">
         {filteredMissions.map((item) => {
           const isDone = item.completed;
@@ -125,7 +134,7 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
               key={item.id}
               className={`rounded-2xl p-3.5 border transition-all ${
                 isDone
-                  ? 'border-emerald-200 bg-emerald-50/70'
+                  ? 'border-emerald-300 bg-emerald-50/70 shadow-xs'
                   : 'border-slate-100 bg-white shadow-sm hover:border-emerald-200'
               }`}
             >
@@ -143,7 +152,7 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
                       {item.isPenalty && (
                         <span className="rounded-md bg-amber-100 px-1.5 py-0.2 text-[9px] font-bold text-amber-800 flex items-center gap-0.5">
                           <AlertTriangle size={9} />
-                          Lưu ý lãng phí
+                          {isEn ? 'Penalty warning' : 'Lưu ý lãng phí'}
                         </span>
                       )}
                     </div>
@@ -157,49 +166,37 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
                         {item.subtitle}
                       </p>
                     )}
+
+                    {item.qrInstruction && (
+                      <p className="mt-1 text-[10px] text-emerald-700 font-medium flex items-center gap-1">
+                        <span>📍</span>
+                        <span>{item.qrInstruction}</span>
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {/* Right action button */}
+                {/* Right action button: 100% QR Scanning */}
                 <div className="shrink-0 text-right">
-                  <span className="block text-xs font-extrabold text-[#1E4D3E] mb-1">
+                  <span className="block text-xs font-extrabold text-[#1E4D3E] mb-1.5">
                     +{item.points} CP
                   </span>
 
-                  {item.actionType === 'toggle' ? (
+                  {isDone ? (
                     <button
-                      onClick={() => onCompleteMission(item.id)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        isDone ? 'bg-[#1E4D3E]' : 'bg-slate-300'
-                      }`}
-                      role="switch"
-                      aria-checked={isDone}
+                      onClick={() => onOpenMissionQR(item)}
+                      className="flex items-center gap-1 rounded-xl bg-emerald-600 px-2.5 py-1.5 text-[11px] font-bold text-white shadow-sm hover:bg-emerald-700 active:scale-95 transition-all"
                     >
-                      <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                          isDone ? 'translate-x-5' : 'translate-x-0'
-                        }`}
-                      />
-                    </button>
-                  ) : item.actionType === 'qr' ? (
-                    <button
-                      onClick={onNavigateToScanner}
-                      className="flex items-center gap-1 rounded-xl bg-[#1E4D3E] px-2.5 py-1 text-[11px] font-bold text-white shadow-sm hover:bg-[#16392E] active:scale-95 transition-all"
-                    >
-                      <QrCode size={12} />
-                      <span>Quét mã</span>
+                      <Check size={12} className="stroke-[3]" />
+                      <span>{isEn ? 'Done ✓' : 'Đã quét ✓'}</span>
                     </button>
                   ) : (
                     <button
-                      onClick={() => onCompleteMission(item.id)}
-                      disabled={isDone}
-                      className={`rounded-xl px-2.5 py-1 text-[11px] font-bold transition-all shadow-sm active:scale-95 ${
-                        isDone
-                          ? 'bg-emerald-600 text-white cursor-default'
-                          : 'bg-[#D97736] text-white hover:bg-[#C26D45]'
-                      }`}
+                      onClick={() => onOpenMissionQR(item)}
+                      className="flex items-center gap-1 rounded-xl bg-gradient-to-r from-[#1E4D3E] to-[#2D6A56] px-2.5 py-1.5 text-[11px] font-bold text-white shadow-sm hover:from-[#16392E] hover:to-[#225242] active:scale-95 transition-all"
                     >
-                      {isDone ? 'Đã xong ✓' : 'Thực hiện'}
+                      <QrCode size={13} className="text-amber-300" />
+                      <span>{isEn ? 'Scan QR' : 'Quét QR'}</span>
                     </button>
                   )}
                 </div>

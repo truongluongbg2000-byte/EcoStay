@@ -31,19 +31,21 @@ import { HandbookModal } from '@/components/HandbookModal';
 import { HistoryModal } from '@/components/HistoryModal';
 import { FeedbackModal } from '@/components/FeedbackModal';
 import { AboutModal } from '@/components/AboutModal';
+import { AIChatModal } from '@/components/AIChatModal';
+import { MissionQRModal } from '@/components/MissionQRModal';
 import { triggerEcoConfetti } from '@/components/Confetti';
 import { Sparkles, CheckCircle2 } from 'lucide-react';
 
-const STORAGE_KEY_USER = 'ecostay_user_profile_v4';
-const STORAGE_KEY_VOUCHERS = 'ecostay_vouchers_v4';
-const STORAGE_KEY_LOGS = 'ecostay_logs_v4';
-const STORAGE_KEY_MISSIONS = 'ecostay_missions_v4';
-const STORAGE_KEY_LANG = 'ecostay_lang_v4';
+const STORAGE_KEY_USER = 'ecostay_user_profile_v5';
+const STORAGE_KEY_VOUCHERS = 'ecostay_vouchers_v5';
+const STORAGE_KEY_LOGS = 'ecostay_logs_v5';
+const STORAGE_KEY_MISSIONS = 'ecostay_missions_v5';
+const STORAGE_KEY_LANG = 'ecostay_lang_v5';
 
 export default function EcoStayApp() {
   const [activeTab, setActiveTab] = useState<TabId>('home');
 
-  // Application Data States (Hydrated with LocalStorage v4)
+  // Application Data States (Hydrated with LocalStorage v5)
   const [user, setUser] = useState<UserProfile>(initialUserProfile);
   const [destinations] = useState<GreenDestination[]>(initialDestinations);
   const [rewards] = useState<RewardItem[]>(initialRewards);
@@ -61,6 +63,8 @@ export default function EcoStayApp() {
   const [historyTab, setHistoryTab] = useState<'points' | 'orders'>('points');
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
+  const [selectedMissionForQR, setSelectedMissionForQR] = useState<DetailedMission | null>(null);
   const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
 
   // Toast System
@@ -111,238 +115,236 @@ export default function EcoStayApp() {
     }
   }, [user, vouchers, logs, missions, currentLang, isLoaded]);
 
-  // Handler: Complete Mission in "Tích Điểm"
+  // Handler: Complete Mission in "Tích Điểm" via QR Scan
   const handleCompleteMission = (missionId: string) => {
     const mission = missions.find((m) => m.id === missionId);
     if (!mission) return;
 
-    const willComplete = !mission.completed;
+    if (mission.completed) {
+      showToast(
+        currentLang === 'en'
+          ? `Mission "${mission.title}" already verified!`
+          : `Nhiệm vụ "${mission.title}" đã được xác nhận hoàn thành trước đó!`
+      );
+      return;
+    }
 
     setMissions((prev) =>
-      prev.map((m) => (m.id === missionId ? { ...m, completed: willComplete } : m))
+      prev.map((m) => (m.id === missionId ? { ...m, completed: true } : m))
     );
 
-    if (willComplete) {
-      triggerEcoConfetti();
-      const pointsAdded = mission.points;
-
-      setUser((prev) => ({
-        ...prev,
-        carbonPoints: prev.carbonPoints + pointsAdded,
-      }));
-
-      const newLog: ImpactLog = {
-        id: `log-${Date.now()}`,
-        date: 'Vừa xong',
-        title: mission.title,
-        points: pointsAdded,
-        type: 'earn',
-        detail: mission.subtitle || `Nhận ${pointsAdded} CP từ nhiệm vụ ${mission.categoryName}`,
-      };
-      setLogs((prev) => [newLog, ...prev]);
-
-      showToast(
-        `Chúc mừng! Bạn nhận được +${pointsAdded} CP từ "${mission.title}"`,
-        <Sparkles size={16} className="text-amber-400" />
-      );
-    } else {
-      // Revert if toggled off
-      setUser((prev) => ({
-        ...prev,
-        carbonPoints: Math.max(0, prev.carbonPoints - mission.points),
-      }));
-      showToast(`Đã hủy hoàn thành nhiệm vụ (-${mission.points} CP).`);
-    }
-  };
-
-  // Handler: Book Service in Green Destination Directory
-  const handleBookService = (destination: GreenDestination) => {
-    const pointsAdded = destination.pointsReward;
+    triggerEcoConfetti();
+    const pointsAdded = mission.points;
 
     setUser((prev) => ({
       ...prev,
       carbonPoints: prev.carbonPoints + pointsAdded,
+      co2Saved: Number((prev.co2Saved + pointsAdded * 0.12).toFixed(1)),
     }));
 
     const newLog: ImpactLog = {
       id: `log-${Date.now()}`,
-      date: 'Vừa xong',
-      title: `Đặt dịch vụ: ${destination.name}`,
+      date: currentLang === 'en' ? 'Just now' : 'Vừa xong',
+      title: mission.title,
       points: pointsAdded,
       type: 'earn',
-      detail: `Cơ sở xanh: ${destination.location} (${destination.greenBadge})`,
+      detail:
+        mission.subtitle ||
+        `Quét mã QR hoàn thành nhiệm vụ ${mission.categoryName} (+${pointsAdded} CP)`,
     };
+
     setLogs((prev) => [newLog, ...prev]);
 
     showToast(
-      `Đặt thành công ${destination.name}! Nhận ngay +${pointsAdded} CP!`,
+      currentLang === 'en'
+        ? `+${pointsAdded} CP earned from "${mission.title}"!`
+        : `+${pointsAdded} CP! Đã quét mã xác nhận "${mission.title}"`,
       <CheckCircle2 size={16} className="text-emerald-400" />
     );
   };
 
-  // Handler: Live QR Scan (Camera jsQR)
-  const handleLiveQRScan = (decodedData: string) => {
-    const upper = decodedData.toUpperCase();
-    let title = '';
-    let points = 25;
-    let detail = `Mã: ${decodedData.slice(0, 30)}${decodedData.length > 30 ? '...' : ''}`;
-
-    if (upper.includes('ROOM') || upper.includes('SUITE') || upper.includes('HOTEL')) {
-      title = 'Quét mã Buồng phòng xanh';
-      points = 50;
-      detail = 'Xác nhận không thay ga/khăn hằng ngày.';
-    } else if (upper.includes('FOOD') || upper.includes('TABLE') || upper.includes('ZERO_WASTE') || upper.includes('BUFFET')) {
-      title = 'Quét mã Zero Food Waste';
-      points = 30;
-      detail = 'Xác nhận ăn sạch đĩa không lãng phí thức ăn.';
-    } else if (upper.includes('XANH_SM') || upper.includes('VINFAST') || upper.includes('TNGO') || upper.includes('BIKE') || upper.includes('BUS')) {
-      title = 'Quét mã Di chuyển xanh';
-      points = 20;
-      detail = 'Di chuyển bằng xe điện hoặc xe đạp công cộng.';
-    } else {
-      title = 'Quét mã Tiêu dùng xanh đối tác';
-      points = 25;
-      detail = `Nhận diện mã: ${decodedData.slice(0, 26)}...`;
-    }
-
+  // Handler: Book Service from Home Green Destination
+  const handleBookService = (dest: GreenDestination) => {
     setUser((prev) => ({
       ...prev,
-      carbonPoints: prev.carbonPoints + points,
+      carbonPoints: prev.carbonPoints + dest.pointsReward,
+      co2Saved: Number((prev.co2Saved + 5.5).toFixed(1)),
     }));
 
     const newLog: ImpactLog = {
       id: `log-${Date.now()}`,
-      date: 'Vừa xong',
-      title,
-      points,
+      date: currentLang === 'en' ? 'Just now' : 'Vừa xong',
+      title: `Đặt dịch vụ xanh: ${dest.name}`,
+      points: dest.pointsReward,
       type: 'earn',
-      detail,
+      detail: `Check-in cơ sở xanh ${dest.location} (+${dest.pointsReward} CP)`,
     };
+
     setLogs((prev) => [newLog, ...prev]);
 
     showToast(
-      `Camera nhận diện thành công: +${points} CP!`,
-      <CheckCircle2 size={16} className="text-emerald-400" />
+      currentLang === 'en'
+        ? `Booked at ${dest.name}! +${dest.pointsReward} CP added.`
+        : `Đã kết nối dịch vụ ${dest.name}! +${dest.pointsReward} CP`,
+      <Sparkles size={16} className="text-amber-400" />
     );
   };
 
-  // Handler: Fallback Simulator QR Scan
-  const handleSimulateQRScan = (type: 'room' | 'food' | 'transport') => {
-    let title = '';
-    let points = 0;
-    let detail = '';
-
-    if (type === 'room') {
-      title = 'Quét mã Buồng phòng xanh';
-      points = 50;
-      detail = 'Từ chối thay ga/khăn hằng ngày tại phòng 402.';
-    } else if (type === 'food') {
-      title = 'Quét mã Zero Food Waste';
-      points = 30;
-      detail = 'Hoàn thành suất ăn sạch đĩa tại nhà hàng.';
-    } else {
-      title = 'Quét mã Xe điện Xanh SM';
-      points = 20;
-      detail = 'Di chuyển bằng taxi điện thuần 100%.';
-    }
-
-    setUser((prev) => ({
-      ...prev,
-      carbonPoints: prev.carbonPoints + points,
-    }));
-
-    const newLog: ImpactLog = {
-      id: `log-${Date.now()}`,
-      date: 'Vừa xong',
-      title,
-      points,
-      type: 'earn',
-      detail,
-    };
-    setLogs((prev) => [newLog, ...prev]);
-
-    showToast(
-      `Quét mã thành công! Bạn nhận được +${points} CP`,
-      <CheckCircle2 size={16} className="text-emerald-400" />
-    );
-  };
-
-  // Handler: Redeem Reward into "Giỏ hàng xanh"
+  // Handler: Redeem Reward into Green Cart
   const handleRedeemReward = (reward: RewardItem) => {
-    if (user.carbonPoints < reward.points) return;
+    if (user.carbonPoints < reward.points) {
+      showToast(
+        currentLang === 'en'
+          ? 'Not enough Carbon Points to redeem this reward!'
+          : 'Bạn chưa đủ điểm Cacbon để đổi quà tặng này!'
+      );
+      return;
+    }
 
-    const newBalance = user.carbonPoints - reward.points;
-    const isTree = reward.category === 'tree';
-
+    // Deduct points
     setUser((prev) => ({
       ...prev,
-      carbonPoints: newBalance,
-      treesPlanted: isTree ? prev.treesPlanted + 1 : prev.treesPlanted,
+      carbonPoints: prev.carbonPoints - reward.points,
+      treesPlanted: reward.category === 'tree' ? prev.treesPlanted + 1 : prev.treesPlanted,
     }));
 
-    const randomCode = `ECO-${Math.floor(100000 + Math.random() * 900000)}`;
+    // Create unique voucher
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const voucherCode = `ECO-${reward.category.toUpperCase().slice(0, 3)}-${randomSuffix}`;
+
     const newVoucher: Voucher = {
-      id: `vouch-${Date.now()}`,
+      id: `voucher-${Date.now()}`,
       rewardId: reward.id,
       title: reward.title,
-      code: randomCode,
+      code: voucherCode,
       category: reward.categoryName,
       image: reward.image,
       pointsUsed: reward.points,
       issueDate: new Date().toLocaleDateString('vi-VN'),
-      expiryDate: '30/12/2026',
+      expiryDate: '31/12/2026',
       isUsed: false,
       partner: reward.partner,
       description: reward.description,
-      qrValue: `ECOSTAY_${randomCode}_VAL_${reward.points}CP`,
+      qrValue: `ECOSTAY:VOUCHER:${voucherCode}:${reward.points}`,
     };
 
     setVouchers((prev) => [newVoucher, ...prev]);
 
+    // Add log
     const newLog: ImpactLog = {
       id: `log-${Date.now()}`,
-      date: 'Vừa xong',
-      title: `Đổi phần quà: ${reward.title}`,
+      date: currentLang === 'en' ? 'Just now' : 'Vừa xong',
+      title: `Đổi quà: ${reward.title}`,
       points: -reward.points,
       type: 'redeem',
-      detail: `Tạo thành công voucher ${randomCode} trong Giỏ hàng xanh`,
+      detail: `Đã đổi quà thành công và lưu vào Giỏ hàng xanh (-${reward.points} CP)`,
     };
+
     setLogs((prev) => [newLog, ...prev]);
 
     showToast(
-      `Đổi quà thành công! Đã thêm vào Giỏ hàng xanh`,
-      <CheckCircle2 size={16} className="text-emerald-400" />
+      currentLang === 'en'
+        ? `Redeemed ${reward.title}! Saved to Green Cart.`
+        : `Đã đổi thành công! Quà đã được chuyển vào "Giỏ hàng xanh".`,
+      <Sparkles size={16} className="text-amber-400" />
     );
   };
 
-  // Handler: Mark Voucher Used
+  // Handler: Mark Voucher as Used
   const handleMarkVoucherUsed = (voucherId: string) => {
     setVouchers((prev) =>
       prev.map((v) => (v.id === voucherId ? { ...v, isUsed: true } : v))
     );
-    showToast('Voucher đã được đánh dấu sử dụng.');
+    showToast(
+      currentLang === 'en'
+        ? 'Voucher marked as redeemed at counter!'
+        : 'Đã xác nhận sử dụng voucher tại quầy!'
+    );
   };
 
-  // Handler: Submit Feedback
-  const handleSubmitFeedback = (comment: string, rating: number) => {
+  // Handler: Simulated QR Scan
+  const handleSimulateQRScan = (type: 'room' | 'food' | 'transport') => {
+    let earnedPoints = 10;
+    let title = 'Tiết kiệm giặt là trong phòng';
+    let targetMissionId = 'mis-r1';
+
+    if (type === 'food') {
+      earnedPoints = 15;
+      title = 'Đặt bàn xanh & Zero Food Waste';
+      targetMissionId = 'mis-f1';
+    } else if (type === 'transport') {
+      earnedPoints = 20;
+      title = 'Di chuyển bằng Xe đạp điện / Xe công cộng';
+      targetMissionId = 'mis-t1';
+    }
+
+    handleCompleteMission(targetMissionId);
+  };
+
+  // Handler: Live Camera QR Scan (jsQR)
+  const handleLiveQRScan = (decodedData: string) => {
     triggerEcoConfetti();
+
+    // Check if matches mission
+    const matchingMission = missions.find(
+      (m) => m.qrSampleCode && decodedData.includes(m.qrSampleCode)
+    );
+
+    if (matchingMission) {
+      handleCompleteMission(matchingMission.id);
+      return;
+    }
+
+    // Default recognition
+    const pointsAwarded = 25;
     setUser((prev) => ({
       ...prev,
-      carbonPoints: prev.carbonPoints + 15,
+      carbonPoints: prev.carbonPoints + pointsAwarded,
+      co2Saved: Number((prev.co2Saved + 1.8).toFixed(1)),
     }));
 
     const newLog: ImpactLog = {
       id: `log-${Date.now()}`,
-      date: 'Vừa xong',
-      title: 'Đánh giá & Khảo sát dịch vụ',
-      points: 15,
+      date: currentLang === 'en' ? 'Just now' : 'Vừa xong',
+      title: 'Quét mã QR đối tác xanh',
+      points: pointsAwarded,
       type: 'earn',
-      detail: `Đánh giá ${rating} sao: "${comment.slice(0, 30)}..."`,
+      detail: `Mã: ${decodedData.slice(0, 32)}... (+${pointsAwarded} CP)`,
     };
+
     setLogs((prev) => [newLog, ...prev]);
 
     showToast(
-      'Cảm ơn đánh giá quý báu! Bạn nhận được +15 CP',
+      currentLang === 'en'
+        ? `QR Code verified! +${pointsAwarded} CP added.`
+        : `Quét mã thành công! +${pointsAwarded} CP đã cộng vào tài khoản.`,
+      <CheckCircle2 size={16} className="text-emerald-400" />
+    );
+  };
+
+  // Handler: Feedback Submit
+  const handleSubmitFeedback = (feedbackText: string, rating: number) => {
+    const pointsAwarded = 15;
+    setUser((prev) => ({
+      ...prev,
+      carbonPoints: prev.carbonPoints + pointsAwarded,
+    }));
+
+    const newLog: ImpactLog = {
+      id: `log-${Date.now()}`,
+      date: currentLang === 'en' ? 'Just now' : 'Vừa xong',
+      title: 'Khảo sát ý kiến du khách sống xanh',
+      points: pointsAwarded,
+      type: 'earn',
+      detail: `Đóng góp ${rating} sao giúp nâng cao chất lượng dịch vụ (+${pointsAwarded} CP)`,
+    };
+
+    setLogs((prev) => [newLog, ...prev]);
+
+    showToast(
+      currentLang === 'en'
+        ? `Thank you for your review! +${pointsAwarded} CP.`
+        : `Cảm ơn bạn đã đóng góp ý kiến! +${pointsAwarded} CP`,
       <Sparkles size={16} className="text-amber-400" />
     );
   };
@@ -366,10 +368,10 @@ export default function EcoStayApp() {
 
   return (
     <div className="relative mx-auto w-full max-w-md min-h-screen bg-[#F8FAF8] text-[#1B3B2B] pb-24 shadow-2xl font-sans rounded-none sm:rounded-[40px] overflow-hidden border-0 sm:border-8 sm:border-slate-800 flex flex-col justify-between">
-      
       {/* Top Header */}
       <Header
         user={user}
+        currentLang={currentLang}
         onOpenNotifications={() => setIsNotificationOpen(true)}
         onOpenProfile={() => setActiveTab('more')}
       />
@@ -380,8 +382,10 @@ export default function EcoStayApp() {
           <TabHome
             user={user}
             destinations={destinations}
+            currentLang={currentLang}
             onBookService={handleBookService}
             onNavigateToEarn={() => setActiveTab('earn')}
+            onOpenAIChat={() => setIsAIChatOpen(true)}
           />
         )}
 
@@ -390,6 +394,7 @@ export default function EcoStayApp() {
             userPoints={user.carbonPoints}
             rewards={rewards}
             vouchers={vouchers}
+            currentLang={currentLang}
             onRedeemReward={handleRedeemReward}
             onSelectVoucher={setSelectedVoucher}
             onNavigateToEarn={() => setActiveTab('earn')}
@@ -399,6 +404,7 @@ export default function EcoStayApp() {
         {activeTab === 'scanner' && (
           <TabScanner
             user={user}
+            currentLang={currentLang}
             onSimulateQRScan={handleSimulateQRScan}
             onLiveQRScan={handleLiveQRScan}
           />
@@ -408,7 +414,8 @@ export default function EcoStayApp() {
           <TabEarnPoints
             user={user}
             missions={missions}
-            onCompleteMission={handleCompleteMission}
+            currentLang={currentLang}
+            onOpenMissionQR={(mission) => setSelectedMissionForQR(mission)}
             onNavigateToScanner={() => setActiveTab('scanner')}
             onOpenEcoImpact={() => setIsEcoImpactOpen(true)}
           />
@@ -437,6 +444,7 @@ export default function EcoStayApp() {
         activeTab={activeTab}
         onSelectTab={setActiveTab}
         cartCount={vouchers.filter((v) => !v.isUsed).length}
+        currentLang={currentLang}
       />
 
       {/* Floating Toast Notification */}
@@ -446,6 +454,22 @@ export default function EcoStayApp() {
           <span>{toastMessage.text}</span>
         </div>
       )}
+
+      {/* Mission QR Modal (100% QR Scanner for missions) */}
+      <MissionQRModal
+        mission={selectedMissionForQR}
+        onClose={() => setSelectedMissionForQR(null)}
+        onSuccess={(missionId) => handleCompleteMission(missionId)}
+        onOpenLiveScanner={() => setActiveTab('scanner')}
+      />
+
+      {/* EcoBot AI Chatbot Modal */}
+      <AIChatModal
+        isOpen={isAIChatOpen}
+        onClose={() => setIsAIChatOpen(false)}
+        user={user}
+        currentLang={currentLang}
+      />
 
       {/* Shared Modals */}
       <EcoImpactModal
@@ -488,7 +512,6 @@ export default function EcoStayApp() {
         isOpen={isAboutOpen}
         onClose={() => setIsAboutOpen(false)}
       />
-
     </div>
   );
 }

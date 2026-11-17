@@ -22,15 +22,18 @@ import { triggerEcoConfetti } from './Confetti';
 
 interface TabScannerProps {
   user: UserProfile;
+  currentLang?: 'vi' | 'en';
   onSimulateQRScan: (type: 'room' | 'food' | 'transport') => void;
   onLiveQRScan: (decodedData: string) => void;
 }
 
 export const TabScanner: React.FC<TabScannerProps> = ({
   user,
+  currentLang = 'vi',
   onSimulateQRScan,
   onLiveQRScan,
 }) => {
+  const isEn = currentLang === 'en';
   const [activeScannerTab, setActiveScannerTab] = useState<'camera' | 'my_qr'>('camera');
   const [copiedCode, setCopiedCode] = useState(false);
 
@@ -216,7 +219,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
           }`}
         >
           <ScanLine size={15} />
-          <span>Quét mã camera</span>
+          <span>{isEn ? 'Camera Scanner' : 'Quét mã camera'}</span>
         </button>
         <button
           onClick={() => setActiveScannerTab('my_qr')}
@@ -227,7 +230,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
           }`}
         >
           <UserCheck size={15} />
-          <span>MÃ QR CỦA TÔI</span>
+          <span>{isEn ? 'MY MEMBER QR' : 'MÃ QR CỦA TÔI'}</span>
         </button>
       </div>
 

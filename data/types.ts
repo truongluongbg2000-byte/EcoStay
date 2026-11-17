@@ -1,6 +1,6 @@
 export type CategoryType = 'all' | 'fashion' | 'food' | 'tree' | 'hotdeal' | 'service' | 'other';
 
-export type DestinationCategory = 'all' | 'food' | 'hotel' | 'activity' | 'transport';
+export type DestinationCategory = 'all' | 'food' | 'hotel' | 'activity' | 'transport' | 'shopping';
 
 export interface GreenDestination {
   id: string;
@@ -26,7 +26,9 @@ export interface DetailedMission {
   points: number; // e.g. +10, +20, -5
   isPenalty?: boolean;
   completed: boolean;
-  actionType: 'toggle' | 'qr' | 'button';
+  actionType: 'qr';
+  qrInstruction?: string;
+  qrSampleCode?: string;
   iconName?: string;
 }
 

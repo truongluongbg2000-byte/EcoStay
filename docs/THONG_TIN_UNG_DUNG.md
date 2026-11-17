@@ -3,7 +3,7 @@
 > **Môn học:** Quản trị Chiến lược / Quản trị Chất lượng (QTCL)  
 > **Cuộc thi:** ThangLong Business & Marketing Challenge Season 5 “Kỳ Tích”  
 > **Tên dự án:** **App EcoStay - Nền Tảng Du Lịch Xanh & Tích Lũy CACBON POINT**  
-> **Đơn vị thực hiện:** Nhóm Tinh Hà Say Hi - Lớp QI3703, Trường Đại học Thăng Long  
+> **Đơn vị thực hiện:** Nhóm MVP, Trường Đại học Thăng Long  
 > **Thành viên:**  
 > 1. Hà Thị Yến Nhi (Nhóm trưởng)  
 > 2. Trương Thế Lương  
@@ -103,4 +103,4 @@ Nơi tập trung đầy đủ **5 nhóm nhiệm vụ xanh** để khách hàng c
 | **Kích thước tải ban đầu** | **127 kB** (Cực nhẹ, thời gian tải < 1 giây) |
 | **Thư viện giải mã Camera** | `jsQR` (Client-side Canvas real-time frame decoder) |
 | **Cơ chế lưu trữ Client** | LocalStorage Engine v4 |
-| **Bản quyền môn học** | Nhóm Tinh Hà Say Hi - Lớp QI3703 - Trường Đại học Thăng Long |
+| **Bản quyền môn học** | Nhóm MVP - Trường Đại học Thăng Long |

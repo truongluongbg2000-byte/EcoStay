@@ -23,6 +23,7 @@ interface TabRewardsProps {
   userPoints: number;
   rewards: RewardItem[];
   vouchers: Voucher[];
+  currentLang?: 'vi' | 'en';
   onRedeemReward: (reward: RewardItem) => void;
   onSelectVoucher: (voucher: Voucher) => void;
   onNavigateToEarn: () => void;
@@ -32,10 +33,12 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
   userPoints,
   rewards,
   vouchers,
+  currentLang = 'vi',
   onRedeemReward,
   onSelectVoucher,
   onNavigateToEarn,
 }) => {
+  const isEn = currentLang === 'en';
   const [activeSubTab, setActiveSubTab] = useState<'store' | 'cart'>('store');
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>('all');
   const [selectedRegion, setSelectedRegion] = useState('Miền Bắc');
@@ -89,7 +92,7 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          🎁 Kho đổi quà
+          {isEn ? '🎁 Rewards Store' : '🎁 Kho đổi quà'}
         </button>
         <button
           onClick={() => setActiveSubTab('cart')}
@@ -99,7 +102,7 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <span>🛒 Giỏ hàng xanh</span>
+          <span>{isEn ? '🛒 Green Cart' : '🛒 Giỏ hàng xanh'}</span>
           {activeVouchers.length > 0 && (
             <span className="rounded-full bg-[#D97736] px-1.5 py-0.2 text-[10px] font-extrabold text-white">
               {activeVouchers.length}

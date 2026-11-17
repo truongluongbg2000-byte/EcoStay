@@ -198,20 +198,6 @@ export const TabMore: React.FC<TabMoreProps> = ({
           <ChevronRight size={16} className="text-slate-300" />
         </button>
 
-        {/* Lịch sử điểm */}
-        <button
-          onClick={() => onOpenHistory('points')}
-          className="flex w-full items-center justify-between p-3 hover:bg-slate-50 rounded-2xl transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <div className="text-emerald-800">
-              <History size={18} />
-            </div>
-            <span className="text-xs font-semibold text-slate-700">Lịch sử điểm CACBON POINT</span>
-          </div>
-          <ChevronRight size={16} className="text-slate-300" />
-        </button>
-
         {/* Hướng dẫn sử dụng */}
         <button
           onClick={onOpenHandbook}
@@ -272,18 +258,18 @@ export const TabMore: React.FC<TabMoreProps> = ({
 
       {/* App Version Info */}
       <div className="text-center pt-2 text-[10px] text-slate-400">
-        <p>EcoStay Mobile Web • v2.0 (Thăng Long Kỳ Tích)</p>
-        <p className="mt-0.5">Phát triển bởi Nhóm Tinh Hà Say Hi - Lớp QI3703</p>
+        <p>EcoStay Mobile Web • v2.1 (Thăng Long Kỳ Tích)</p>
+        <p className="mt-0.5">Phát triển bởi Nhóm MVP</p>
       </div>
 
-      {/* Language Selector Modal (Only Tiếng Việt and Tiếng Anh) */}
+      {/* Language Selector Modal (12 Global Languages) */}
       {isLangModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fadeIn">
           <div className="relative w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl text-left">
             <div className="flex items-center justify-between border-b pb-3 mb-3">
               <div className="flex items-center gap-2">
                 <Globe size={18} className="text-emerald-700" />
-                <h4 className="text-sm font-bold text-slate-800">Chọn ngôn ngữ / Language</h4>
+                <h4 className="text-sm font-bold text-slate-800">Chọn ngôn ngữ / Languages</h4>
               </div>
               <button
                 onClick={() => setIsLangModalOpen(false)}
@@ -293,42 +279,61 @@ export const TabMore: React.FC<TabMoreProps> = ({
               </button>
             </div>
 
-            <div className="space-y-2">
-              <button
-                onClick={() => {
-                  onChangeLang('vi');
-                  setIsLangModalOpen(false);
-                }}
-                className={`w-full flex items-center justify-between p-3 rounded-2xl border transition-all ${
-                  currentLang === 'vi'
-                    ? 'border-emerald-500 bg-emerald-50 text-[#1E4D3E] font-bold'
-                    : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="text-lg">🇻🇳</span>
-                  <span className="text-xs">Tiếng Việt (Mặc định)</span>
-                </div>
-                {currentLang === 'vi' && <Check size={16} className="text-emerald-700" />}
-              </button>
+            <p className="text-[11px] text-slate-500 mb-2">
+              Hỗ trợ đầy đủ Tiếng Việt (Cacbon) và English (Carbon). Các ngôn ngữ khác được AI tự động dịch.
+            </p>
 
-              <button
-                onClick={() => {
-                  onChangeLang('en');
-                  setIsLangModalOpen(false);
-                }}
-                className={`w-full flex items-center justify-between p-3 rounded-2xl border transition-all ${
-                  currentLang === 'en'
-                    ? 'border-emerald-500 bg-emerald-50 text-[#1E4D3E] font-bold'
-                    : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="text-lg">🇬🇧</span>
-                  <span className="text-xs">English (US/UK)</span>
-                </div>
-                {currentLang === 'en' && <Check size={16} className="text-emerald-700" />}
-              </button>
+            <div className="max-h-64 overflow-y-auto space-y-1.5 pr-1">
+              {[
+                { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳', label: 'Việt Nam (Mặc định - Cacbon)' },
+                { code: 'en', name: 'English', flag: '🇬🇧', label: 'Global / US / UK (Carbon)' },
+                { code: 'fr', name: 'Français', flag: '🇫🇷', label: 'France' },
+                { code: 'ja', name: '日本語', flag: '🇯🇵', label: 'Japan' },
+                { code: 'ko', name: '한국어', flag: '🇰🇷', label: 'Korea' },
+                { code: 'zh', name: '中文', flag: '🇨🇳', label: 'China' },
+                { code: 'de', name: 'Deutsch', flag: '🇩🇪', label: 'Germany' },
+                { code: 'es', name: 'Español', flag: '🇪🇸', label: 'Spain' },
+                { code: 'ru', name: 'Русский', flag: '🇷🇺', label: 'Russia' },
+                { code: 'th', name: 'ภาษาไทย', flag: '🇹🇭', label: 'Thailand' },
+                { code: 'it', name: 'Italiano', flag: '🇮🇹', label: 'Italy' },
+                { code: 'pt', name: 'Português', flag: '🇵🇹', label: 'Portugal' },
+              ].map((lang) => {
+                const isSelected =
+                  lang.code === currentLang || (currentLang === 'en' && lang.code !== 'vi');
+                const isSupported = lang.code === 'vi' || lang.code === 'en';
+
+                return (
+                  <button
+                    key={lang.code}
+                    onClick={() => {
+                      if (lang.code === 'vi') {
+                        onChangeLang('vi');
+                      } else {
+                        onChangeLang('en');
+                      }
+                      setIsLangModalOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between p-2.5 rounded-2xl border transition-all ${
+                      (currentLang === 'vi' && lang.code === 'vi') ||
+                      (currentLang === 'en' && lang.code === 'en')
+                        ? 'border-emerald-500 bg-emerald-50 text-[#1E4D3E] font-bold'
+                        : 'border-slate-100 hover:bg-slate-50 text-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xl">{lang.flag}</span>
+                      <div className="text-left">
+                        <p className="text-xs font-semibold">{lang.name}</p>
+                        <p className="text-[10px] text-slate-400">{lang.label}</p>
+                      </div>
+                    </div>
+                    {((currentLang === 'vi' && lang.code === 'vi') ||
+                      (currentLang === 'en' && lang.code === 'en')) && (
+                      <Check size={16} className="text-emerald-700 shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
             <button
