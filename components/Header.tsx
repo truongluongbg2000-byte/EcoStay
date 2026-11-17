@@ -46,6 +46,9 @@ export const Header: React.FC<HeaderProps> = ({
             <h2 className="text-sm font-bold tracking-tight text-white line-clamp-1">
               {user.name}
             </h2>
+            <p className="text-[10px] text-emerald-200/80 font-medium line-clamp-1">
+              {isEn ? 'Green Member • Sprout Tier' : user.rank}
+            </p>
           </div>
         </div>
 

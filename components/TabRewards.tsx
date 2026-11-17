@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { RewardItem, CategoryType, Voucher } from '@/data/types';
 import { triggerEcoConfetti } from './Confetti';
+import { rewardTranslations, voucherTranslations } from '@/data/translations';
 
 interface TabRewardsProps {
   userPoints: number;
@@ -184,6 +185,14 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
           <div className="space-y-3.5">
             {filteredRewards.map((reward) => {
               const canAfford = userPoints >= reward.points;
+              const trans = isEn ? rewardTranslations[reward.id] : null;
+              const displayTitle = trans?.title || reward.title;
+              const displayDesc = trans?.description || reward.description;
+              const displayCategory = trans?.categoryName || reward.categoryName;
+              const displayPartner = trans?.partner || reward.partner;
+              const displayLocation = trans?.location || reward.location;
+              const displayBadge = trans?.badge !== undefined ? trans.badge : reward.badge;
+
               return (
                 <div
                   key={reward.id}
@@ -192,16 +201,16 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
                   <div className="relative h-36 w-full overflow-hidden">
                     <img
                       src={reward.image}
-                      alt={reward.title}
+                      alt={displayTitle}
                       className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
                     />
                     <div className="absolute top-2.5 left-2.5 flex gap-1.5">
                       <span className="rounded-full bg-[#1E4D3E]/90 px-2.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
-                        {reward.categoryName}
+                        {displayCategory}
                       </span>
-                      {reward.badge && (
+                      {displayBadge && (
                         <span className="rounded-full bg-[#D97736] px-2.5 py-0.5 text-[10px] font-bold text-white shadow">
-                          {reward.badge}
+                          {displayBadge}
                         </span>
                       )}
                     </div>
@@ -212,19 +221,19 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
                   </div>
 
                   <div className="p-4">
-                    <h4 className="text-sm font-bold text-slate-900 leading-snug">{reward.title}</h4>
+                    <h4 className="text-sm font-bold text-slate-900 leading-snug">{displayTitle}</h4>
                     <p className="mt-1 text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                      {reward.description}
+                      {displayDesc}
                     </p>
 
                     <div className="mt-2.5 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100 pt-2">
                       <span className="flex items-center gap-1 text-emerald-800 font-medium">
                         <Building2 size={12} />
-                        {reward.partner}
+                        {displayPartner}
                       </span>
                       <span className="flex items-center gap-1">
                         <MapPin size={12} />
-                        {reward.location}
+                        {displayLocation}
                       </span>
                     </div>
 
@@ -296,63 +305,72 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
               </button>
             </div>
           ) : (
-            activeVouchers.map((voucher) => (
-              <div
-                key={voucher.id}
-                className="relative overflow-hidden rounded-3xl bg-white shadow-md border border-emerald-950/5 transition-all hover:shadow-lg"
-              >
-                {/* Visual Ticket Cut-outs */}
-                <div className="absolute -left-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-[#F8FAF8] border-r border-slate-200 z-10" />
-                <div className="absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-[#F8FAF8] border-l border-slate-200 z-10" />
+            activeVouchers.map((voucher) => {
+              const vTrans = isEn
+                ? voucherTranslations[voucher.id] || voucherTranslations[voucher.rewardId]
+                : null;
+              const vTitle = vTrans?.title || voucher.title;
+              const vCat = vTrans?.category || voucher.category;
+              const vPartner = vTrans?.partner || voucher.partner;
 
-                <div className="flex">
-                  <div className="relative w-28 shrink-0 overflow-hidden bg-emerald-900">
-                    <img
-                      src={voucher.image}
-                      alt={voucher.title}
-                      className="h-full w-full object-cover opacity-85"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent p-2 flex flex-col justify-end">
-                      <span className="text-[9px] font-bold text-emerald-200 uppercase">
-                        {voucher.category}
-                      </span>
-                    </div>
-                  </div>
+              return (
+                <div
+                  key={voucher.id}
+                  className="relative overflow-hidden rounded-3xl bg-white shadow-md border border-emerald-950/5 transition-all hover:shadow-lg"
+                >
+                  {/* Visual Ticket Cut-outs */}
+                  <div className="absolute -left-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-[#F8FAF8] border-r border-slate-200 z-10" />
+                  <div className="absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-[#F8FAF8] border-l border-slate-200 z-10" />
 
-                  <div className="flex-1 p-3.5 pl-4 text-left flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono text-[10px] font-extrabold text-[#1E4D3E] bg-emerald-50 px-2 py-0.5 rounded-md">
-                          {voucher.code}
+                  <div className="flex">
+                    <div className="relative w-28 shrink-0 overflow-hidden bg-emerald-900">
+                      <img
+                        src={voucher.image}
+                        alt={vTitle}
+                        className="h-full w-full object-cover opacity-85"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent p-2 flex flex-col justify-end">
+                        <span className="text-[9px] font-bold text-emerald-200 uppercase">
+                          {vCat}
                         </span>
-                        <span className="text-[10px] text-slate-400">-{voucher.pointsUsed} CP</span>
                       </div>
-                      <h4 className="mt-1 text-xs font-bold text-slate-900 line-clamp-2 leading-snug">
-                        {voucher.title}
-                      </h4>
-                      <p className="mt-1 text-[10px] text-slate-500 line-clamp-1 flex items-center gap-1">
-                        <Building2 size={11} />
-                        {voucher.partner}
-                      </p>
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between border-t border-dashed border-slate-200 pt-2">
-                      <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                        <Calendar size={11} />
-                        {isEn ? 'Exp:' : 'Hạn:'} {voucher.expiryDate}
-                      </span>
-                      <button
-                        onClick={() => onSelectVoucher(voucher)}
-                        className="flex items-center gap-1 rounded-xl bg-[#1E4D3E] px-3 py-1.5 text-[11px] font-bold text-white shadow hover:bg-[#16392E] active:scale-95 transition-all"
-                      >
-                        <QrCode size={12} />
-                        <span>{isEn ? 'Use Now' : 'Sử dụng ngay'}</span>
-                      </button>
+                    <div className="flex-1 p-3.5 pl-4 text-left flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono text-[10px] font-extrabold text-[#1E4D3E] bg-emerald-50 px-2 py-0.5 rounded-md">
+                            {voucher.code}
+                          </span>
+                          <span className="text-[10px] text-slate-400">-{voucher.pointsUsed} CP</span>
+                        </div>
+                        <h4 className="mt-1 text-xs font-bold text-slate-900 line-clamp-2 leading-snug">
+                          {vTitle}
+                        </h4>
+                        <p className="mt-1 text-[10px] text-slate-500 line-clamp-1 flex items-center gap-1">
+                          <Building2 size={11} />
+                          {vPartner}
+                        </p>
+                      </div>
+
+                      <div className="mt-3 flex items-center justify-between border-t border-dashed border-slate-200 pt-2">
+                        <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                          <Calendar size={11} />
+                          {isEn ? 'Exp:' : 'Hạn:'} {voucher.expiryDate}
+                        </span>
+                        <button
+                          onClick={() => onSelectVoucher(voucher)}
+                          className="flex items-center gap-1 rounded-xl bg-[#1E4D3E] px-3 py-1.5 text-[11px] font-bold text-white shadow hover:bg-[#16392E] active:scale-95 transition-all"
+                        >
+                          <QrCode size={12} />
+                          <span>{isEn ? 'Use Now' : 'Sử dụng ngay'}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       )}
@@ -375,15 +393,29 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
             </p>
 
             <div className="mt-3 rounded-2xl bg-emerald-50/70 p-3 text-left border border-emerald-100">
-              <p className="text-xs font-bold text-emerald-950">{confirmReward.title}</p>
+              <p className="text-xs font-bold text-emerald-950">
+                {isEn
+                  ? rewardTranslations[confirmReward.id]?.title || confirmReward.title
+                  : confirmReward.title}
+              </p>
               <p className="text-[11px] text-slate-500 mt-0.5">
-                {isEn ? 'Partner:' : 'Đối tác:'} {confirmReward.partner}
+                {isEn ? 'Partner:' : 'Đối tác:'}{' '}
+                {isEn
+                  ? rewardTranslations[confirmReward.id]?.partner || confirmReward.partner
+                  : confirmReward.partner}
               </p>
               {confirmReward.treeDetails && (
                 <div className="mt-2 text-[10px] text-emerald-800 bg-white/80 p-2 rounded-xl">
                   🌲 <strong>{isEn ? 'Tree planted:' : 'Cây trồng:'}</strong>{' '}
-                  {confirmReward.treeDetails.treeType} {isEn ? 'at' : 'tại'}{' '}
-                  {confirmReward.treeDetails.forestName}
+                  {isEn
+                    ? rewardTranslations[confirmReward.id]?.treeDetails?.treeType ||
+                      confirmReward.treeDetails.treeType
+                    : confirmReward.treeDetails.treeType}{' '}
+                  {isEn ? 'at' : 'tại'}{' '}
+                  {isEn
+                    ? rewardTranslations[confirmReward.id]?.treeDetails?.forestName ||
+                      confirmReward.treeDetails.forestName
+                    : confirmReward.treeDetails.forestName}
                 </div>
               )}
             </div>

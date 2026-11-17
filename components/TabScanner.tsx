@@ -93,7 +93,11 @@ export const TabScanner: React.FC<TabScannerProps> = ({
             }
 
             triggerEcoConfetti();
-            setScanResult(`Đã nhận diện: ${code.data.slice(0, 36)}${code.data.length > 36 ? '...' : ''}`);
+            setScanResult(
+              isEn
+                ? `Recognized: ${code.data.slice(0, 36)}${code.data.length > 36 ? '...' : ''}`
+                : `Đã nhận diện: ${code.data.slice(0, 36)}${code.data.length > 36 ? '...' : ''}`
+            );
             onLiveQRScan(code.data);
 
             setTimeout(() => {
@@ -189,11 +193,13 @@ export const TabScanner: React.FC<TabScannerProps> = ({
   };
 
   const handleSimulateScan = (type: 'room' | 'food' | 'transport', title: string) => {
-    setScanResult(`Đang nhận diện: ${title}...`);
+    setScanResult(isEn ? `Recognizing: ${title}...` : `Đang nhận diện: ${title}...`);
     setTimeout(() => {
       triggerEcoConfetti();
       onSimulateQRScan(type);
-      setScanResult(`Thành công! Đã ghi nhận mã QR ${title}`);
+      setScanResult(
+        isEn ? `Success! Verified QR: ${title}` : `Thành công! Đã ghi nhận mã QR ${title}`
+      );
       setTimeout(() => setScanResult(null), 3500);
     }, 700);
   };

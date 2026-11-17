@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { X, History, TrendingUp, TrendingDown, ShoppingBag } from 'lucide-react';
 import { ImpactLog, Voucher } from '@/data/types';
+import { logTranslations, voucherTranslations } from '@/data/translations';
 
 interface HistoryModalProps {
   isOpen: boolean;
@@ -78,63 +79,75 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                 {isEn ? 'No points activity recorded yet' : 'Chưa có lịch sử điểm'}
               </p>
             ) : (
-              logs.map((item) => (
-                <div key={item.id} className="pt-2 flex items-center justify-between text-left">
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-full ${
-                        item.type === 'earn'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : 'bg-amber-100 text-amber-700'
-                      }`}
-                    >
-                      {item.type === 'earn' ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+              logs.map((item) => {
+                const lTrans = isEn ? logTranslations[item.id] : null;
+                const displayTitle = lTrans?.title || item.title;
+                const displayDetail = lTrans?.detail || item.detail;
+                const displayDate = isEn && item.date === 'Vừa xong' ? 'Just now' : item.date;
+
+                return (
+                  <div key={item.id} className="pt-2 flex items-center justify-between text-left">
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                          item.type === 'earn'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-amber-100 text-amber-700'
+                        }`}
+                      >
+                        {item.type === 'earn' ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-800">{displayTitle}</p>
+                        <p className="text-[10px] text-slate-400">{displayDate}</p>
+                        {displayDetail && (
+                          <p className="text-[10px] text-slate-500 mt-0.5">{displayDetail}</p>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-800">{item.title}</p>
-                      <p className="text-[10px] text-slate-400">{item.date}</p>
-                      {item.detail && (
-                        <p className="text-[10px] text-slate-500 mt-0.5">{item.detail}</p>
-                      )}
+                    <div className="text-right">
+                      <span
+                        className={`text-xs font-extrabold ${
+                          item.type === 'earn' ? 'text-emerald-700' : 'text-amber-700'
+                        }`}
+                      >
+                        {item.type === 'earn' ? `+${item.points}` : item.points} CP
+                      </span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span
-                      className={`text-xs font-extrabold ${
-                        item.type === 'earn' ? 'text-emerald-700' : 'text-amber-700'
-                      }`}
-                    >
-                      {item.type === 'earn' ? `+${item.points}` : item.points} CP
-                    </span>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )
           ) : vouchers.length === 0 ? (
             <p className="text-center py-8 text-xs text-slate-400">
               {isEn ? 'No redeemed vouchers yet' : 'Chưa đổi voucher nào'}
             </p>
           ) : (
-            vouchers.map((v) => (
-              <div key={v.id} className="pt-2 flex items-center justify-between text-left">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-                    <ShoppingBag size={16} />
+            vouchers.map((v) => {
+              const vTrans = isEn ? voucherTranslations[v.id] || voucherTranslations[v.rewardId] : null;
+              const displayTitle = vTrans?.title || v.title;
+
+              return (
+                <div key={v.id} className="pt-2 flex items-center justify-between text-left">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                      <ShoppingBag size={16} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800 line-clamp-1">{displayTitle}</p>
+                      <p className="text-[10px] text-slate-400">
+                        {isEn ? 'Code:' : 'Mã:'} {v.code} • {isEn ? 'Date:' : 'Ngày:'} {v.issueDate}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-800 line-clamp-1">{v.title}</p>
-                    <p className="text-[10px] text-slate-400">
-                      {isEn ? 'Code:' : 'Mã:'} {v.code} • {isEn ? 'Date:' : 'Ngày:'} {v.issueDate}
-                    </p>
+                  <div className="text-right shrink-0">
+                    <span className="text-[11px] font-semibold text-slate-700">
+                      -{v.pointsUsed} CP
+                    </span>
                   </div>
                 </div>
-                <div className="text-right shrink-0">
-                  <span className="text-[11px] font-semibold text-slate-700">
-                    -{v.pointsUsed} CP
-                  </span>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 

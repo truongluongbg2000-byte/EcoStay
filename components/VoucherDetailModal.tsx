@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { X, Copy, Check, QrCode, Sparkles, Building2, Calendar, ShieldCheck } from 'lucide-react';
 import { Voucher } from '@/data/types';
+import { voucherTranslations } from '@/data/translations';
 
 interface VoucherDetailModalProps {
   voucher: Voucher | null;
@@ -28,6 +29,13 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const vTrans = isEn
+    ? voucherTranslations[voucher.id] || voucherTranslations[voucher.rewardId]
+    : null;
+  const displayTitle = vTrans?.title || voucher.title;
+  const displayCategory = vTrans?.category || voucher.category;
+  const displayPartner = vTrans?.partner || voucher.partner;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm animate-fadeIn">
       <div className="relative w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl overflow-hidden max-h-[95vh] overflow-y-auto">
@@ -43,13 +51,13 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({
         <div className="text-center pt-2">
           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
             <Sparkles size={12} className="text-emerald-600" />
-            {voucher.category}
+            {displayCategory}
           </span>
-          <h3 className="mt-2 text-base font-bold text-slate-800 leading-snug">{voucher.title}</h3>
+          <h3 className="mt-2 text-base font-bold text-slate-800 leading-snug">{displayTitle}</h3>
           <div className="mt-1 flex items-center justify-center gap-1.5 text-xs text-slate-500">
             <Building2 size={13} />
             <span>
-              {isEn ? 'Partner:' : 'Đối tác:'} {voucher.partner}
+              {isEn ? 'Partner:' : 'Đối tác:'} {displayPartner}
             </span>
           </div>
         </div>

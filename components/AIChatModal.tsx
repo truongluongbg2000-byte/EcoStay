@@ -60,6 +60,15 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
   };
 
   useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length <= 1) {
+        return [initialBotMessage];
+      }
+      return prev;
+    });
+  }, [currentLang, isEn, user.name]);
+
+  useEffect(() => {
     if (isOpen) {
       setTimeout(scrollToBottom, 100);
     }

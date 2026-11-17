@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { UserProfile, GreenDestination, DestinationCategory } from '@/data/types';
 import { triggerEcoConfetti } from './Confetti';
-import { destinationTranslations, destinationCategoryTranslations } from '@/data/translations';
+import { destinationTranslations, destinationCategoryTranslations, mapLocationTranslations } from '@/data/translations';
 
 interface TabHomeProps {
   user: UserProfile;
@@ -212,7 +212,13 @@ export const TabHome: React.FC<TabHomeProps> = ({
           </div>
           <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200/60">
             {isEn ? 'Region:' : 'Khu vực:'}{' '}
-            {selectedLocation === 'all' ? (isEn ? 'National' : 'Toàn quốc') : selectedLocation}
+            {selectedLocation === 'all'
+              ? isEn
+                ? 'National'
+                : 'Toàn quốc'
+              : isEn
+              ? mapLocationTranslations[selectedLocation] || selectedLocation
+              : selectedLocation}
           </span>
         </div>
 
@@ -271,7 +277,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
             }`}
           >
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span>🌲 Cúc Phương</span>
+            <span>🌲 {isEn ? 'Cuc Phuong' : 'Cúc Phương'}</span>
           </button>
 
           {/* Hội An Node (Active Center Node) */}
@@ -284,7 +290,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
             }`}
           >
             <span className="h-2.5 w-2.5 rounded-full bg-amber-400 animate-ping" />
-            <span>🏮 Hội An</span>
+            <span>🏮 {isEn ? 'Hoi An' : 'Hội An'}</span>
           </button>
 
           {/* Đà Lạt Node */}
@@ -297,7 +303,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
             }`}
           >
             <span className="h-2 w-2 rounded-full bg-pink-500" />
-            <span>🌸 Đà Lạt</span>
+            <span>🌸 {isEn ? 'Da Lat' : 'Đà Lạt'}</span>
           </button>
 
           {/* Nam Cát Tiên Node */}
@@ -310,7 +316,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
             }`}
           >
             <span className="h-2 w-2 rounded-full bg-emerald-600" />
-            <span>🦜 Nam Cát Tiên</span>
+            <span>🦜 {isEn ? 'Nam Cat Tien' : 'Nam Cát Tiên'}</span>
           </button>
 
           {/* Floating "Tất cả" shortcut button at bottom right (matching mockup) */}
@@ -384,6 +390,10 @@ export const TabHome: React.FC<TabHomeProps> = ({
         ) : (
           filtered.map((item) => {
             const trans = isEn ? destinationTranslations[item.id] : null;
+            const displayName = trans?.name || item.name;
+            const displayLocation = isEn
+              ? mapLocationTranslations[item.location] || item.location
+              : item.location;
             const displayCategoryName = isEn
               ? destinationCategoryTranslations[item.category] || item.categoryName
               : item.categoryName;
@@ -393,6 +403,8 @@ export const TabHome: React.FC<TabHomeProps> = ({
 
             const translatedItem: GreenDestination = {
               ...item,
+              name: displayName,
+              location: displayLocation,
               categoryName: displayCategoryName,
               title: displayTitle,
               description: displayDesc,
@@ -424,10 +436,10 @@ export const TabHome: React.FC<TabHomeProps> = ({
 
                   <div>
                     <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-wide">
-                      {displayCategoryName} • {item.location}
+                      {displayCategoryName} • {displayLocation}
                     </p>
                     <h4 className="mt-0.5 text-sm font-extrabold text-slate-900 leading-snug">
-                      {item.name}
+                      {displayName}
                     </h4>
                   </div>
                 </div>
