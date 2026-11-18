@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import {
   Settings,
   Phone,
-  FileQuestion,
-  Share2,
   TreePine,
   ShieldAlert,
   Sparkles,
@@ -165,38 +163,6 @@ export const TabMore: React.FC<TabMoreProps> = ({
             </div>
             <span className="text-xs font-semibold text-slate-700">
               {isEn ? 'Contact & Support Hotline' : 'Liên hệ & Hotline hỗ trợ'}
-            </span>
-          </div>
-          <ChevronRight size={16} className="text-slate-300" />
-        </button>
-
-        {/* Khảo sát sống xanh */}
-        <button
-          onClick={onOpenFeedback}
-          className="flex w-full items-center justify-between p-3 hover:bg-slate-50 rounded-2xl transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <div className="text-emerald-800">
-              <FileQuestion size={18} />
-            </div>
-            <span className="text-xs font-semibold text-slate-700">
-              {isEn ? 'Guest Eco Survey (+15 CP)' : 'Khảo sát ý kiến du khách (+15 CP)'}
-            </span>
-          </div>
-          <ChevronRight size={16} className="text-slate-300" />
-        </button>
-
-        {/* Mời bạn bè */}
-        <button
-          onClick={onOpenEcoImpact}
-          className="flex w-full items-center justify-between p-3 hover:bg-slate-50 rounded-2xl transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <div className="text-emerald-800">
-              <Share2 size={18} />
-            </div>
-            <span className="text-xs font-semibold text-slate-700">
-              {isEn ? 'Invite Friends to Go Green (+50 CP)' : 'Mời bạn bè sống xanh (+50 CP)'}
             </span>
           </div>
           <ChevronRight size={16} className="text-slate-300" />
