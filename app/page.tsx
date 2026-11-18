@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   initialUserProfile,
   initialDestinations,
@@ -77,12 +77,15 @@ export default function EcoStayApp() {
 
   // Toast System
   const [toastMessage, setToastMessage] = useState<{ text: string; icon?: React.ReactNode } | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const showToast = (text: string, icon?: React.ReactNode) => {
+  const showToast = (text: string, icon?: React.ReactNode, durationMs = 3500) => {
     setToastMessage({ text, icon });
-    setTimeout(() => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => {
       setToastMessage(null);
-    }, 3500);
+      toastTimerRef.current = null;
+    }, durationMs);
   };
 
   // Load from LocalStorage
@@ -400,9 +403,10 @@ export default function EcoStayApp() {
 
     showToast(
       currentLang === 'en'
-        ? `Logged in as ${account.profile.name} (${account.profile.carbonPoints} CP)`
-        : `Đã đăng nhập: ${account.profile.name} (${account.profile.carbonPoints} CP)`,
-      <UserCheck size={16} className="text-emerald-400" />
+        ? `Signed in successfully! (${account.profile.name})`
+        : `Đăng nhập thành công! (${account.profile.name})`,
+      <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />,
+      2000
     );
   };
 
@@ -464,9 +468,10 @@ export default function EcoStayApp() {
 
     showToast(
       currentLang === 'en'
-        ? `Welcome ${data.name}! +50 Carbon Points added!`
-        : `Chào mừng ${data.name}! Đã nhận +50 Điểm Cacbon!`,
-      <Sparkles size={16} className="text-amber-400" />
+        ? `Account created & signed in! (+50 CP)`
+        : `Đăng ký & đăng nhập thành công! (+50 CP)`,
+      <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />,
+      2000
     );
   };
 
@@ -518,8 +523,10 @@ export default function EcoStayApp() {
             setIsLoggedIn(true);
             showToast(
               currentLang === 'en'
-                ? `Welcome! Exploring as Guest (${user.name})`
-                : `Chào mừng! Trải nghiệm dạng Khách (${user.name})`
+                ? 'Signed in as Guest!'
+                : 'Đăng nhập thành công (Chế độ Khách)!',
+              <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />,
+              2000
             );
           }}
         />

@@ -1,28 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   X,
   UserCheck,
   Sparkles,
-  Lock,
-  Mail,
+  KeyRound,
+  UserCircle2,
   Building2,
   Check,
-  ShieldCheck,
-  Zap,
   ArrowRight,
   UserPlus,
   LogIn,
   Eye,
   EyeOff,
-  Wifi,
-  CreditCard
+  Users,
+  Award,
+  Info,
 } from 'lucide-react';
 import { MockAccount } from '@/data/types';
 import { mockAccounts } from '@/data/mockData';
 import { rankTranslations } from '@/data/translations';
-import { triggerEcoConfetti } from './Confetti';
+import { playSuccessTickSound } from '@/lib/audio/successSound';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -49,63 +48,74 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 }) => {
   const isEn = currentLang === 'en';
   const [activeTab, setActiveTab] = useState<'quick' | 'login' | 'register'>('quick');
+  const [noticeText, setNoticeText] = useState<string | null>(null);
+  const noticeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Form states for login
-  const [loginIdentifier, setLoginIdentifier] = useState('luong.truong@ecostay.vn');
-  const [loginPassword, setLoginPassword] = useState('123456');
+  // Login form state
+  const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showForgotHint, setShowForgotHint] = useState(false);
 
-  // Form states for register
+  // Register form state
   const [regName, setRegName] = useState('');
   const [regPhone, setRegPhone] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regHotel, setRegHotel] = useState('Silk Sense Hội An River Eco-Resort');
   const [regRoom, setRegRoom] = useState('Suite Eco-501');
-  const [regPassword, setRegPassword] = useState('123456');
+  const [regPassword, setRegPassword] = useState('');
   const [showRegPassword, setShowRegPassword] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current);
+    };
+  }, []);
 
   if (!isOpen) return null;
 
+  const showTempNotice = (message: string) => {
+    setNoticeText(message);
+    if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current);
+    noticeTimerRef.current = setTimeout(() => setNoticeText(null), 2200);
+  };
+
+  const handleSocialInDev = (provider: 'Google' | 'Facebook') => {
+    showTempNotice(
+      isEn
+        ? `${provider} sign-in is currently under development.`
+        : `Chức năng đăng nhập bằng ${provider} đang phát triển.`
+    );
+  };
+
   const handleQuickSelect = (acc: MockAccount) => {
-    triggerEcoConfetti();
+    playSuccessTickSound();
     onSelectAccount(acc);
     onClose();
   };
 
   const handleManualLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const found = mockAccounts.find(
-      (a) =>
-        a.email.toLowerCase() === loginIdentifier.toLowerCase().trim() ||
-        a.phone === loginIdentifier.trim()
-    );
+    const cleaned = loginIdentifier.toLowerCase().trim();
+    const found = cleaned
+      ? mockAccounts.find(
+          (a) =>
+            a.email.toLowerCase() === cleaned || a.phone === loginIdentifier.trim()
+        )
+      : mockAccounts[0];
 
-    if (found) {
-      handleQuickSelect(found);
-    } else {
-      handleQuickSelect(mockAccounts[0]);
-    }
-  };
-
-  const handleGoogleLogin = () => {
-    const target = mockAccounts.find((a) => a.id === 'user-2') || mockAccounts[0];
-    handleQuickSelect(target);
-  };
-
-  const handleAppleLogin = () => {
-    const target = mockAccounts.find((a) => a.id === 'user-1') || mockAccounts[0];
-    handleQuickSelect(target);
+    handleQuickSelect(found || mockAccounts[0]);
   };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!regName.trim()) {
-      alert(isEn ? 'Please enter your full name!' : 'Vui lòng nhập họ và tên của bạn!');
+      showTempNotice(
+        isEn ? 'Please enter your full name.' : 'Vui lòng nhập họ và tên của bạn.'
+      );
       return;
     }
 
-    triggerEcoConfetti();
+    playSuccessTickSound();
     onRegisterNewAccount({
       name: regName.trim(),
       phone: regPhone.trim() || '0988 888 999',
@@ -116,107 +126,62 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     onClose();
   };
 
-  const getCardTheme = (accId: string) => {
-    switch (accId) {
-      case 'user-2': // VIP Titanium
-        return {
-          gradient: 'from-[#071710] via-[#0E2E21] to-[#06150E]',
-          border: 'border-amber-400/40 hover:border-amber-400',
-          chipGradient: 'from-amber-200 via-yellow-400 to-amber-600',
-          badgeBg: 'bg-amber-500/20 border-amber-400/50 text-amber-300',
-          pointsColor: 'text-amber-300',
-          tierTag: isEn ? 'VIP TITANIUM • CỔ THỤ XANH' : 'VIP TITANIUM • CỔ THỤ XANH',
-          memberCode: 'ECO • HM • 998811',
-        };
-      case 'user-1': // Emerald Prestige
-        return {
-          gradient: 'from-[#0A261D] via-[#144233] to-[#0B2119]',
-          border: 'border-emerald-400/40 hover:border-emerald-400',
-          chipGradient: 'from-emerald-200 via-teal-300 to-emerald-600',
-          badgeBg: 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300',
-          pointsColor: 'text-emerald-300',
-          tierTag: isEn ? 'PRESTIGE • MẦM XANH' : 'PRESTIGE • MẦM XANH',
-          memberCode: 'ECO • TL • 883921',
-        };
-      case 'user-3': // Sapphire Explorer
-        return {
-          gradient: 'from-[#0B2332] via-[#133A52] to-[#091D2A]',
-          border: 'border-cyan-400/40 hover:border-cyan-400',
-          chipGradient: 'from-cyan-200 via-sky-400 to-cyan-600',
-          badgeBg: 'bg-cyan-500/20 border-cyan-400/40 text-cyan-300',
-          pointsColor: 'text-cyan-300',
-          tierTag: isEn ? 'PASSPORT • GLOBAL EXPLORER' : 'PASSPORT • DU KHÁCH QUỐC TẾ',
-          memberCode: 'ECO • DH • 772233',
-        };
-      default: // Neo Starter
-        return {
-          gradient: 'from-[#14261F] via-[#1F3D32] to-[#101F19]',
-          border: 'border-lime-400/30 hover:border-lime-400',
-          chipGradient: 'from-lime-200 via-emerald-400 to-lime-600',
-          badgeBg: 'bg-lime-500/20 border-lime-400/40 text-lime-300',
-          pointsColor: 'text-lime-300',
-          tierTag: isEn ? 'MEMBER • ECO STARTER' : 'THÀNH VIÊN • TÂN BINH XANH',
-          memberCode: 'ECO • MK • 112233',
-        };
-    }
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-3 sm:p-4 backdrop-blur-md animate-fadeIn text-left">
-      <div className="relative w-full max-w-md rounded-3xl bg-[#091E16] text-white p-4 sm:p-5 shadow-2xl border border-emerald-500/30 overflow-hidden max-h-[92vh] flex flex-col">
-        {/* Glow Effects */}
-        <div className="pointer-events-none absolute -top-20 -left-20 h-60 w-60 rounded-full bg-emerald-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -right-20 h-60 w-60 rounded-full bg-amber-500/15 blur-3xl" />
-
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4 backdrop-blur-xs animate-fadeIn text-left"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-md rounded-3xl bg-white text-slate-800 p-4 sm:p-5 shadow-2xl border border-emerald-100 overflow-hidden max-h-[90vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-3 relative z-10">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 shadow-md">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#E8F5E9] text-[#2E7D32] border border-[#C8E6C9]">
               <UserCheck size={20} />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <h3 className="text-sm font-extrabold text-white">
-                  {isEn ? 'EcoStay Digital Passports' : 'Xác Thực & Thẻ Thành Viên Xanh'}
-                </h3>
-                <span className="rounded bg-emerald-400/20 px-1 py-0.2 text-[9px] font-black text-emerald-300 border border-emerald-400/30">
-                  VIP
-                </span>
-              </div>
-              <p className="text-[10px] text-emerald-300/80 font-medium">
-                {isEn ? 'Switch between 4 demo VIP cards or register' : 'Chuyển đổi 4 thẻ VIP mẫu hoặc tạo mới'}
+              <h3 className="text-sm font-extrabold text-slate-900">
+                {isEn ? 'EcoStay Account' : 'Tài khoản EcoStay'}
+              </h3>
+              <p className="text-[10px] text-[#2E7D32] font-semibold">
+                {isEn ? 'Switch demo accounts or sign in' : 'Đổi tài khoản mẫu hoặc đăng nhập mới'}
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="rounded-full bg-white/10 p-1.5 text-slate-400 hover:text-white hover:bg-white/20 transition-colors"
+            className="rounded-full bg-slate-100 p-1.5 text-slate-500 hover:bg-slate-200 transition-colors"
             aria-label={isEn ? 'Close' : 'Đóng'}
           >
             <X size={16} />
           </button>
         </div>
 
-        {/* Tab Switcher: [ 💳 4 Thẻ VIP ] vs [ 🔑 Đăng nhập ] vs [ ✨ Đăng ký (+50) ] */}
-        <div className="mt-3 flex rounded-2xl bg-white/5 p-1 border border-white/10 relative z-10">
+        {/* Tab Switcher */}
+        <div className="mt-3 flex rounded-2xl bg-[#EEF7F0] p-1 border border-emerald-100">
           <button
+            type="button"
             onClick={() => setActiveTab('quick')}
             className={`flex-1 rounded-xl py-2 text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
               activeTab === 'quick'
-                ? 'bg-gradient-to-r from-emerald-600 to-[#1E4D3E] text-white shadow-md shadow-emerald-950/40 ring-1 ring-emerald-400/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-[#4CAF50] text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <CreditCard size={13} className={activeTab === 'quick' ? 'text-amber-300' : ''} />
-            <span>{isEn ? '4 VIP Cards' : '4 Thẻ VIP'}</span>
+            <Users size={13} />
+            <span>{isEn ? 'Demo Accounts' : 'Tài khoản mẫu'}</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('login')}
             className={`flex-1 rounded-xl py-2 text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
               activeTab === 'login'
-                ? 'bg-gradient-to-r from-emerald-600 to-[#1E4D3E] text-white shadow-md shadow-emerald-950/40 ring-1 ring-emerald-400/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-[#4CAF50] text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <LogIn size={13} />
@@ -224,120 +189,113 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('register')}
             className={`flex-1 rounded-xl py-2 text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
               activeTab === 'register'
-                ? 'bg-gradient-to-r from-emerald-600 to-[#1E4D3E] text-white shadow-md shadow-emerald-950/40 ring-1 ring-emerald-400/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-[#4CAF50] text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <UserPlus size={13} />
-            <span>{isEn ? 'Register (+50)' : 'Đăng ký (+50)'}</span>
+            <span>{isEn ? 'Sign Up' : 'Đăng ký'}</span>
           </button>
         </div>
 
-        {/* Tab 1: 4 DEMO ACCOUNTS QUICK SWITCHER */}
-        {activeTab === 'quick' && (
-          <div className="mt-3 flex-1 overflow-y-auto space-y-2.5 pr-1 relative z-10">
-            <p className="text-[10px] text-slate-400 leading-snug">
-              {isEn
-                ? 'Tap any VIP card to instantly switch profile, points, vouchers and real CO₂ metrics:'
-                : 'Chạm vào thẻ VIP để đổi tức thì dữ liệu điểm thưởng CP, voucher và hồ sơ du lịch xanh:'}
-            </p>
-
-            <div className="space-y-2.5">
-              {mockAccounts.map((acc) => {
-                const isActive = acc.id === currentUserId;
-                const theme = getCardTheme(acc.id);
-                const displayRole = isEn ? acc.roleBadgeEn : acc.roleBadge;
-
-                return (
-                  <div
-                    key={acc.id}
-                    onClick={() => handleQuickSelect(acc)}
-                    className={`relative rounded-3xl p-3 bg-gradient-to-br ${theme.gradient} border ${
-                      isActive
-                        ? 'border-emerald-400 ring-2 ring-emerald-400/60 shadow-lg'
-                        : theme.border
-                    } cursor-pointer transition-all hover:scale-[1.01] active:scale-98 overflow-hidden`}
-                  >
-                    {/* Active Ribbon */}
-                    {isActive && (
-                      <span className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[9px] font-black text-[#071611] shadow">
-                        <Check size={10} className="stroke-[3]" />
-                        <span>{isEn ? 'CURRENT ACTIVE' : 'ĐANG DÙNG'}</span>
-                      </span>
-                    )}
-
-                    {/* Card Top */}
-                    <div className="flex items-center gap-2 pb-2 border-b border-white/10">
-                      <div className={`h-4 w-6 rounded bg-gradient-to-br ${theme.chipGradient} shadow-inner`} />
-                      <Wifi size={12} className="text-white/60 rotate-90" />
-                      <span className={`rounded px-1.5 py-0.2 text-[8px] font-black uppercase tracking-wider border ${theme.badgeBg}`}>
-                        {theme.tierTag}
-                      </span>
-                      <span className="font-mono text-[9px] text-slate-400 ml-auto mr-1">
-                        {theme.memberCode}
-                      </span>
-                    </div>
-
-                    {/* Card Body */}
-                    <div className="pt-2.5 flex items-center justify-between gap-2.5">
-                      <div className="flex items-center gap-2.5">
-                        <img
-                          src={acc.profile.avatar}
-                          alt={acc.profile.name}
-                          className="h-10 w-10 rounded-full object-cover border-2 border-white/30 shadow"
-                        />
-                        <div>
-                          <h4 className="text-xs font-bold text-white">
-                            {acc.profile.name}
-                          </h4>
-                          <p className="text-[10px] text-slate-300 flex items-center gap-1">
-                            <Building2 size={10} className="text-emerald-400" />
-                            <span>{acc.profile.hotelName}</span>
-                          </p>
-                          <p className="text-[9px] text-slate-400 font-mono">
-                            {acc.profile.roomNumber}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <div className="flex items-baseline justify-end gap-1">
-                          <span className={`text-base font-black ${theme.pointsColor}`}>
-                            {acc.profile.carbonPoints.toLocaleString()}
-                          </span>
-                          <span className="text-[9px] font-black text-emerald-400">CP</span>
-                        </div>
-                        <span className="text-[9px] font-semibold text-slate-300 block">
-                          🌱 {acc.profile.co2Saved}kg • {acc.profile.treesPlanted} 🌲
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[9px] text-slate-400">
-                      <span>{displayRole}</span>
-                      <span className="text-emerald-400 font-bold flex items-center gap-0.5">
-                        <span>{isEn ? 'Select card' : 'Chọn thẻ này'}</span>
-                        <ArrowRight size={10} />
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+        {/* Inline Notice Banner */}
+        {noticeText && (
+          <div className="mt-3 flex items-center gap-2 rounded-2xl bg-[#E8F5E9] border border-[#A5D6A7] px-3 py-2 text-[11px] font-semibold text-[#1B5E20] animate-fadeIn">
+            <Info size={14} className="shrink-0 text-[#2E7D32]" />
+            <span>{noticeText}</span>
           </div>
         )}
 
-        {/* Tab 2: MANUAL LOGIN */}
+        {/* TAB 1: 4 DEMO ACCOUNTS */}
+        {activeTab === 'quick' && (
+          <div className="mt-3 flex-1 overflow-y-auto space-y-2.5 pr-0.5">
+            {mockAccounts.map((acc) => {
+              const isActive = acc.id === currentUserId;
+              const displayRank = isEn
+                ? rankTranslations[acc.profile.rank] || acc.profile.rank
+                : acc.profile.rank;
+              const displayRole = isEn ? acc.roleBadgeEn : acc.roleBadge;
+
+              return (
+                <button
+                  key={acc.id}
+                  type="button"
+                  onClick={() => handleQuickSelect(acc)}
+                  className={`w-full text-left rounded-2xl p-3 border transition-all active:scale-98 ${
+                    isActive
+                      ? 'border-[#4CAF50] bg-[#E8F5E9] ring-1 ring-[#81C784]'
+                      : 'border-emerald-100 bg-[#F9FDF9] hover:border-[#66BB6A] hover:bg-[#EDF7EE]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2.5">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="relative shrink-0">
+                        <img
+                          src={acc.profile.avatar}
+                          alt={acc.profile.name}
+                          className="h-11 w-11 rounded-full object-cover border-2 border-[#A5D6A7]"
+                        />
+                        {isActive && (
+                          <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#4CAF50] text-white shadow">
+                            <Check size={10} className="stroke-[3]" />
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <h4 className="text-xs font-extrabold text-slate-900 truncate">
+                            {acc.profile.name}
+                          </h4>
+                          {isActive && (
+                            <span className="rounded bg-[#4CAF50] px-1.5 py-0.2 text-[8px] font-bold text-white shrink-0">
+                              {isEn ? 'ACTIVE' : 'ĐANG DÙNG'}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] font-semibold text-[#2E7D32] flex items-center gap-1 mt-0.5 truncate">
+                          <Award size={11} className="text-amber-500 shrink-0" />
+                          <span className="truncate">{displayRank}</span>
+                        </p>
+                        <p className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5 truncate">
+                          <Building2 size={10} className="shrink-0" />
+                          <span className="truncate">
+                            {acc.profile.roomNumber} • {acc.profile.hotelName}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+
+                    <span className="shrink-0 rounded-xl bg-white border border-[#A5D6A7] px-2.5 py-1 text-xs font-black text-[#1B5E20]">
+                      {acc.profile.carbonPoints.toLocaleString()} CP
+                    </span>
+                  </div>
+
+                  <div className="mt-2 pt-1.5 border-t border-emerald-100/80 flex items-center justify-between text-[10px] text-slate-500">
+                    <span>{displayRole}</span>
+                    <span className="font-bold text-[#2E7D32] flex items-center gap-0.5">
+                      <span>{isEn ? 'Switch' : 'Chọn'}</span>
+                      <ArrowRight size={11} />
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* TAB 2: LOGIN FORM (Google & Facebook only -> In Development) */}
         {activeTab === 'login' && (
-          <form onSubmit={handleManualLogin} className="mt-3 flex-1 overflow-y-auto space-y-3 pr-1 relative z-10">
-            <div className="grid grid-cols-2 gap-2">
+          <form onSubmit={handleManualLogin} className="mt-3 flex-1 overflow-y-auto space-y-3 pr-0.5">
+            <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
-                onClick={handleGoogleLogin}
-                className="flex items-center justify-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 py-2.5 text-xs font-bold text-white hover:bg-white/20 transition-all"
+                onClick={() => handleSocialInDev('Google')}
+                className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-2.5 text-xs font-semibold text-slate-700 hover:bg-emerald-50/50 transition-colors"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -350,205 +308,138 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               <button
                 type="button"
-                onClick={handleAppleLogin}
-                className="flex items-center justify-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 py-2.5 text-xs font-bold text-white hover:bg-white/20 transition-all"
+                onClick={() => handleSocialInDev('Facebook')}
+                className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-2.5 text-xs font-semibold text-slate-700 hover:bg-emerald-50/50 transition-colors"
               >
-                <svg className="h-4 w-4 fill-current text-white" viewBox="0 0 170 170">
-                  <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.69-7.85-11.97-14.42-6.19-9.5-10.9-20.2-14.13-32.08-3.23-11.89-4.85-23.23-4.85-34.03 0-14.03 3.49-25.76 10.47-35.18 6.98-9.42 15.82-14.23 26.52-14.42 4.12 0 8.97 1.05 14.54 3.17 5.57 2.12 9.4 3.24 11.48 3.35 1.74 0 5.86-1.16 12.35-3.48 6.5-2.32 11.89-3.3 16.18-2.94 12.01.98 21.6 5.3 28.77 12.96-10.47 6.32-15.6 15.12-15.39 26.4.22 8.91 3.53 16.32 9.93 22.23 6.4 5.91 14.11 9.27 23.13 10.08-2.28 7.07-5.06 14.07-8.34 21zm-28.77-104.7c0-7.07 2.5-13.7 7.5-19.89 5-6.19 11.24-10.33 18.73-12.42.22 1.3.33 2.5.33 3.59 0 6.96-2.61 13.7-7.83 20.22-5.22 6.52-11.53 10.43-18.93 11.74-.22-1.09-.33-2.18-.33-3.24z" />
+                <svg className="h-4 w-4" viewBox="0 0 24 24">
+                  <path fill="#1877F2" d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.514c-1.491 0-1.956.93-1.956 1.886v2.268h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" />
                 </svg>
-                <span>Apple ID</span>
+                <span>Facebook</span>
               </button>
             </div>
 
-            <div>
-              <label className="text-[11px] font-bold text-slate-300">
-                {isEn ? 'Email or Phone Number:' : 'Email hoặc Số điện thoại:'}
-              </label>
-              <div className="mt-1 relative flex items-center">
-                <Mail size={15} className="absolute left-3.5 text-emerald-400" />
-                <input
-                  type="text"
-                  value={loginIdentifier}
-                  onChange={(e) => setLoginIdentifier(e.target.value)}
-                  placeholder="luong.truong@ecostay.vn"
-                  className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-3 text-xs font-semibold text-white placeholder-slate-400 focus:border-emerald-400 focus:outline-none"
-                />
-              </div>
+            <div className="flex items-center gap-3 text-[11px] text-slate-400">
+              <div className="h-px flex-1 bg-slate-200" />
+              <span>{isEn ? 'or' : 'hoặc'}</span>
+              <div className="h-px flex-1 bg-slate-200" />
             </div>
 
-            <div>
-              <div className="flex items-center justify-between">
-                <label className="text-[11px] font-bold text-slate-300">
-                  {isEn ? 'Password:' : 'Mật khẩu:'}
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setShowForgotHint(!showForgotHint)}
-                  className="text-[10px] font-semibold text-emerald-400 hover:underline"
-                >
-                  {isEn ? 'Forgot password?' : 'Quên mật khẩu?'}
-                </button>
-              </div>
+            <div className="relative flex items-center">
+              <UserCircle2 size={17} className="absolute left-3.5 text-slate-400" />
+              <input
+                type="text"
+                value={loginIdentifier}
+                onChange={(e) => setLoginIdentifier(e.target.value)}
+                placeholder={isEn ? 'Email or phone number' : 'Email hoặc số điện thoại'}
+                className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none focus:ring-2 focus:ring-[#C8E6C9]"
+              />
+            </div>
 
-              <div className="mt-1 relative flex items-center">
-                <Lock size={15} className="absolute left-3.5 text-emerald-400" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="••••••"
-                  className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-10 text-xs font-semibold text-white placeholder-slate-400 focus:border-emerald-400 focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 text-slate-400 hover:text-white"
-                >
-                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                </button>
-              </div>
-
-              {showForgotHint && (
-                <div className="mt-2 rounded-xl bg-emerald-950/80 p-2.5 border border-emerald-500/40 text-[10px] text-emerald-200">
-                  <p className="font-bold flex items-center gap-1">
-                    <Sparkles size={11} className="text-amber-400" />
-                    <span>{isEn ? 'Demo System Hint:' : 'Gợi ý kiểm thử:'}</span>
-                  </p>
-                  <p className="mt-0.5">
-                    {isEn
-                      ? 'Default password is "123456". You can also tap the "4 VIP Cards" tab.'
-                      : 'Mật khẩu mặc định là "123456". Bạn cũng có thể dùng tab 4 Thẻ VIP.'}
-                  </p>
-                </div>
-              )}
+            <div className="relative flex items-center">
+              <KeyRound size={16} className="absolute left-3.5 text-slate-400" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                placeholder={isEn ? 'Password' : 'Mật khẩu'}
+                className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-10 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none focus:ring-2 focus:ring-[#C8E6C9]"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3.5 text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
             </div>
 
             <button
               type="submit"
-              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-[#1E4D3E] py-3 text-xs font-bold text-white shadow-md hover:brightness-110 active:scale-98 transition-all"
+              className="w-full rounded-full bg-gradient-to-r from-[#66BB6A] to-[#4CAF50] py-3 text-xs font-bold text-white shadow-md hover:from-[#57AE5B] hover:to-[#43A047] active:scale-98 transition-all"
             >
-              <LogIn size={15} />
-              <span>{isEn ? 'Sign In Now' : 'Đăng Nhập Ngay'}</span>
+              {isEn ? 'Sign In' : 'Đăng nhập'}
             </button>
           </form>
         )}
 
-        {/* Tab 3: REGISTER NEW */}
+        {/* TAB 3: REGISTER */}
         {activeTab === 'register' && (
-          <form onSubmit={handleRegisterSubmit} className="mt-3 flex-1 overflow-y-auto space-y-2.5 pr-1 relative z-10">
-            <div className="rounded-2xl bg-gradient-to-r from-amber-500/20 to-emerald-500/20 p-2.5 border border-amber-400/40 flex items-center gap-2.5">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-slate-950 shadow-xs">
-                <Sparkles size={15} />
-              </div>
-              <div>
-                <p className="text-[11px] font-black text-amber-300">
-                  {isEn ? 'Bonus: +50 Carbon Points!' : 'Đặc quyền: +50 Điểm Cacbon!'}
-                </p>
-                <p className="text-[9px] text-slate-300">
-                  {isEn ? 'Receive 50 CP upon registration.' : 'Nhận ngay 50 CP khởi tạo thẻ thành viên xanh.'}
-                </p>
-              </div>
+          <form onSubmit={handleRegisterSubmit} className="mt-3 flex-1 overflow-y-auto space-y-2.5 pr-0.5">
+            <div className="rounded-2xl bg-[#E8F5E9] border border-[#C8E6C9] p-2.5 flex items-center gap-2">
+              <Sparkles size={15} className="text-[#2E7D32] shrink-0" />
+              <p className="text-[11px] font-semibold text-[#1B5E20]">
+                {isEn ? 'Welcome bonus: +50 Carbon Points!' : 'Tặng ngay +50 Điểm Cacbon khi đăng ký!'}
+              </p>
             </div>
 
-            <div>
-              <label className="text-[11px] font-bold text-slate-300">
-                {isEn ? 'Full Name:' : 'Họ và tên:'}
-              </label>
+            <input
+              type="text"
+              required
+              value={regName}
+              onChange={(e) => setRegName(e.target.value)}
+              placeholder={isEn ? 'Full name *' : 'Họ và tên *'}
+              className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 px-3 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none"
+            />
+
+            <div className="grid grid-cols-2 gap-2">
               <input
-                type="text"
-                required
-                value={regName}
-                onChange={(e) => setRegName(e.target.value)}
-                placeholder={isEn ? 'e.g. Tran Minh Tuan' : 'Ví dụ: Trần Minh Tuấn'}
-                className="mt-1 w-full rounded-2xl border border-white/15 bg-white/10 py-2 px-3 text-xs font-semibold text-white placeholder-slate-400 focus:border-emerald-400 focus:outline-none"
+                type="tel"
+                value={regPhone}
+                onChange={(e) => setRegPhone(e.target.value)}
+                placeholder={isEn ? 'Phone' : 'Số điện thoại'}
+                className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 px-3 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none"
+              />
+              <input
+                type="email"
+                value={regEmail}
+                onChange={(e) => setRegEmail(e.target.value)}
+                placeholder="Email"
+                className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 px-3 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="text-[11px] font-bold text-slate-300">
-                  {isEn ? 'Phone:' : 'Số điện thoại:'}
-                </label>
-                <input
-                  type="tel"
-                  value={regPhone}
-                  onChange={(e) => setRegPhone(e.target.value)}
-                  placeholder="0912 888 777"
-                  className="mt-1 w-full rounded-2xl border border-white/15 bg-white/10 py-2 px-3 text-xs font-semibold text-white placeholder-slate-400 focus:border-emerald-400 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold text-slate-300">Email:</label>
-                <input
-                  type="email"
-                  value={regEmail}
-                  onChange={(e) => setRegEmail(e.target.value)}
-                  placeholder="tuan.tran@gmail.com"
-                  className="mt-1 w-full rounded-2xl border border-white/15 bg-white/10 py-2 px-3 text-xs font-semibold text-white placeholder-slate-400 focus:border-emerald-400 focus:outline-none"
-                />
-              </div>
+              <select
+                value={regHotel}
+                onChange={(e) => setRegHotel(e.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 px-2 text-xs font-medium text-slate-800 focus:border-[#66BB6A] focus:outline-none"
+              >
+                <option value="Silk Sense Hội An River Eco-Resort">Silk Sense Hội An</option>
+                <option value="Emeralda Resort Ninh Bình">Emeralda Ninh Bình</option>
+                <option value="Terracotta Resort Đà Lạt">Terracotta Đà Lạt</option>
+                <option value="Cat Tien Jungle Lodge">Cat Tien Jungle Lodge</option>
+              </select>
+              <input
+                type="text"
+                value={regRoom}
+                onChange={(e) => setRegRoom(e.target.value)}
+                placeholder={isEn ? 'Room' : 'Số phòng'}
+                className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 px-3 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none"
+              />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="text-[11px] font-bold text-slate-300">
-                  {isEn ? 'Hotel:' : 'Khách sạn:'}
-                </label>
-                <select
-                  value={regHotel}
-                  onChange={(e) => setRegHotel(e.target.value)}
-                  className="mt-1 w-full rounded-2xl border border-white/15 bg-[#0E2E22] py-2 px-2 text-xs font-semibold text-white focus:border-emerald-400 focus:outline-none"
-                >
-                  <option value="Silk Sense Hội An River Eco-Resort">Silk Sense Hội An</option>
-                  <option value="Emeralda Resort Ninh Bình">Emeralda Ninh Bình</option>
-                  <option value="Terracotta Resort Đà Lạt">Terracotta Đà Lạt</option>
-                  <option value="Cat Tien Jungle Lodge">Cat Tien Jungle Lodge</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold text-slate-300">
-                  {isEn ? 'Room:' : 'Số phòng:'}
-                </label>
-                <input
-                  type="text"
-                  value={regRoom}
-                  onChange={(e) => setRegRoom(e.target.value)}
-                  placeholder="Suite Eco-302"
-                  className="mt-1 w-full rounded-2xl border border-white/15 bg-white/10 py-2 px-3 text-xs font-semibold text-white placeholder-slate-400 focus:border-emerald-400 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-[11px] font-bold text-slate-300">
-                {isEn ? 'Password:' : 'Mật khẩu:'}
-              </label>
-              <div className="mt-1 relative flex items-center">
-                <input
-                  type={showRegPassword ? 'text' : 'password'}
-                  value={regPassword}
-                  onChange={(e) => setRegPassword(e.target.value)}
-                  placeholder="••••••"
-                  className="w-full rounded-2xl border border-white/15 bg-white/10 py-2 pl-3 pr-9 text-xs font-semibold text-white placeholder-slate-400 focus:border-emerald-400 focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowRegPassword(!showRegPassword)}
-                  className="absolute right-3 text-slate-400 hover:text-white"
-                >
-                  {showRegPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                </button>
-              </div>
+            <div className="relative flex items-center">
+              <input
+                type={showRegPassword ? 'text' : 'password'}
+                value={regPassword}
+                onChange={(e) => setRegPassword(e.target.value)}
+                placeholder={isEn ? 'Password' : 'Mật khẩu'}
+                className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowRegPassword((prev) => !prev)}
+                className="absolute right-3 text-slate-400 hover:text-slate-600"
+              >
+                {showRegPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
             </div>
 
             <button
               type="submit"
-              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 py-3 text-xs font-black text-slate-950 shadow-md hover:brightness-105 active:scale-98 transition-all"
+              className="w-full rounded-full bg-gradient-to-r from-[#66BB6A] to-[#4CAF50] py-3 text-xs font-bold text-white shadow-md hover:from-[#57AE5B] hover:to-[#43A047] active:scale-98 transition-all"
             >
-              <Sparkles size={15} />
-              <span>{isEn ? 'Create Card & Claim +50 CP' : 'Kích Hoạt Thẻ & Nhận +50 CP'}</span>
+              {isEn ? 'Create Account (+50 CP)' : 'Đăng ký & Nhận +50 CP'}
             </button>
           </form>
         )}
