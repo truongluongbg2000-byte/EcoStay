@@ -152,6 +152,13 @@ export default function EcoStayApp() {
       ...prev,
       carbonPoints: prev.carbonPoints + pointsAdded,
       co2Saved: Number((prev.co2Saved + pointsAdded * 0.12).toFixed(1)),
+      waterSaved: mission.id === 'mis-r1' ? prev.waterSaved + 35 : prev.waterSaved,
+      energySaved:
+        mission.id === 'mis-r2'
+          ? Number((prev.energySaved + 1.5).toFixed(1))
+          : prev.energySaved,
+      treesPlanted:
+        mission.id === 'mis-e5' ? prev.treesPlanted + 1 : prev.treesPlanted,
     }));
 
     const newLog: ImpactLog = {
@@ -296,7 +303,13 @@ export default function EcoStayApp() {
   // Handler: Live Camera QR Scan (Strict verification against all 15 EcoStay missions)
   const handleLiveQRScan = (
     decodedData: string
-  ): { status: 'success' | 'already_completed' | 'invalid'; message: string; points?: number } => {
+  ): {
+    status: 'success' | 'already_completed' | 'invalid';
+    message: string;
+    points?: number;
+    missionTitle?: string;
+    categoryName?: string;
+  } => {
     const cleaned = decodedData.trim();
 
     const matchingMission = missions.find(
@@ -318,7 +331,12 @@ export default function EcoStayApp() {
           ? `Mission "${matchingMission.title}" was already completed!`
           : `Nhiệm vụ "${matchingMission.title}" đã được quét trước đó rồi!`;
       showToast(alreadyMsg);
-      return { status: 'already_completed', message: alreadyMsg };
+      return {
+        status: 'already_completed',
+        message: alreadyMsg,
+        missionTitle: matchingMission.title,
+        categoryName: matchingMission.categoryName,
+      };
     }
 
     handleCompleteMission(matchingMission.id);
@@ -326,7 +344,13 @@ export default function EcoStayApp() {
       currentLang === 'en'
         ? `+${matchingMission.points} CP! Completed "${matchingMission.title}"`
         : `+${matchingMission.points} CP! Đã xác thực "${matchingMission.title}"`;
-    return { status: 'success', message: successMsg, points: matchingMission.points };
+    return {
+      status: 'success',
+      message: successMsg,
+      points: matchingMission.points,
+      missionTitle: matchingMission.title,
+      categoryName: matchingMission.categoryName,
+    };
   };
 
   // Handler: Feedback Submit
@@ -362,12 +386,14 @@ export default function EcoStayApp() {
     setUser(account.profile);
     setVouchers(account.initialVouchers);
     setLogs(account.initialLogs);
+    setMissions(initialMissions);
 
     try {
       localStorage.setItem(STORAGE_KEY_ACTIVE_ACCOUNT, account.id);
       localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(account.profile));
       localStorage.setItem(STORAGE_KEY_VOUCHERS, JSON.stringify(account.initialVouchers));
       localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(account.initialLogs));
+      localStorage.setItem(STORAGE_KEY_MISSIONS, JSON.stringify(initialMissions));
     } catch (e) {
       console.warn('LocalStorage save failed', e);
     }
@@ -551,6 +577,7 @@ export default function EcoStayApp() {
             currentLang={currentLang}
             onSimulateQRScan={handleSimulateQRScan}
             onLiveQRScan={handleLiveQRScan}
+            onNavigateHome={() => setActiveTab('home')}
           />
         )}
 
@@ -601,13 +628,21 @@ export default function EcoStayApp() {
         </div>
       )}
 
-      {/* Mission QR Modal (100% QR Scanner for missions) */}
+      {/* Mission QR Modal (100% Real Live Camera QR Scanner for missions) */}
       <MissionQRModal
         mission={selectedMissionForQR}
+        userPoints={user.carbonPoints}
         currentLang={currentLang}
         onClose={() => setSelectedMissionForQR(null)}
         onSuccess={(missionId) => handleCompleteMission(missionId)}
-        onOpenLiveScanner={() => setActiveTab('scanner')}
+        onScanNext={() => {
+          setSelectedMissionForQR(null);
+          setActiveTab('scanner');
+        }}
+        onNavigateHome={() => {
+          setSelectedMissionForQR(null);
+          setActiveTab('home');
+        }}
       />
 
       {/* EcoBot AI Chatbot Modal */}
