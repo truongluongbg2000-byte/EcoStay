@@ -143,6 +143,9 @@ export interface AppDictionary {
     recenterTitle: string;
     zoomInTitle: string;
     zoomOutTitle: string;
+    expandMap: string;
+    collapseMap: string;
+    venuesCount: string; // uses {count}
     regionPrefix: string;
     allVietnam: string;
     viewAndBook: string;

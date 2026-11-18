@@ -1,30 +1,24 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   MapPin,
-  Layers,
   Plus,
   Minus,
   Navigation,
-  Compass,
-  CheckCircle2,
-  Sparkles,
-  Building2,
-  UtensilsCrossed,
-  Bike,
-  TreePine,
-  ExternalLink,
   ChevronRight,
-  Maximize2
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
-import { GreenDestination } from '@/data/types';
-import { getDictionary, Lang } from '@/lib/i18n';
+import { DestinationCategory, GreenDestination } from '@/data/types';
+import { formatText, getDictionary, Lang } from '@/lib/i18n';
 import 'leaflet/dist/leaflet.css';
 
 interface EcoMapProps {
   selectedLocation: string;
   onSelectLocation: (location: string) => void;
+  selectedCategory?: DestinationCategory;
+  onSelectCategory?: (category: DestinationCategory) => void;
   currentLang?: Lang;
   destinations?: GreenDestination[];
   onSelectVenue?: (destination: GreenDestination) => void;
@@ -45,70 +39,83 @@ const REGION_TARGETS: RegionTarget[] = [
     id: 'all',
     name: 'Toàn quốc',
     nameEn: 'National',
-    lat: 16.0544,
-    lng: 107.5847,
-    zoom: 6,
+    lat: 16.3,
+    lng: 107.2,
+    zoom: 5,
     icon: '🌐',
   },
   {
     id: 'hoi-an',
     name: 'Hội An',
     nameEn: 'Hoi An',
-    lat: 15.888,
+    lat: 15.886,
     lng: 108.342,
-    zoom: 14,
+    zoom: 13,
     icon: '🏮',
   },
   {
     id: 'da-lat',
     name: 'Đà Lạt',
     nameEn: 'Da Lat',
-    lat: 11.892,
-    lng: 108.44,
-    zoom: 13,
+    lat: 11.942,
+    lng: 108.442,
+    zoom: 12,
     icon: '🌸',
   },
   {
     id: 'cuc-phuong',
     name: 'Cúc Phương',
     nameEn: 'Cuc Phuong',
-    lat: 20.3167,
-    lng: 105.6069,
-    zoom: 13,
+    lat: 20.275,
+    lng: 105.685,
+    zoom: 12,
     icon: '🌲',
   },
   {
     id: 'ninh-binh',
     name: 'Ninh Bình',
     nameEn: 'Ninh Binh',
-    lat: 20.354,
-    lng: 105.864,
-    zoom: 13,
+    lat: 20.255,
+    lng: 105.925,
+    zoom: 11,
     icon: '🪷',
   },
   {
     id: 'nam-cat-tien',
     name: 'Nam Cát Tiên',
     nameEn: 'Nam Cat Tien',
-    lat: 11.423,
-    lng: 107.431,
-    zoom: 13,
+    lat: 11.415,
+    lng: 107.405,
+    zoom: 12,
     icon: '🦜',
   },
   {
     id: 'sa-pa',
     name: 'Sa Pa',
     nameEn: 'Sa Pa',
-    lat: 22.253,
-    lng: 103.905,
-    zoom: 13,
+    lat: 22.332,
+    lng: 103.852,
+    zoom: 12,
     icon: '⛰️',
   },
 ];
 
+const CATEGORY_STYLE: Record<
+  Exclude<DestinationCategory, 'all'>,
+  { color: string; emoji: string }
+> = {
+  food: { color: '#EA580C', emoji: '🍽️' },
+  hotel: { color: '#E11D48', emoji: '🏨' },
+  transport: { color: '#0284C7', emoji: '🚲' },
+  activity: { color: '#16A34A', emoji: '🎯' },
+  shopping: { color: '#9333EA', emoji: '🛍️' },
+};
+
 export const EcoMap: React.FC<EcoMapProps> = ({
   selectedLocation,
   onSelectLocation,
+  selectedCategory = 'all',
+  onSelectCategory,
   currentLang = 'vi',
   destinations = [],
   onSelectVenue,
@@ -119,18 +126,41 @@ export const EcoMap: React.FC<EcoMapProps> = ({
   const tileLayerRef = useRef<any>(null);
   const labelLayerRef = useRef<any>(null);
   const markersLayerRef = useRef<any>(null);
+
   const [mapMode, setMapMode] = useState<'street' | 'satellite'>('street');
+  const [isExpanded, setIsExpanded] = useState(false);
   const [activeVenue, setActiveVenue] = useState<GreenDestination | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
 
-  // Initialize Leaflet Map (Client Side only to prevent SSR issues)
+  const visibleDestinations = useMemo(() => {
+    return destinations.filter((dest) => {
+      const matchesLocation =
+        selectedLocation === 'all' ||
+        dest.location.toLowerCase().includes(selectedLocation.toLowerCase());
+      const matchesCategory =
+        selectedCategory === 'all' || dest.category === selectedCategory;
+      return matchesLocation && matchesCategory;
+    });
+  }, [destinations, selectedLocation, selectedCategory]);
+
+  // Clear spotlight venue if filtered out
+  useEffect(() => {
+    if (
+      activeVenue &&
+      !visibleDestinations.some((d) => d.id === activeVenue.id)
+    ) {
+      setActiveVenue(null);
+    }
+  }, [activeVenue, visibleDestinations]);
+
+  // Initialize Leaflet Map (Client Side only)
   useEffect(() => {
     let isMounted = true;
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
 
     const initMap = async () => {
       if (typeof window === 'undefined' || !mapContainerRef.current) return;
-      if (mapInstanceRef.current) return; // already initialized
+      if (mapInstanceRef.current) return;
 
       try {
         const leafletModule = await import('leaflet');
@@ -138,7 +168,6 @@ export const EcoMap: React.FC<EcoMapProps> = ({
 
         if (!isMounted || !mapContainerRef.current) return;
 
-        // Determine initial center based on selectedLocation
         const q = selectedLocation.toLowerCase().trim();
         const initialRegion = REGION_TARGETS.find(
           (r) =>
@@ -147,31 +176,26 @@ export const EcoMap: React.FC<EcoMapProps> = ({
             r.nameEn.toLowerCase().includes(q)
         );
 
-        // Create Leaflet Map Instance
         const map = L.map(mapContainerRef.current, {
-          center: initialRegion ? [initialRegion.lat, initialRegion.lng] : [15.888, 108.342],
-          zoom: initialRegion ? initialRegion.zoom : 14,
+          center: initialRegion
+            ? [initialRegion.lat, initialRegion.lng]
+            : [15.886, 108.342],
+          zoom: initialRegion ? initialRegion.zoom : 13,
           zoomControl: false,
           attributionControl: false,
         });
 
-        // Official OpenStreetMap Street Tile Layer (100% Free, No API Key, Full Vietnamese Street & River Detail)
         const streetTiles = L.tileLayer(
           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          {
-            maxZoom: 19,
-          }
+          { maxZoom: 19 }
         );
-
         streetTiles.addTo(map);
         tileLayerRef.current = streetTiles;
 
-        // Group layer for markers
         const markersGroup = L.layerGroup().addTo(map);
         markersLayerRef.current = markersGroup;
         mapInstanceRef.current = map;
 
-        // Ensure tiles render cleanly across full container dimensions
         resizeTimer = setTimeout(() => {
           if (mapInstanceRef.current) {
             mapInstanceRef.current.invalidateSize();
@@ -192,7 +216,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
       if (mapInstanceRef.current) {
         try {
           mapInstanceRef.current.remove();
-        } catch (e) {
+        } catch {
           // ignore cleanup error
         }
         mapInstanceRef.current = null;
@@ -200,7 +224,18 @@ export const EcoMap: React.FC<EcoMapProps> = ({
     };
   }, []);
 
-  // Toggle Map Tiles: Street (OpenStreetMap - No API Key) vs Satellite (Esri World Imagery + Labels)
+  // Re-measure Leaflet viewport smoothly when expanding/collapsing map height
+  useEffect(() => {
+    if (!mapInstanceRef.current || !isMapReady) return;
+    const timer = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize({ animate: true });
+      }
+    }, 220);
+    return () => clearTimeout(timer);
+  }, [isExpanded, isMapReady]);
+
+  // Toggle Street vs Satellite Tiles
   useEffect(() => {
     if (!mapInstanceRef.current || !isMapReady) return;
 
@@ -221,15 +256,11 @@ export const EcoMap: React.FC<EcoMapProps> = ({
       if (mapMode === 'satellite') {
         const satLayer = L.tileLayer(
           'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-          {
-            maxZoom: 19,
-          }
+          { maxZoom: 19 }
         );
         const labelsOverlay = L.tileLayer(
           'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-          {
-            maxZoom: 19,
-          }
+          { maxZoom: 19 }
         );
         satLayer.addTo(map);
         labelsOverlay.addTo(map);
@@ -238,9 +269,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
       } else {
         const osmLayer = L.tileLayer(
           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          {
-            maxZoom: 19,
-          }
+          { maxZoom: 19 }
         );
         osmLayer.addTo(map);
         tileLayerRef.current = osmLayer;
@@ -248,7 +277,9 @@ export const EcoMap: React.FC<EcoMapProps> = ({
     });
   }, [mapMode, isMapReady]);
 
-  // Update Markers when destinations or language change
+  // Render Markers:
+  // - National mode ('all'): 6 Regional Eco-Hub cluster pins (clean, zero overlap)
+  // - Regional mode: All filtered POI pins for that region
   useEffect(() => {
     if (!mapInstanceRef.current || !markersLayerRef.current || !isMapReady) return;
 
@@ -260,93 +291,110 @@ export const EcoMap: React.FC<EcoMapProps> = ({
 
       markersGroup.clearLayers();
 
-      destinations.forEach((dest) => {
+      if (selectedLocation === 'all') {
+        // Render 6 Regional Hub Clusters
+        REGION_TARGETS.filter((r) => r.id !== 'all').forEach((reg) => {
+          const regionCount = visibleDestinations.filter(
+            (d) => d.location.toLowerCase() === reg.name.toLowerCase()
+          ).length;
+
+          if (regionCount === 0) return;
+
+          const displayRegionName = t.data.locations[reg.name] || reg.name;
+
+          const hubHtml = `
+            <div class="relative flex flex-col items-center cursor-pointer group">
+              <div class="flex items-center gap-1 rounded-full bg-[#1E4D3E] px-2.5 py-1 text-[10px] font-black text-white shadow-lg border-2 border-white transition-transform group-hover:scale-110 whitespace-nowrap">
+                <span>${reg.icon}</span>
+                <span>${displayRegionName}</span>
+                <span class="rounded-full bg-emerald-400 text-[#0F2820] px-1.5 py-0.2 text-[9px] font-black">${regionCount}</span>
+              </div>
+              <div class="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] border-t-[#1E4D3E]"></div>
+            </div>
+          `;
+
+          const hubIcon = L.divIcon({
+            className: 'custom-eco-hub',
+            html: hubHtml,
+            iconSize: [120, 34],
+            iconAnchor: [60, 32],
+          });
+
+          const marker = L.marker([reg.lat, reg.lng], { icon: hubIcon });
+          marker.on('click', () => {
+            onSelectLocation(reg.name);
+          });
+          marker.addTo(markersGroup);
+        });
+        return;
+      }
+
+      // Regional Detail Mode: render all matching POI pins in this region
+      visibleDestinations.forEach((dest) => {
         if (!dest.lat || !dest.lng) return;
 
-        const isMatchingLocation =
-          selectedLocation === 'all' ||
-          dest.location.toLowerCase().includes(selectedLocation.toLowerCase());
+        const style =
+          dest.category !== 'all'
+            ? CATEGORY_STYLE[dest.category]
+            : { color: '#10B981', emoji: '🌱' };
 
-        // Category Icon & Color
-        let categoryColor = '#10B981'; // default emerald
-        let iconEmoji = '🌱';
-        if (dest.category === 'hotel') {
-          categoryColor = '#E11D48'; // Rose pink like Google Maps Hotel
-          iconEmoji = '🏨';
-        } else if (dest.category === 'food') {
-          categoryColor = '#EA580C'; // Warm Orange
-          iconEmoji = '🥗';
-        } else if (dest.category === 'transport') {
-          categoryColor = '#0284C7'; // Cyan Sky
-          iconEmoji = '🚴';
-        } else if (dest.category === 'activity') {
-          categoryColor = '#16A34A'; // Forest Green
-          iconEmoji = '🛶';
-        } else if (dest.category === 'shopping') {
-          categoryColor = '#9333EA'; // Purple
-          iconEmoji = '🛍️';
-        }
+        const isSelectedPin = activeVenue?.id === dest.id;
 
         const customHtml = `
           <div class="relative flex flex-col items-center cursor-pointer group" style="transform: translate3d(0,0,0);">
-            <!-- Points Badge -->
-            <div class="mb-1 rounded-full px-2 py-0.5 text-[10px] font-black text-white shadow-md flex items-center gap-0.5 border border-white/60 transition-transform group-hover:scale-110" style="background-color: ${categoryColor};">
+            <div class="mb-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-black text-white shadow-md flex items-center gap-0.5 border border-white/70 transition-transform group-hover:scale-110" style="background-color: ${style.color};">
               <span>+${dest.pointsReward}</span>
-              <span class="text-[8px] opacity-90">CB</span>
+              <span class="text-[7px] opacity-90">CB</span>
             </div>
-            <!-- Google Maps Style Teardrop Pin -->
-            <div class="relative flex h-8 w-8 items-center justify-center rounded-full text-white shadow-lg border-2 border-white transition-transform group-hover:scale-110" style="background-color: ${categoryColor};">
-              <span class="text-xs leading-none select-none">${iconEmoji}</span>
+            <div class="relative flex h-7 w-7 items-center justify-center rounded-full text-white shadow-lg border-2 border-white transition-transform group-hover:scale-110" style="background-color: ${style.color};">
+              <span class="text-[11px] leading-none select-none">${style.emoji}</span>
               ${
-                isMatchingLocation
-                  ? `<span class="absolute -inset-1 rounded-full border-2 border-amber-300 animate-ping opacity-60"></span>`
+                isSelectedPin
+                  ? `<span class="absolute -inset-1.5 rounded-full border-2 border-amber-300 animate-ping opacity-80"></span>`
                   : ''
               }
             </div>
-            <!-- Pin Pointer Triangle -->
-            <div class="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px]" style="border-top-color: ${categoryColor};"></div>
+            <div class="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px]" style="border-top-color: ${style.color};"></div>
           </div>
         `;
 
         const markerIcon = L.divIcon({
           className: 'custom-eco-pin',
           html: customHtml,
-          iconSize: [64, 56],
-          iconAnchor: [32, 54],
-          popupAnchor: [0, -54],
+          iconSize: [58, 50],
+          iconAnchor: [29, 48],
+          popupAnchor: [0, -48],
         });
 
         const marker = L.marker([dest.lat, dest.lng], { icon: markerIcon });
 
-        // Popup Content formatted like Google Maps business card
         const dTrans = t.data.destinations[dest.id];
         const popupName = dTrans?.name || dest.name;
         const popupBadge = dTrans?.badge || dest.greenBadge;
         const popupLoc = t.data.locations[dest.location] || dest.location;
 
         const popupContent = document.createElement('div');
-        popupContent.className = 'eco-leaflet-popup p-1 text-left min-w-[210px] max-w-[240px]';
+        popupContent.className = 'eco-leaflet-popup p-1 text-left min-w-[215px] max-w-[245px]';
         popupContent.innerHTML = `
           <div class="rounded-xl overflow-hidden mb-1.5 relative border border-slate-100">
             <img src="${dest.image}" alt="${popupName}" class="h-20 w-full object-cover" />
-            <span class="absolute top-1 right-1 rounded-md bg-emerald-600/90 text-white px-1.5 py-0.5 text-[8px] font-black uppercase shadow-xs">
+            <span class="absolute top-1 right-1 rounded-md bg-emerald-700/90 text-white px-1.5 py-0.5 text-[8px] font-black shadow-xs">
               ${popupBadge}
             </span>
           </div>
           <h4 class="text-xs font-black text-slate-900 leading-snug line-clamp-2">${popupName}</h4>
-          <p class="text-[10px] text-slate-500 mt-0.5">${dest.address || popupLoc}</p>
-          <div class="mt-1.5 pt-1.5 border-t border-slate-100 flex items-center justify-between">
-            <span class="rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 text-[10px] font-black">
+          <p class="text-[10px] text-slate-500 mt-0.5 line-clamp-1">${dest.address || popupLoc}</p>
+          <div class="mt-1.5 pt-1.5 border-t border-slate-100 flex items-center justify-between gap-2">
+            <span class="rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 text-[10px] font-black shrink-0">
               +${dest.pointsReward} CB
             </span>
-            <span class="text-[10px] font-bold text-slate-700">${dest.priceEstimate || ''}</span>
+            <span class="text-[10px] font-bold text-slate-700 truncate">${dest.priceEstimate || ''}</span>
           </div>
         `;
 
-        // Click popup button action
         marker.bindPopup(popupContent, {
           closeButton: true,
-          offset: [0, -48],
+          offset: [0, -44],
           className: 'eco-popup-wrapper',
         });
 
@@ -357,9 +405,18 @@ export const EcoMap: React.FC<EcoMapProps> = ({
         marker.addTo(markersGroup);
       });
     });
-  }, [destinations, selectedLocation, isMapReady, currentLang]);
+  }, [
+    visibleDestinations,
+    selectedLocation,
+    isMapReady,
+    currentLang,
+    activeVenue?.id,
+    onSelectLocation,
+    t.data.destinations,
+    t.data.locations,
+  ]);
 
-  // Smooth FlyTo when selectedLocation changes (Search input or pill click)
+  // Smooth FlyTo when selectedLocation changes
   useEffect(() => {
     if (!mapInstanceRef.current || !isMapReady) return;
 
@@ -375,19 +432,18 @@ export const EcoMap: React.FC<EcoMapProps> = ({
 
     if (target) {
       map.flyTo([target.lat, target.lng], target.zoom, {
-        duration: 1.2,
+        duration: 1.0,
         easeLinearity: 0.25,
       });
     } else {
-      // Find matching destination directly
       const foundDest = destinations.find(
         (d) =>
           d.location.toLowerCase().includes(query) ||
           d.name.toLowerCase().includes(query)
       );
       if (foundDest && foundDest.lat && foundDest.lng) {
-        map.flyTo([foundDest.lat, foundDest.lng], 15, {
-          duration: 1.2,
+        map.flyTo([foundDest.lat, foundDest.lng], 14, {
+          duration: 1.0,
           easeLinearity: 0.25,
         });
         setActiveVenue(foundDest);
@@ -395,7 +451,6 @@ export const EcoMap: React.FC<EcoMapProps> = ({
     }
   }, [selectedLocation, isMapReady, destinations]);
 
-  // Zoom Handlers
   const handleZoomIn = () => {
     if (mapInstanceRef.current) mapInstanceRef.current.zoomIn();
   };
@@ -407,32 +462,38 @@ export const EcoMap: React.FC<EcoMapProps> = ({
   const handleRecenter = () => {
     onSelectLocation('all');
     if (mapInstanceRef.current) {
-      mapInstanceRef.current.flyTo([16.0544, 107.5847], 6, {
-        duration: 1.0,
-      });
+      mapInstanceRef.current.flyTo([16.3, 107.2], 5, { duration: 1.0 });
     }
   };
+
+  const legendItems: { id: Exclude<DestinationCategory, 'all'>; label: string }[] = [
+    { id: 'food', label: t.data.destinationCategories.food },
+    { id: 'hotel', label: t.data.destinationCategories.hotel },
+    { id: 'transport', label: t.data.destinationCategories.transport },
+    { id: 'activity', label: t.data.destinationCategories.activity },
+    { id: 'shopping', label: t.data.destinationCategories.shopping },
+  ];
 
   return (
     <div className="rounded-3xl bg-white p-3.5 shadow-sm border border-emerald-950/5 text-left">
       {/* 1. Header Toolbar */}
-      <div className="flex items-center justify-between mb-2.5">
-        <div className="flex items-center gap-1.5">
-          <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-[#1E4D3E]">
+      <div className="flex items-center justify-between mb-2.5 gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-[#1E4D3E]">
             <MapPin size={14} />
           </div>
-          <div>
-            <h3 className="text-xs font-bold text-slate-900 leading-tight">
+          <div className="min-w-0">
+            <h3 className="text-xs font-bold text-slate-900 leading-tight truncate">
               {t.map.title}
             </h3>
-            <p className="text-[9px] text-slate-400">
+            <p className="text-[9px] text-slate-400 truncate">
               {t.map.subtitle}
             </p>
           </div>
         </div>
 
-        {/* Region Badge & Satellite Toggle */}
-        <div className="flex items-center gap-1.5">
+        {/* Satellite / Street Toggle */}
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={() => setMapMode(mapMode === 'street' ? 'satellite' : 'street')}
             className={`flex items-center gap-1 rounded-xl px-2 py-1 text-[10px] font-bold shadow-xs border transition-colors ${
@@ -450,12 +511,27 @@ export const EcoMap: React.FC<EcoMapProps> = ({
       </div>
 
       {/* 2. Real Leaflet Map Viewport */}
-      <div className="relative h-64 w-full overflow-hidden rounded-2xl border border-slate-200 shadow-inner bg-slate-100 isolate z-0">
-        {/* Leaflet DOM Node */}
+      <div
+        className={`relative w-full overflow-hidden rounded-2xl border border-slate-200 shadow-inner bg-slate-100 isolate z-0 transition-all duration-300 ${
+          isExpanded ? 'h-[420px]' : 'h-64'
+        }`}
+      >
         <div ref={mapContainerRef} className="h-full w-full z-10" />
 
-        {/* Floating Controls: Recenter, Zoom +, Zoom - */}
+        {/* Floating Controls: Expand, Recenter, Zoom +, Zoom - */}
         <div className="absolute top-2.5 right-2.5 z-[500] flex flex-col gap-1.5">
+          <button
+            onClick={() => setIsExpanded((prev) => !prev)}
+            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/95 text-slate-700 shadow-md border border-slate-200 hover:bg-emerald-50 active:scale-95 transition-all"
+            title={isExpanded ? t.map.collapseMap : t.map.expandMap}
+          >
+            {isExpanded ? (
+              <Minimize2 size={14} className="text-[#1E4D3E]" />
+            ) : (
+              <Maximize2 size={14} className="text-[#1E4D3E]" />
+            )}
+          </button>
+
           <button
             onClick={handleRecenter}
             className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/95 text-slate-700 shadow-md border border-slate-200 hover:bg-emerald-50 active:scale-95 transition-all"
@@ -481,7 +557,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
           </button>
         </div>
 
-        {/* Floating Location Spotlight Callout at Bottom-Left */}
+        {/* Floating Location & Count Callout at Bottom-Left */}
         <div className="absolute bottom-2.5 left-2.5 z-[500] pointer-events-auto">
           <div className="rounded-xl bg-white/95 px-2.5 py-1 text-[10px] font-bold text-slate-800 shadow-md border border-slate-200 flex items-center gap-1.5 backdrop-blur-xs">
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -493,11 +569,15 @@ export const EcoMap: React.FC<EcoMapProps> = ({
                   : t.data.locations[selectedLocation] || selectedLocation}
               </strong>
             </span>
+            <span className="text-slate-300">•</span>
+            <span className="text-emerald-700 font-extrabold">
+              {formatText(t.map.venuesCount, { count: visibleDestinations.length })}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* 3. Quick Region Navigation Chips */}
+      {/* 3. Quick Region Navigation Chips (with live venue count) */}
       <div className="mt-2.5 flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar text-left">
         {REGION_TARGETS.map((reg) => {
           const isSelected =
@@ -505,13 +585,24 @@ export const EcoMap: React.FC<EcoMapProps> = ({
             reg.name.toLowerCase() === selectedLocation.toLowerCase() ||
             (reg.id === 'all' && selectedLocation === 'all');
 
+          const count =
+            reg.id === 'all'
+              ? destinations.filter(
+                  (d) => selectedCategory === 'all' || d.category === selectedCategory
+                ).length
+              : destinations.filter(
+                  (d) =>
+                    d.location.toLowerCase() === reg.name.toLowerCase() &&
+                    (selectedCategory === 'all' || d.category === selectedCategory)
+                ).length;
+
           return (
             <button
               key={reg.id}
               onClick={() => onSelectLocation(reg.id === 'all' ? 'all' : reg.name)}
               className={`flex shrink-0 items-center gap-1 rounded-xl px-2.5 py-1 text-[11px] font-bold transition-all ${
                 isSelected
-                  ? 'bg-[#1E4D3E] text-white shadow-xs scale-102 ring-1 ring-emerald-300'
+                  ? 'bg-[#1E4D3E] text-white shadow-xs ring-1 ring-emerald-300'
                   : 'bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-emerald-900 border border-slate-200/60'
               }`}
             >
@@ -521,55 +612,99 @@ export const EcoMap: React.FC<EcoMapProps> = ({
                   ? t.map.allVietnam
                   : t.data.locations[reg.name] || reg.name}
               </span>
+              <span
+                className={`ml-0.5 rounded-full px-1.5 text-[9px] font-extrabold ${
+                  isSelected
+                    ? 'bg-emerald-400/25 text-emerald-100'
+                    : 'bg-white text-slate-500'
+                }`}
+              >
+                {count}
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* 4. Active Selected Venue Spotlight Drawer */}
-      {activeVenue && (() => {
-        const avTrans = t.data.destinations[activeVenue.id];
-        const avName = avTrans?.name || activeVenue.name;
-        const avCat =
-          avTrans?.categoryName ||
-          t.data.destinationCategories[activeVenue.category] ||
-          activeVenue.categoryName;
-        const avLoc = t.data.locations[activeVenue.location] || activeVenue.location;
-        return (
-          <div className="mt-2.5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50/50 p-2.5 border border-emerald-200/80 flex items-center justify-between gap-2.5 animate-fadeIn">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <img
-                src={activeVenue.image}
-                alt={avName}
-                className="h-11 w-11 shrink-0 rounded-xl object-cover border border-emerald-200 shadow-xs"
+      {/* 4. Interactive Color-Coded Legend (click to filter map pins by category) */}
+      <div className="mt-2 flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
+        {legendItems.map((item) => {
+          const style = CATEGORY_STYLE[item.id];
+          const isCatActive = selectedCategory === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() =>
+                onSelectCategory?.(isCatActive ? 'all' : item.id)
+              }
+              className={`flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold transition-all border ${
+                isCatActive
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                  : 'bg-slate-50 text-slate-600 border-slate-200/80 hover:bg-slate-100'
+              }`}
+            >
+              <span
+                className="h-2 w-2 rounded-full shrink-0"
+                style={{ backgroundColor: style.color }}
               />
-              <div className="min-w-0">
-                <div className="flex items-center gap-1">
-                  <span className="rounded bg-emerald-600 px-1 py-0.2 text-[8px] font-bold uppercase text-white">
-                    +{activeVenue.pointsReward} CB
-                  </span>
-                  <span className="text-[9px] font-semibold text-slate-500 truncate">
-                    {avCat} • {avLoc}
-                  </span>
-                </div>
-                <h4 className="text-xs font-bold text-slate-900 truncate mt-0.5">
-                  {avName}
-                </h4>
-              </div>
-            </div>
+              <span>{style.emoji}</span>
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
-            {onSelectVenue && (
-              <button
-                onClick={() => onSelectVenue(activeVenue)}
-                className="shrink-0 rounded-xl bg-[#1E4D3E] px-2.5 py-1.5 text-[10px] font-bold text-white shadow-xs hover:bg-[#16392E] active:scale-95 transition-all flex items-center gap-1"
-              >
-                <span>{t.map.viewAndBook}</span>
-                <ChevronRight size={12} />
-              </button>
-            )}
-          </div>
-        );
-      })()}
+      {/* 5. Active Selected Venue Spotlight Drawer */}
+      {activeVenue &&
+        (() => {
+          const avTrans = t.data.destinations[activeVenue.id];
+          const avName = avTrans?.name || activeVenue.name;
+          const avCat =
+            avTrans?.categoryName ||
+            t.data.destinationCategories[activeVenue.category] ||
+            activeVenue.categoryName;
+          const avLoc = t.data.locations[activeVenue.location] || activeVenue.location;
+          return (
+            <div className="mt-2.5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50/50 p-2.5 border border-emerald-200/80 flex items-center justify-between gap-2.5 animate-fadeIn">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <img
+                  src={activeVenue.image}
+                  alt={avName}
+                  className="h-11 w-11 shrink-0 rounded-xl object-cover border border-emerald-200 shadow-xs"
+                />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1">
+                    <span className="rounded bg-emerald-600 px-1 py-0.2 text-[8px] font-bold uppercase text-white shrink-0">
+                      +{activeVenue.pointsReward} CB
+                    </span>
+                    <span className="text-[9px] font-semibold text-slate-500 truncate">
+                      {avCat} • {avLoc}
+                    </span>
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-900 truncate mt-0.5">
+                    {avName}
+                  </h4>
+                  {activeVenue.priceEstimate && (
+                    <p className="text-[10px] font-semibold text-emerald-700 truncate">
+                      {activeVenue.priceEstimate}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {onSelectVenue && (
+                <button
+                  onClick={() => onSelectVenue(activeVenue)}
+                  className="shrink-0 rounded-xl bg-[#1E4D3E] px-2.5 py-1.5 text-[10px] font-bold text-white shadow-xs hover:bg-[#16392E] active:scale-95 transition-all flex items-center gap-1"
+                >
+                  <span>{t.map.viewAndBook}</span>
+                  <ChevronRight size={12} />
+                </button>
+              )}
+            </div>
+          );
+        })()}
     </div>
   );
 };

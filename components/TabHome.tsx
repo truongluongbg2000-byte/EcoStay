@@ -118,17 +118,8 @@ export const TabHome: React.FC<TabHomeProps> = ({
     }
   }, [searchQuery]);
 
-  const categories: { id: DestinationCategory; label: string; icon: React.ReactNode }[] = [
-    { id: 'all', label: t.data.destinationCategories.all || t.common.all, icon: <LayoutGrid size={15} /> },
-    { id: 'food', label: t.data.destinationCategories.food, icon: <UtensilsCrossed size={15} /> },
-    { id: 'hotel', label: t.data.destinationCategories.hotel, icon: <Building2 size={15} /> },
-    { id: 'transport', label: t.data.destinationCategories.transport, icon: <Bike size={15} /> },
-    { id: 'activity', label: t.data.destinationCategories.activity, icon: <Compass size={15} /> },
-    { id: 'shopping', label: t.data.destinationCategories.shopping, icon: <ShoppingBag size={15} /> },
-  ];
-
-  // Filtering destinations (supports searching in both canonical and localized text)
-  const filtered = destinations.filter((item) => {
+  // Pre-calculate counts per category for the current region + search query
+  const locationScopedDestinations = destinations.filter((item) => {
     const trans = t.data.destinations[item.id];
     const displayName = trans?.name || item.name;
     const displayLocation = t.data.locations[item.location] || item.location;
@@ -140,9 +131,6 @@ export const TabHome: React.FC<TabHomeProps> = ({
       selectedLocation === 'all' ||
       item.location.toLowerCase().includes(selectedLocation.toLowerCase());
 
-    const matchesCategory =
-      selectedCategory === 'all' || item.category === selectedCategory;
-
     const q = searchQuery.toLowerCase().trim();
     const matchesQuery =
       q === '' ||
@@ -150,12 +138,58 @@ export const TabHome: React.FC<TabHomeProps> = ({
       item.location.toLowerCase().includes(q) ||
       item.categoryName.toLowerCase().includes(q) ||
       item.description.toLowerCase().includes(q) ||
+      item.greenBadge.toLowerCase().includes(q) ||
+      (item.address && item.address.toLowerCase().includes(q)) ||
       displayName.toLowerCase().includes(q) ||
       displayLocation.toLowerCase().includes(q) ||
       displayCategoryName.toLowerCase().includes(q) ||
       displayDesc.toLowerCase().includes(q);
 
-    return matchesLocation && matchesCategory && matchesQuery;
+    return matchesLocation && matchesQuery;
+  });
+
+  const categories: { id: DestinationCategory; label: string; count: number; icon: React.ReactNode }[] = [
+    {
+      id: 'all',
+      label: t.data.destinationCategories.all || t.common.all,
+      count: locationScopedDestinations.length,
+      icon: <LayoutGrid size={15} />,
+    },
+    {
+      id: 'food',
+      label: t.data.destinationCategories.food,
+      count: locationScopedDestinations.filter((d) => d.category === 'food').length,
+      icon: <UtensilsCrossed size={15} />,
+    },
+    {
+      id: 'hotel',
+      label: t.data.destinationCategories.hotel,
+      count: locationScopedDestinations.filter((d) => d.category === 'hotel').length,
+      icon: <Building2 size={15} />,
+    },
+    {
+      id: 'transport',
+      label: t.data.destinationCategories.transport,
+      count: locationScopedDestinations.filter((d) => d.category === 'transport').length,
+      icon: <Bike size={15} />,
+    },
+    {
+      id: 'activity',
+      label: t.data.destinationCategories.activity,
+      count: locationScopedDestinations.filter((d) => d.category === 'activity').length,
+      icon: <Compass size={15} />,
+    },
+    {
+      id: 'shopping',
+      label: t.data.destinationCategories.shopping,
+      count: locationScopedDestinations.filter((d) => d.category === 'shopping').length,
+      icon: <ShoppingBag size={15} />,
+    },
+  ];
+
+  // Filtering destinations
+  const filtered = locationScopedDestinations.filter((item) => {
+    return selectedCategory === 'all' || item.category === selectedCategory;
   });
 
   const handleSelectMapPoint = (loc: string) => {
@@ -259,6 +293,8 @@ export const TabHome: React.FC<TabHomeProps> = ({
       <EcoMap
         selectedLocation={selectedLocation}
         onSelectLocation={handleSelectMapPoint}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
         currentLang={currentLang}
         destinations={destinations}
         onSelectVenue={setViewingDestination}
@@ -288,6 +324,15 @@ export const TabHome: React.FC<TabHomeProps> = ({
             >
               {cat.icon}
               <span>{cat.label}</span>
+              <span
+                className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
+                  selectedCategory === cat.id
+                    ? 'bg-emerald-400/25 text-emerald-100'
+                    : 'bg-slate-100 text-slate-500'
+                }`}
+              >
+                {cat.count}
+              </span>
             </button>
           ))}
         </div>
@@ -340,13 +385,13 @@ export const TabHome: React.FC<TabHomeProps> = ({
                 key={item.id}
                 className="rounded-3xl bg-white p-4 shadow-sm border border-emerald-950/5 hover:border-emerald-200 hover:shadow-md transition-all text-left"
               >
-                <div className="flex items-center justify-between">
-                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200/80 flex items-center gap-1">
-                    <CheckCircle2 size={11} className="text-emerald-600" />
-                    <span>{t.home.greenBadge100}</span>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200/80 flex items-center gap-1 truncate">
+                    <CheckCircle2 size={11} className="text-emerald-600 shrink-0" />
+                    <span className="truncate">{displayBadge}</span>
                   </span>
 
-                  <span className="rounded-full bg-[#1E4D3E] px-2.5 py-0.5 text-xs font-black text-white shadow-xs">
+                  <span className="shrink-0 rounded-full bg-[#1E4D3E] px-2.5 py-0.5 text-xs font-black text-white shadow-xs">
                     +{item.pointsReward} CB
                   </span>
                 </div>
@@ -356,7 +401,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
                     {getCategoryIconBox(item.category)}
                   </div>
 
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-wide">
                       {displayCategoryName} • {displayLocation}
                     </p>
@@ -370,10 +415,17 @@ export const TabHome: React.FC<TabHomeProps> = ({
                   {displayDesc}
                 </p>
 
-                <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                  <span className="text-[10px] font-semibold text-slate-500 line-clamp-1 flex items-center gap-1">
+                {item.address && (
+                  <p className="mt-2 flex items-center gap-1 text-[11px] text-slate-500">
+                    <MapPin size={12} className="text-emerald-700 shrink-0" />
+                    <span className="truncate">{item.address}</span>
+                  </p>
+                )}
+
+                <div className="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold text-emerald-800 truncate flex items-center gap-1">
                     <ShieldCheck size={12} className="text-emerald-700 shrink-0" />
-                    <span>{displayBadge}</span>
+                    <span className="truncate">{item.priceEstimate || t.home.greenBadge100}</span>
                   </span>
 
                   <button

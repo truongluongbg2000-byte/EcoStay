@@ -783,4 +783,311 @@ Source of Growth & Room-to-Win:
    - Email Marketing cá nhân hóa: Mời khách cũ quay lại, tặng ngay 200 điểm EcoStay nếu đặt phòng qua email; KPI tỷ lệ mở email > 25%, tỷ lệ chuyển đổi đặt phòng > 3%.
    - Đối tác chiến lược B2B: Liên kết NGO môi trường và doanh nghiệp có quỹ CSR thiết kế gói nghỉ dưỡng phát thải thấp; KPI số hợp đồng B2B ký kết và số cây xanh doanh nghiệp đồng tài trợ.`,
   },
+
+  // =========================================================================
+  // MẠNG LƯỚI 90 DỊCH VỤ DU LỊCH XANH ECOSTAY TẠI 6 ĐIỂM ĐẾN (15 CƠ SỞ / VÙNG)
+  // =========================================================================
+  {
+    id: 'eco-services-hoi-an',
+    source: 'Danh mục Dịch vụ Du lịch Xanh EcoStay — Hội An (Quảng Nam)',
+    title: '15 Cơ sở Du lịch Xanh tại Hội An (Ăn uống, Khách sạn, Di chuyển, Vui chơi, Mua sắm)',
+    keywords: [
+      'hoi an',
+      'hoian',
+      'quang nam',
+      'an nhien',
+      'com ga chay',
+      'reaching out',
+      'cam thanh',
+      'red flower cottage',
+      'an villa',
+      'tribee cham',
+      'an bang',
+      'song hoai',
+      'den long',
+      'tra que',
+      'cua dai',
+      'cheo sup',
+      'vai dui',
+      'taboo',
+      'xa phong thao moc',
+      'lich trinh hoi an',
+      'an gi o hoi an',
+      'o dau hoi an',
+      '호이안',
+      'ホイアン',
+      '会安',
+    ],
+    content: `Danh sách 15 dịch vụ du lịch xanh EcoStay tại HỘI AN (Quảng Nam):
+1. ĂN UỐNG:
+- Quán Cơm Gà Xanh Chay An Nhiên (+40 CB | Từ 45.000đ/món | 212 Nguyễn Duy Hiệu, Hội An): 100% Plant-based; gà chay từ nấm & đậu hũ hữu cơ, cơm nấu nước dừa tươi và lá dứa.
+- Tiệm Trà & Bánh Thảo Mộc Reaching Out (+50 CB | Từ 55.000đ/món | 131 Trần Phú, Minh An): Social Impact • Zero Plastic; trà hữu cơ, cà phê rang xay thủ công, bánh đậu xanh phục vụ bởi nhân viên khiếm thính.
+- Bếp Xanh Cẩm Thanh – Ẩm Thực Sông Nước (+60 CB | Từ 85.000đ/món | Tổ 4, Thôn Vạn Lăng, Cẩm Thanh): Sustainable Seafood; hải sản đánh bắt bền vững kết hợp rau hữu cơ Trà Quế, không túi nilon & ống hút nhựa.
+2. KHÁCH SẠN:
+- Red Flower Cottage Homestay Hội An (+250 CB | Từ 1.200.000đ/đêm | Lô 04, Cẩm An): Eco-Lodges & Solar Energy; vật liệu tre nứa, nước nóng năng lượng mặt trời giữa vườn rau.
+- An Villa Boutique Resort (+320 CB | Từ 2.100.000đ/đêm | Võng Nhi, Cẩm Thanh): Water Recycling • Organic Amenities; tái chế nước tuần hoàn, nội thất gỗ tái chế, bình thủy tinh, tắm gội thảo mộc.
+- Tribee Cham Eco-Hostel (+120 CB | Từ 350.000đ/đêm | 58 Bà Triệu, Cẩm Phô): Community Eco-Action; dọn rác sông Hoài hàng tuần, miễn phí nạp nước tinh khiết.
+3. DI CHUYỂN:
+- Trạm Xe Đạp Trợ Lực Xanh Hội An (+30 CB | Miễn phí 1h đầu cho khách EcoStay | Bến xe Phố cổ): Zero Emission; xe đạp trợ lực pin mặt trời không tiếng ồn.
+- Xe Điện Du Lịch Xanh Hội An – An Bàng (+40 CB | Từ 20.000đ/lượt | 02 Hai Bà Trưng): Clean Transit; xe điện 8–12 chỗ kết nối phố cổ và biển An Bàng.
+- Dịch Vụ Thuyền Năng Lượng Mặt Trời Sông Hoài (+60 CB | 100.000đ/lượt | Bến thuyền Bạch Đằng): Solar Boat • Zero Water Pollution; thuyền gỗ gắn động cơ điện sạc pin mặt trời.
+4. VUI CHƠI:
+- Workshop Làm Đèn Lồng Tái Chế Giấy Tre (+100 CB | 120.000đ/vé | 32 Trần Phú, Minh An): Bảo tồn văn hóa thủ công; làm đèn lồng từ khung tre và giấy dó tái chế.
+- Trải Nghiệm Làm Nông Dân Hữu Cơ Làng Trà Quế (+130 CB | 180.000đ/vé | Làng rau Trà Quế, Cẩm Hà): Organic Farming; bón phân rong biển, tưới gáo dừa, thu hoạch rau thơm hữu cơ.
+- Tour Chèo SUP Ngắm Bình Minh & Nhặt Rác Cửa Đại (+160 CB | 250.000đ/vé | Bãi biển Cửa Đại): Ocean Cleanup; chèo SUP đón bình minh kết hợp nhặt rác nhựa bãi bồi.
+5. MUA SẮM:
+- Tiệm Thời Trang Vải Đũi & Sợi Gai Tự Nhiên (+60 CB | Từ 150.000đ/sp | 88 Nguyễn Thái Học): Organic Textile; vải đũi mộc nhuộm lá cây, túi giấy tái sinh.
+- Xưởng Sản Phẩm Tái Chế Từ Vải Vụn Taboo (+50 CB | Từ 75.000đ/sp | 45 Phan Châu Trinh): Upcycled Fashion; túi tote, ví, thú bông từ vải thừa tiệm may Hội An.
+- Cửa Hàng Xà Phòng & Tinh Dầu Thảo Mộc Xanh (+45 CB | Từ 65.000đ/sp | 19 Lê Lợi, Minh An): Zero Waste Cosmetics; xà phòng dầu dừa, tinh dầu sả chanh, gói giấy nến tự hủy.`,
+  },
+  {
+    id: 'eco-services-da-lat',
+    source: 'Danh mục Dịch vụ Du lịch Xanh EcoStay — Đà Lạt (Lâm Đồng)',
+    title: '15 Cơ sở Du lịch Xanh tại Đà Lạt (Ăn uống, Khách sạn, Di chuyển, Vui chơi, Mua sắm)',
+    keywords: [
+      'da lat',
+      'dalat',
+      'lam dong',
+      'leguda',
+      'doi robin',
+      'chay hoa sen',
+      'la viet',
+      'warbler',
+      'edensee',
+      'ho tuyen lam',
+      'legume',
+      'ho xuan huong',
+      'lam vien',
+      'xe may dien vinfast',
+      'kayak la phong',
+      'tinh dau thong do',
+      'nen sap ong',
+      'dalat organic',
+      'tho cam kho',
+      'langbiang',
+      'sen da chau xo dua',
+      'lich trinh da lat',
+      '달랏',
+      'ダラット',
+      '大叻',
+    ],
+    content: `Danh sách 15 dịch vụ du lịch xanh EcoStay tại ĐÀ LẠT (Lâm Đồng):
+1. ĂN UỐNG:
+- Nhà Hàng Farm-to-Table Leguda Đà Lạt (+60 CB | Từ 79.000đ/suất | Lầu 1 Cáp Treo Đồi Robin, P.3): Local Farm Produce; buffet lẩu rau củ >20 loại rau VietGAP/hữu cơ.
+- Quán Chay Hoa Sen Đà Lạt (+45 CB | Từ 40.000đ/món | 62 Phan Đình Phùng, P.1): 100% Plant-based • Plastic-Free; nấm rừng & nông sản cao nguyên, không bột ngọt, không hộp xốp.
+- Tiệm Cà Phê Vườn Rừng Là Việt Organic (+50 CB | Từ 45.000đ/món | 200 Nguyễn Công Trứ, P.8): Sustainable Coffee • Composting; Arabica Cầu Đất dưới tán rừng, bã cà phê ủ phân hữu cơ.
+2. KHÁCH SẠN:
+- Warbler Farmstay & Eco-Lodge Đà Lạt (+350 CB | Từ 1.800.000đ/đêm | Thôn Đạ Ròn, Lạc Dương): Forest Conservation; gỗ thông tái chế, lọc nước tự nhiên, nông nghiệp tuần hoàn.
+- Dalat Edensee Lake Resort & Spa (+420 CB | Từ 2.500.000đ/đêm | Khu VII.2, Hồ Tuyền Lâm): Biodiversity Protection; giữ nguyên đồi thông, năng lượng sạch, xử lý rác khép kín.
+- Légume Homestay Vườn Rau Hữu Cơ (+200 CB | Từ 950.000đ/đêm | 12B Bạch Đằng, P.7): Zero-Waste Stay; nhà gỗ giữa vườn rau không thuốc trừ sâu, tự hái rau, phân loại rác 100%.
+3. DI CHUYỂN:
+- Dịch Vụ Xe Điện Du Lịch Xanh Đà Lạt (+40 CB | Từ 50.000đ/tuyến | Quảng trường Lâm Viên, P.10): Electric Mobility; ô tô điện tham quan Hồ Xuân Hương và dinh thự cổ.
+- Trạm Thuê Xe Máy Điện VinFast Xanh Đà Lạt (+50 CB | 150.000đ/ngày | 05 Trần Quốc Toản, P.1): Zero Tailpipe Emission; trạm đổi pin phủ trung tâm, leo dốc khỏe.
+- Xe Đạp Đôi & Xe Đạp Thể Thao Quanh Hồ Xuân Hương (+30 CB | 30.000đ/giờ | Bến du thuyền Hồ Xuân Hương): Eco-Fitness; đạp xe quãng ngắn không động cơ.
+4. VUI CHƠI:
+- Tour Khám Phá Rừng Thông Cổ Thụ & Trồng Cây Gây Rừng (+150 CB | 200.000đ/người | KDL Hồ Tuyền Lâm, P.4): Reforestation Action; trekking rừng thông & trồng cây thông con gắn bảng tên.
+- Chèo Thuyền Kayak Ngắm Rừng Lá Phong Hồ Tuyền Lâm (+140 CB | 220.000đ/vé | Bến thuyền Hồ Tuyền Lâm): Leave No Trace; chèo kayak yên tĩnh không gây tiếng ồn.
+- Workshop Làm Tinh Dầu Thông Đỏ & Nến Sáp Ong (+110 CB | 180.000đ/vé | 48 Khe Sanh, P.10): Natural Ingredients; chiết xuất lá thông rụng tự nhiên và sáp ong làm nến không hóa chất.
+5. MUA SẮM:
+- Cửa Hàng Nông Sản Hữu Cơ Đà Lạt Organic (+50 CB | Từ 60.000đ/sp | 12 Phù Đổng Thiên Vương, P.8): Zero Plastic Packaging; đặc sản sấy khô, mứt, trà thảo mộc bao bì giấy.
+- Tiệm Len Đan Tay & Thổ Cẩm Người K'Ho (+60 CB | Từ 120.000đ/sp | Xã Lát, Lạc Dương - chân núi Langbiang): Fair Trade Craft; khăn len, túi thổ cẩm dệt tay tạo sinh kế đồng bào.
+- Vườn Sen Đá & Cây Cảnh Mini Chậu Xơ Dừa (+40 CB | Từ 35.000đ/chậu | 75 Nguyễn Đình Chiểu, P.9): Biodegradable Pots; sen đá trồng chậu xơ dừa tự phân hủy.`,
+  },
+  {
+    id: 'eco-services-cuc-phuong',
+    source: 'Danh mục Dịch vụ Du lịch Xanh EcoStay — Cúc Phương (Ninh Bình)',
+    title: '15 Cơ sở Du lịch Xanh tại VQG Cúc Phương (Ăn uống, Lưu trú, Di chuyển, Vui chơi, Mua sắm)',
+    keywords: [
+      'cuc phuong',
+      'nho quan',
+      'ben dang',
+      'ho mac',
+      'ban khanh',
+      'khu bong',
+      'cho ngan nam',
+      'dong nguoi xua',
+      'cuu ho linh truong',
+      'xem thu dem cuc phuong',
+      'them xanh cho cuc phuong',
+      'buom rung',
+      'con trung',
+      'vooc mong trang',
+      'ky phu',
+      'mat ong rung',
+      'com lam',
+      '꾹프엉',
+      'クックフォン',
+      '菊芳',
+    ],
+    content: `Danh sách 15 dịch vụ du lịch xanh EcoStay tại CÚC PHƯƠNG (Ninh Bình):
+1. ĂN UỐNG:
+- Nhà Hàng Ẩm Thực Bản Địa Cúc Phương (+50 CB | Từ 90.000đ/món | Cổng VQG Cúc Phương, Nho Quan): Local Community Support; lợn bản, gà đồi, rau rừng vị người Mường.
+- Quán Cơm Lam & Rau Rừng Bến Đang (+45 CB | Từ 60.000đ/suất | Thôn Bến Đang, Xã Cúc Phương): Plastic-Free Dining; cơm lam ống tre gói lá chuối, rau dớn rừng.
+- Tiệm Trà Thảo Mộc Rừng Cúc Phương (+35 CB | Từ 30.000đ/ly | Khu Hồ Mạc, VQG Cúc Phương): Sustainable Herbal Harvest; trà giảo cổ lam, trà hoa vàng, cốc tre tái sử dụng.
+2. KHÁCH SẠN:
+- Cuc Phuong Bungalow & Eco-Resort (+280 CB | Từ 1.500.000đ/đêm | Xã Cúc Phương, Nho Quan): Eco-Architecture; nhà sàn bản địa kết hợp năng lượng mặt trời.
+- Nhà Sàn Cộng Đồng Bản Khanh (+180 CB | Từ 400.000đ/đêm | Bản Khanh, Xã Cúc Phương): Community-Based Tourism; nhà sàn gỗ lợp lá cọ người Mường, nước suối lọc, góp quỹ bảo tồn.
+- Khu Lưu Trú Trung Tâm Bống (+220 CB | Từ 700.000đ/đêm | Khu Bống, VQG Cúc Phương): Dark-Sky & Wildlife Friendly; nghỉ giữa lõi rừng nguyên sinh không sóng điện thoại, điện mặt trời giới hạn giờ bảo vệ thú đêm.
+3. DI CHUYỂN:
+- Đội Xe Đạp Địa Hình Xuyên Rừng Cúc Phương (+30 CB | 50.000đ/ngày | Trung tâm Du khách VQG): Non-Motorized Exploration; xe đạp địa hình đường mòn rừng không tiếng ồn.
+- Xe Điện Trung Chuyển Nội Khu Vườn Quốc Gia (+40 CB | 60.000đ/lượt | Cổng VQG Cúc Phương): Low-Noise Electric Transit; chạy dọc 20km đường rừng không ảnh hưởng linh trưởng.
+- Tuyến Đi Bộ Đường Rừng (Trekking) Có Kiểm Lâm Dẫn Đường (+50 CB | 100.000đ/nhóm | Trạm Kiểm lâm VQG): Zero Carbon Footprint; khám phá cây Chò Ngàn Năm, Động Người Xưa.
+4. VUI CHƠI:
+- Tour Xem Thú Đêm & Thăm Cứu Hộ Linh Trưởng (+150 CB | 150.000đ/vé | VQG Cúc Phương): Wildlife Conservation; thăm Trung tâm Cứu hộ linh trưởng nguy cấp & xem thú đêm cùng kiểm lâm.
+- Chương Trình "Thêm Xanh Cho Cúc Phương" – Trồng Cây Rừng (+200 CB | 250.000đ/người | Vườn Thực Vật Cúc Phương): Forest Restoration; ươm mầm và trồng cây gỗ quý bản địa.
+- Tour Khám Phá Thế Giới Côn Trùng & Bướm Rừng Mùa Sinh Sản (+120 CB | 120.000đ/vé | Bảo tàng Cúc Phương): Ethical Eco-Education; quan sát & nhiếp ảnh thiên nhiên có trách nhiệm.
+5. MUA SẮM:
+- Quầy Lưu Niệm Thủ Công Mỹ Nghệ Gỗ Rừng Trồng (+40 CB | Từ 40.000đ/món | Khu hành chính VQG): Fair Trade & Handicraft; mỹ nghệ gỗ trồng hợp pháp & mây tre của người Mường.
+- Hợp Tác Xã Mật Ong Rừng & Thảo Dược Vùng Đệm (+55 CB | Từ 150.000đ/chai | Xã Kỳ Phú, Nho Quan): Sustainable Livelihood; mật ong rừng chai thủy tinh tái sử dụng.
+- Bộ Ấn Phẩm & Bình Nước Giữ Nhiệt "Bảo Vệ Voọc Mông Trắng" (+50 CB | Từ 95.000đ/sp | Trung tâm Giáo dục Môi trường Cúc Phương): 100% Fund for Conservation; bình inox khắc hình voọc giảm chai nhựa.`,
+  },
+  {
+    id: 'eco-services-ninh-binh',
+    source: 'Danh mục Dịch vụ Du lịch Xanh EcoStay — Ninh Bình (Tràng An - Tam Cốc - Vân Long)',
+    title: '15 Cơ sở Du lịch Xanh tại Ninh Bình (Ăn uống, Khách sạn, Di chuyển, Vui chơi, Mua sắm)',
+    keywords: [
+      'ninh binh',
+      'trang an',
+      'tam coc',
+      'van long',
+      'hoa lu',
+      'gia vien',
+      'tam coc garden',
+      'hidden charm',
+      'chezbeo',
+      'thung nham',
+      'vuon chim',
+      'cay lua',
+      'van lam',
+      'theu ren',
+      'coi kim son',
+      'phat diem',
+      'sinh duoc',
+      'tra sen',
+      'kayak van long',
+      '닌빈',
+      'ニンビン',
+      '宁平',
+    ],
+    content: `Danh sách 15 dịch vụ du lịch xanh EcoStay tại NINH BÌNH (Tràng An - Tam Cốc - Vân Long):
+1. ĂN UỐNG:
+- Nhà Hàng Chay & Đạm Thực Tràng An Xanh (+50 CB | Từ 70.000đ/món | KDL sinh thái Tràng An, Hoa Lư): Organic & Local Ingredients; cơm cháy, gỏi ngó sen, nấm kho tộ thực dưỡng.
+- Bếp Đồng Quê Tam Cốc – Farm to Table (+55 CB | Từ 80.000đ/món | Đội 1, Văn Lâm, Ninh Hải): Zero Single-Use Plastic; nhà cổ giữa đồng lúa, rau hữu cơ tại vườn, không ống hút nhựa & khăn ướt 1 lần.
+- Tiệm Trà Sen & Bánh Cốm Cổ Cố Đô (+40 CB | Từ 45.000đ/suất | Bến đò Vân Long, Gia Viễn): Natural Packaging; trà ướp bông sen đầm Vân Long gói lá sen tự nhiên.
+2. KHÁCH SẠN:
+- Tam Coc Garden Resort (+400 CB | Từ 2.800.000đ/đêm | Thôn Hải Nham, Ninh Hải, Hoa Lư): Traditional Eco-Resort; nhà ngói Bắc Bộ, lọc rác hữu cơ, vật liệu tự nhiên.
+- Ninh Binh Hidden Charm Hotel & Eco-Resort (+320 CB | Từ 1.900.000đ/đêm | Số 9, KDL Tam Cốc - Bích Động): Green Lotus Certified; tiết kiệm năng lượng, bình thủy tinh, tái chế rác hữu cơ thành phân bón.
+- Chezbeo Homestay Thung Lũng Sen (+180 CB | Từ 650.000đ/đêm | Làng Khả Lương, Ninh Thắng, Hoa Lư): Low-Impact Architecture; nhà chòi tre nứa lá cọ dưới chân núi đá vôi, hạn chế bê tông hóa.
+3. DI CHUYỂN:
+- Dịch Vụ Xe Điện & Ghe Chèo Tay Sinh Thái Tràng An (+40 CB | Theo giá niêm yết vé thuyền | Bến thuyền Tràng An): Zero Carbon Water Transport; thuyền chèo tay và xe điện nội khu.
+- Trạm Thuê Xe Đạp Làng Quê Tam Cốc – Thung Nham (+30 CB | 40.000đ/ngày | Bến thuyền Tam Cốc): Zero Emission; xe đạp giỏ mây khám phá Hang Múa, Bích Động.
+- Thuyền Nan Chèo Tay Khu Bảo Tồn Vân Long (+45 CB | 100.000đ/vé | Bến thuyền Vân Long, Gia Viễn): Wetland Protection; chèo tay yên tĩnh ngắm núi Mèo Cào & đàn cò trắng.
+4. VUI CHƠI:
+- Tour Chèo Thuyền Kayak Khám Phá Đầm Vân Long (+120 CB | 200.000đ/vé | Khu bảo tồn Vân Long): Eco-Tourism & Habitat Protection; chèo kayak quan sát voọc mông trắng ở khoảng cách an toàn.
+- Trải Nghiệm Cấy Lúa & Bắt Cua Đồng Cùng Nông Dân Ninh Hải (+130 CB | 160.000đ/vé | Thôn Văn Lâm, Ninh Hải): Sustainable Agriculture; cấy lúa, tát nước gầu sòng trên ruộng không thuốc trừ sâu hóa học.
+- Tour Ngắm Chim Di Cư Vườn Chim Thung Nham Lúc Hoàng Hôn (+140 CB | 150.000đ/vé | Thung Nham, Ninh Hải): Avian Conservation; thuyền gỗ không động cơ vào vùng lõi vườn chim.
+5. MUA SẮM:
+- Làng Nghề Thêu Ren Văn Lâm & Sản Phẩm Sậy Tự Nhiên (+50 CB | Từ 50.000đ/sp | Làng thêu Văn Lâm, Ninh Hải): Cultural Heritage Support; khăn thêu tay chỉ tự nhiên, giỏ cói/sậy.
+- Hợp Tác Xã Thủ Công Mỹ Nghệ Cói Kim Sơn (+55 CB | Từ 65.000đ/sp | TT Phát Diệm, Kim Sơn): 100% Biodegradable; chiếu cói, túi, mũ đan tay phơi nắng tự nhiên.
+- Cửa Hàng Trà Thảo Dược & Muối Ngâm Chân Sinh Dược (+45 CB | Từ 55.000đ/sp | Thôn Sinh Dược, Gia Sinh, Gia Viễn): Community Enterprise; cao thảo dược, muối ngâm chân, xà phòng lá thuốc gói giấy kraft tái chế.`,
+  },
+  {
+    id: 'eco-services-nam-cat-tien',
+    source: 'Danh mục Dịch vụ Du lịch Xanh EcoStay — Nam Cát Tiên (Đồng Nai)',
+    title: '15 Cơ sở Du lịch Xanh tại Nam Cát Tiên (Ăn uống, Lưu trú, Di chuyển, Vui chơi, Mua sắm)',
+    keywords: [
+      'nam cat tien',
+      'cat tien',
+      'dong nai',
+      'tan phu',
+      'ta lai',
+      'longhouse',
+      'ma da forest',
+      'jungle lodge',
+      'bau sau',
+      'cay tung',
+      'dao tien',
+      'cuu ho gau',
+      'ngam chim',
+      'ca cao huu co',
+      'phuong lam',
+      'hat dieu',
+      'tieu huu co',
+      '남깟띠엔',
+      'ナムカッティエン',
+      '南吉仙',
+    ],
+    content: `Danh sách 15 dịch vụ du lịch xanh EcoStay tại NAM CÁT TIÊN (Đồng Nai):
+1. ĂN UỐNG:
+- Nhà Hàng Xanh Gió Sông Đồng Nai (+40 CB | Từ 80.000đ/món | Cổng VQG Nam Cát Tiên, Tân Phú): Fresh Local Catch; cá sông tự nhiên hợp pháp, rau rừng vùng đệm.
+- Quán Ăn Hữu Cơ Vườn Rừng Tà Lài (+50 CB | Từ 75.000đ/suất | Ấp 4, Xã Tà Lài): Indigenous Cuisine • Zero Plastic; canh thụt ống lồ ô, cơm gạo rẫy, rau nhíp của đồng bào Mạ & S'tiêng.
+- Cà Phê Vườn Ca Cao Hữu Cơ Nam Cát Tiên (+35 CB | Từ 35.000đ/ly | Ấp 1, Xã Nam Cát Tiên): Agroforestry Produce; ca cao thủ công không phụ gia, ống hút cỏ bàng.
+2. KHÁCH SẠN:
+- Ma Da Forest Lodge Nam Cát Tiên (+300 CB | Từ 1.400.000đ/đêm | Xã Nam Cát Tiên): Low-Impact Stay; lodge giữa rừng mưa, đèn năng lượng mặt trời.
+- Nhà Dài Cộng Đồng Tà Lài / Ta Lai Longhouse (+220 CB | Từ 600.000đ/đêm | Xã Tà Lài): Community Conservation; nhà dài tre tầm vông & lá mây tạo việc làm cho đồng bào dân tộc.
+- Cat Tien Jungle Lodge (+350 CB | Từ 1.950.000đ/đêm | Ấp 4, Xã Nam Cát Tiên): Zero Single-Use Plastic; xử lý nước khép kín tưới vườn rau hữu cơ, không chai nhựa 1 lần.
+3. DI CHUYỂN:
+- Hệ Thống Xe Đạp Xuyên Rừng & Xe Điện Chuyên Dụng (+30 CB | 60.000đ/ngày | Trung tâm VQG Nam Cát Tiên): Quiet Zone Mobility; khám phá tuyến Cây Tung cổ thụ, Bầu Sấu không tiếng ồn.
+- Phà Chèo Tay & Thuyền Điện Qua Sông Đồng Nai (+25 CB | Đã bao gồm trong vé tham quan | Bến phà VQG): Clean River Crossing; qua sông 5 phút không ô nhiễm dầu mỡ.
+- Tuyến Đi Bộ Xuyên Rừng Vào Bầu Sấu 5km (+60 CB | Miễn phí tuyến đường bộ | Trạm Kiểm lâm Bầu Sấu): Strict Zero-Vehicle Zone; cấm xe cơ giới bảo vệ cá sấu Xiêm và chim nước vùng Ramsar.
+4. VUI CHƠI:
+- Tour Xem Thú Đêm Bằng Xe Chuyên Dụng & Trekking Cây Tung (+180 CB | 170.000đ/vé | VQG Nam Cát Tiên): Conservation Education; quan sát nai, heo rừng, chồn ăn đêm cùng kiểm lâm.
+- Thăm Trung Tâm Cứu Hộ Gấu & Động Vật Hoang Dã Đảo Tiên (+150 CB | 150.000đ/vé | Đảo Tiên, VQG): Animal Welfare Support; quan sát vượn đen má vàng, voọc chà vá chân đen, góp quỹ thức ăn.
+- Tour Ngắm Chim Sớm Bình Minh Tại Trảng Cỏ & Bầu Sấu (+160 CB | 250.000đ/người | Khu Ramsar Bầu Sấu): Responsible Birdwatching; ngắm >350 loài chim nhiệt đới bằng ống nhòm.
+5. MUA SẮM:
+- Cửa Hàng Lưu Niệm Sách & Quà Tặng Sinh Quỹ Rừng (+40 CB | Từ 45.000đ/sp | Nhà trưng bày VQG): Eco-Fund Contribution; áo cotton hữu cơ, sổ giấy tái chế ủng hộ bảo tồn.
+- Xưởng Dệt Thổ Cẩm & Đan Gùi Thủ Công Tà Lài (+55 CB | Từ 80.000đ/sp | Nhà Dài Tà Lài): Women Empowerment • Fair Trade; khăn dệt tay nhuộm vỏ cây & giỏ mây tre thay túi nhựa.
+- Quầy Nông Sản Sạch Vùng Đệm — Tiêu Hữu Cơ & Hạt Điều Rang Củi (+50 CB | Từ 70.000đ/gói | Chợ Phương Lâm, Tân Phú): Pesticide-Free Farming; tiêu đen & hạt điều hữu cơ túi giấy zip.`,
+  },
+  {
+    id: 'eco-services-sa-pa',
+    source: 'Danh mục Dịch vụ Du lịch Xanh EcoStay — Sa Pa (Lào Cai)',
+    title: '15 Cơ sở Du lịch Xanh tại Sa Pa (Ăn uống, Khách sạn, Di chuyển, Vui chơi, Mua sắm)',
+    keywords: [
+      'sa pa',
+      'sapa',
+      'lao cai',
+      'cau may',
+      'lao chai',
+      'hoang lien',
+      'ochau',
+      'topas ecolodge',
+      'eco palms house',
+      'la dao',
+      'ta van',
+      'muong hoa',
+      'ta phin',
+      'nhuom cham',
+      'det vai lanh',
+      'nui xe',
+      'dao do',
+      'tam la thuoc',
+      'indigo cat',
+      'mat ong hoang lien',
+      '사파',
+      'サパ',
+      '沙巴',
+    ],
+    content: `Danh sách 15 dịch vụ du lịch xanh EcoStay tại SA PA (Lào Cai):
+1. ĂN UỐNG:
+- Nhà Hàng Chay & Ẩm Thực Bản Địa Sapa Eco (+60 CB | Từ 100.000đ/món | 042 Phố Cầu Mây, TX Sapa): Organic Mountain Food; thắng cố chay nấm rừng, lẩu cá hồi suối lạnh, cải mèo hữu cơ.
+- Bếp Bản H'Mông – Ẩm Thực Mùa Nào Thức Nấy (+50 CB | Từ 75.000đ/suất | Bản Lao Chải, Xã Hoàng Liên): Seasonal & Zero Waste; măng rừng, cải ngồng, đậu phụ thủ công, nếp nương đỏ không rác nhựa.
+- Tiệm Cà Phê & Trà Thảo Mộc Sapa O'Chau (+45 CB | Từ 40.000đ/ly | 08 Thác Bạc, TX Sapa): Social Enterprise; hỗ trợ giáo dục trẻ em dân tộc, trà táo mèo & gừng mật ong dùng ly gốm sứ.
+2. KHÁCH SẠN:
+- Topas Ecolodge Sapa (+500 CB | Từ 3.500.000đ/đêm | Bản Lếch Dao, Xã Thanh Bình): Sustainable Luxury; đá granite địa phương nhìn ra Mường Hoa, xử lý nước thải sinh học, không nhựa 1 lần.
+- Eco Palms House – Sapa Retreat (+340 CB | Từ 1.850.000đ/đêm | Thôn Lao Chải, Hoàng Liên): Vernacular Eco-Design; bungalow lá cọ, tường trình đất & tre nứa, năng lượng mặt trời.
+- Lá Dao Spa & Coffee Homestay Tả Van (+230 CB | Từ 900.000đ/đêm | Thôn Tả Van Giáy, Xã Tả Van): Eco-Water Filtration; tắm lá thuốc người Dao, lọc nước thảo dược qua thực vật thủy sinh.
+3. DI CHUYỂN:
+- Dịch Vụ Xe Điện & Trekking Cùng Hướng Dẫn Bản Địa (+40 CB | Từ 100.000đ/chuyến | Bản Lao Chải): Low Carbon Footprint; kết hợp xe điện & trekking ruộng bậc thang.
+- Xe Điện Du Lịch Xanh Thị Xã Sapa (+30 CB | Từ 25.000đ/lượt | Quảng trường Sân Quần): Clean Mountain Transit; trung chuyển Nhà thờ Đá, Hàm Rồng, bản Cát Cát không phát thải.
+- Tour Xe Đạp Địa Hình Khám Phá Thung Lũng Mường Hoa (+55 CB | 180.000đ/ngày | 24 Fansipan, TX Sapa): Zero Emission Adventure; đạp xe qua bản Tả Van, Giàng Tả Chải.
+4. VUI CHƠI:
+- Workshop Nhuộm Chàm & Dệt Vải Lanh Truyền Thống (+150 CB | 250.000đ/người | Bản Tả Phìn): Cultural Preservation; kéo sợi lanh, vẽ sáp ong, nhuộm chàm tự nhiên từ lá chàm.
+- Tour Trekking VQG Hoàng Liên & Thu Gom Rác Đường Mòn (+180 CB | 300.000đ/người | Trạm Kiểm lâm Núi Xẻ): Trail Cleanup • Forest Care; khám phá rừng đỗ quyên cổ thụ & nhặt rác đường mòn.
+- Trải Nghiệm Hái Thảo Dược & Nấu Nước Tắm Lá Người Dao Đỏ (+140 CB | 200.000đ/người | Thôn Giàng Tra, Tả Phìn): Sustainable Herbalism; chỉ cắt cành không nhổ rễ để cây tái sinh.
+5. MUA SẮM:
+- Hợp Tác Xã Thổ Cẩm & Thảo Dược Tả Phìn (+50 CB | Từ 80.000đ/sp | Bản Tả Phìn): Community Empowerment; thổ cẩm sợi tự nhiên & bài thuốc tắm gội organic người Dao đỏ.
+- Cửa Hàng Thời Trang Bền Vững Indigo Cat (+70 CB | Từ 220.000đ/sp | 018 Fansipan, TX Sapa): Slow Fashion • Natural Dye; vải lanh dệt tay vẽ sáp ong người H'Mông, nhuộm chàm/củ nâu/vỏ cây, túi vải.
+- Quầy Nông Sản Bản Địa & Mật Ong Rừng Hoàng Liên (+45 CB | Từ 65.000đ/sp | Chợ Văn Hóa Sapa): Direct From Farmers; nấm hương rừng, gạo nếp nương, mận hậu, mật ong hũ thủy tinh.`,
+  },
 ];
