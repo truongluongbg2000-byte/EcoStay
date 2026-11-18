@@ -69,7 +69,7 @@ export async function createOpenRouterStream(
       model: config.model,
       messages,
       stream: true,
-      temperature: 0.7,
+      temperature: 0.45,
       max_tokens: 1024,
       reasoning: {
         exclude: true,

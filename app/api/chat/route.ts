@@ -52,11 +52,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const lastUserMessage =
-      [...conversationMessages].reverse().find((m) => m.role === 'user')?.content || '';
+    const userMessages = conversationMessages.filter((m) => m.role === 'user');
+    const lastUserMessage = userMessages[userMessages.length - 1]?.content || '';
+    const prevUserMessage = userMessages[userMessages.length - 2]?.content || '';
 
-    // 1. RAG Hook (Currently returns [] — ready for future Vector DB integration)
-    const ragChunks = await retrieveRagContext(lastUserMessage, { lang, topK: 5 });
+    // If the latest user message is a short follow-up (e.g. "chi tiết hơn", "KPI thì sao?"),
+    // combine it with the previous user message so Local RAG retains topic context.
+    const ragQuery =
+      lastUserMessage.length < 35 && prevUserMessage
+        ? `${prevUserMessage} ${lastUserMessage}`
+        : lastUserMessage;
+
+    // 1. Fast In-Memory Local RAG over the EcoStay team's official project document (< 1ms)
+    const ragChunks = await retrieveRagContext(ragQuery, { lang, topK: 3 });
 
     // 2. Build dynamic system prompt (User profile + EcoStay rules + Future RAG chunks)
     const systemPrompt = buildSystemPrompt({
