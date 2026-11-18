@@ -331,16 +331,16 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
         {/* Header */}
         <div className="bg-gradient-to-r from-[#1E4D3E] via-[#245D4B] to-[#16392E] p-4 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="relative h-11 w-11 rounded-full border-2 border-emerald-300 overflow-hidden shadow bg-emerald-950 flex items-center justify-center">
+            <div className="relative h-11 w-11 rounded-full border-2 border-emerald-300 overflow-hidden shadow bg-emerald-950 flex items-center justify-center shrink-0">
+              <Bot size={22} className="text-emerald-300 absolute z-0" />
               <img
-                src="/chatbot-avatar.png"
+                src="/ecobot-avatar.jpg"
                 alt="EcoBot Avatar"
-                className="h-full w-full object-cover"
+                className="relative z-10 h-full w-full object-cover"
                 onError={(e) => {
                   (e.target as HTMLElement).style.display = 'none';
                 }}
               />
-              <Bot size={24} className="text-emerald-300 absolute" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
@@ -387,15 +387,15 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                 <div className="flex items-start gap-2 max-w-[90%]">
                   {!isUser && (
                     <div className="h-7 w-7 rounded-full overflow-hidden shrink-0 border border-emerald-300 bg-[#1E4D3E] flex items-center justify-center relative">
+                      <Bot size={14} className="text-emerald-200 absolute z-0" />
                       <img
-                        src="/chatbot-avatar.png"
+                        src="/ecobot-avatar.jpg"
                         alt="EcoBot"
-                        className="h-full w-full object-cover"
+                        className="relative z-10 h-full w-full object-cover"
                         onError={(e) => {
                           (e.target as HTMLElement).style.display = 'none';
                         }}
                       />
-                      <Bot size={14} className="text-emerald-200 absolute -z-10" />
                     </div>
                   )}
 

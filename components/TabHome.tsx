@@ -450,16 +450,16 @@ export const TabHome: React.FC<TabHomeProps> = ({
         >
           <div className="absolute inset-0 rounded-full bg-emerald-400 opacity-30 animate-ping pointer-events-none" />
 
-          <div className="relative h-12 w-12 rounded-full overflow-hidden border-2 border-emerald-200 shadow-inner bg-[#16392E]">
+          <div className="relative h-12 w-12 rounded-full overflow-hidden border-2 border-emerald-200 shadow-inner bg-[#16392E] flex items-center justify-center">
+            <Bot size={22} className="text-emerald-300 absolute inset-0 m-auto z-0" />
             <img
-              src="/chatbot-avatar.png"
+              src="/ecobot-avatar.jpg"
               alt="EcoBot AI"
-              className="h-full w-full object-cover"
+              className="relative z-10 h-full w-full object-cover"
               onError={(e) => {
                 (e.target as HTMLElement).style.display = 'none';
               }}
             />
-            <Bot size={22} className="text-emerald-300 absolute inset-0 m-auto" />
           </div>
 
           <span className="absolute top-0 right-0 h-3.5 w-3.5 rounded-full bg-emerald-400 border-2 border-white shadow-xs" />
