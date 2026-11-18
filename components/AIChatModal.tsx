@@ -1,7 +1,16 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { X, Send, Sparkles, Compass, HelpCircle, Gift, Bike, UtensilsCrossed, Bot, RefreshCw } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import {
+  X,
+  Send,
+  Bot,
+  RefreshCw,
+  Square,
+  AlertCircle,
+  RotateCcw,
+  Sparkles,
+} from 'lucide-react';
 import { UserProfile } from '@/data/types';
 
 interface Message {
@@ -10,6 +19,8 @@ interface Message {
   text: string;
   time: string;
   suggestions?: string[];
+  isError?: boolean;
+  errorCode?: string;
 }
 
 interface AIChatModalProps {
@@ -17,6 +28,80 @@ interface AIChatModalProps {
   onClose: () => void;
   user: UserProfile;
   currentLang?: 'vi' | 'en';
+}
+
+function formatCurrentTime(): string {
+  const now = new Date();
+  return now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+}
+
+/**
+ * Lightweight safe Markdown renderer for **bold**, *italic*, and `code` spans.
+ */
+function renderFormattedLine(line: string, lineIdx: number): React.ReactNode {
+  const tokens = line.split(/(\*\*[^*]+\*\*|`[^`]+`|\*[^*]+\*)/g);
+  return (
+    <React.Fragment key={lineIdx}>
+      {tokens.map((token, idx) => {
+        if (token.startsWith('**') && token.endsWith('**') && token.length > 4) {
+          return (
+            <strong key={idx} className="font-bold text-slate-900">
+              {token.slice(2, -2)}
+            </strong>
+          );
+        }
+        if (token.startsWith('`') && token.endsWith('`') && token.length > 2) {
+          return (
+            <code
+              key={idx}
+              className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[11px] text-emerald-800"
+            >
+              {token.slice(1, -1)}
+            </code>
+          );
+        }
+        if (token.startsWith('*') && token.endsWith('*') && token.length > 2) {
+          return (
+            <em key={idx} className="italic">
+              {token.slice(1, -1)}
+            </em>
+          );
+        }
+        return <React.Fragment key={idx}>{token}</React.Fragment>;
+      })}
+    </React.Fragment>
+  );
+}
+
+function renderMessageText(text: string, isUser: boolean): React.ReactNode {
+  if (isUser) return text;
+
+  const lines = text.split('\n');
+  return lines.map((line, idx) => {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      return <div key={idx} className="h-1.5" />;
+    }
+    if (trimmed.startsWith('### ')) {
+      return (
+        <div key={idx} className="font-extrabold text-[#1E4D3E] text-[12px] mt-1.5 mb-0.5">
+          {renderFormattedLine(trimmed.slice(4), idx)}
+        </div>
+      );
+    }
+    if (trimmed.startsWith('## ')) {
+      return (
+        <div key={idx} className="font-extrabold text-[#1E4D3E] text-[13px] mt-1.5 mb-0.5">
+          {renderFormattedLine(trimmed.slice(3), idx)}
+        </div>
+      );
+    }
+    return (
+      <div key={idx} className="leading-relaxed">
+        {renderFormattedLine(line, idx)}
+      </div>
+    );
+  });
 }
 
 export const AIChatModal: React.FC<AIChatModalProps> = ({
@@ -28,32 +113,37 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
   const isEn = currentLang === 'en';
   const pointsTerm = isEn ? 'Carbon Points (CP)' : 'Điểm Cacbon (CP)';
 
-  const initialBotMessage: Message = {
-    id: 'msg-init',
-    sender: 'bot',
-    text: isEn
-      ? `Hello ${user.name}! I am EcoBot, your AI Green Travel Assistant. I can help you plan eco-friendly itineraries (destinations, organic food, green transit) and answer anything about earning & redeeming ${pointsTerm}. How can I assist you today?`
-      : `Xin chào ${user.name}! Mình là EcoBot - Trợ lý Du Lịch Xanh AI của EcoStay. Mình có thể giúp bạn lên lịch trình du lịch xanh trọn gói (đi đâu, ăn gì, đi xe gì) và giải đáp mọi thắc mắc về cách tích/đổi ${pointsTerm}. Bạn cần hỗ trợ gì nè?`,
-    time: 'Vừa xong',
-    suggestions: isEn
-      ? [
-          'Plan a 2D1N green trip in Hoi An',
-          'How do I earn CP at hotels?',
-          'What can I redeem with 270 CP?',
-          'Best vegan & organic restaurants',
-        ]
-      : [
-          'Lên lịch trình 2N1Đ tại Hội An xanh',
-          'Làm sao để tích điểm CP khi lưu trú?',
-          '270 CP của tôi đổi được quà gì?',
-          'Gợi ý quán ăn thuần chay hữu cơ',
-        ],
-  };
+  const buildWelcomeMessage = useCallback((): Message => {
+    const cp = user.carbonPoints;
+    return {
+      id: 'msg-init',
+      sender: 'bot',
+      text: isEn
+        ? `Hello **${user.name}**! I am **EcoBot**, your AI Green Travel Assistant powered by OpenRouter. I can help you plan low-carbon trips in Vietnam and maximize your **${cp} ${pointsTerm}**. How can I help you today?`
+        : `Xin chào **${user.name}**! Mình là **EcoBot** – Trợ lý Du Lịch Xanh AI kết nối trực tiếp OpenRouter. Mình có thể giúp bạn lên lịch trình du lịch xanh và tư vấn tối ưu **${cp} ${pointsTerm}** hiện có. Bạn cần hỗ trợ gì nào?`,
+      time: isEn ? 'Just now' : 'Vừa xong',
+      suggestions: isEn
+        ? [
+            'Plan a 2D1N green trip in Hoi An',
+            'How do I earn CP at hotels?',
+            `What can I redeem with ${cp} CP?`,
+            'Best vegan & organic restaurants',
+          ]
+        : [
+            'Lên lịch trình 2N1Đ tại Hội An xanh',
+            'Làm sao để tích điểm CP khi lưu trú?',
+            `${cp} CP của tôi đổi được quà gì?`,
+            'Gợi ý quán ăn thuần chay hữu cơ',
+          ],
+    };
+  }, [isEn, pointsTerm, user.carbonPoints, user.name]);
 
-  const [messages, setMessages] = useState<Message[]>([initialBotMessage]);
+  const [messages, setMessages] = useState<Message[]>(() => [buildWelcomeMessage()]);
   const [inputText, setInputText] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [lastFailedPrompt, setLastFailedPrompt] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -62,178 +152,224 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
   useEffect(() => {
     setMessages((prev) => {
       if (prev.length <= 1) {
-        return [initialBotMessage];
+        return [buildWelcomeMessage()];
       }
       return prev;
     });
-  }, [currentLang, isEn, user.name]);
+  }, [buildWelcomeMessage]);
 
   useEffect(() => {
     if (isOpen) {
-      setTimeout(scrollToBottom, 100);
+      setTimeout(scrollToBottom, 80);
     }
   }, [messages, isOpen]);
 
+  // Abort active stream if modal closes
+  useEffect(() => {
+    if (!isOpen && abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setIsStreaming(false);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  const generateAIResponse = (query: string): { reply: string; suggestions?: string[] } => {
-    const q = query.toLowerCase();
-
-    // 1. Lên lịch trình Hội An
-    if (q.includes('hội an') || q.includes('hoi an') || q.includes('lịch trình') || q.includes('itinerary')) {
-      if (isEn) {
-        return {
-          reply: `🌿 **Eco-Friendly 2D1N Itinerary in Hoi An (Estimated: +140 CP)**:
-• **Day 1**:
-  - *Morning*: Check-in at **Silk Sense Hội An River Eco-Resort** (Zero-plastic hotel, +10 CP for no daily towel change).
-  - *Afternoon*: Rent an **E-Bike / Green Bike** (+20 CP) to explore the Ancient Town.
-  - *Dinner*: Farm-to-table dinner at **An Lạc Vegan Restaurant** in Trà Quế (+15 CP for booking via app, remember zero food waste!).
-• **Day 2**:
-  - *Morning*: Bamboo Basket Boat Tour at **Bảy Mẫu Coconut Forest** (+40 CP for participating in river cleanup).
-  - *Afternoon*: Pottery workshop at **Thanh Hà Pottery Village** (+40 CP) and buy handmade terracotta souvenirs (+15 CP).
-👉 Total earned: **+140 CP**, saving ~12.5 kg CO₂!`,
-          suggestions: ['How to redeem my points?', 'Rent green bike in Hoi An'],
-        };
-      }
-      return {
-        reply: `🌿 **Gợi Ý Lịch Trình 2N1Đ Du Lịch Xanh Tại Hội An (Tích lũy ước tính +140 CP)**:
-
-• **Ngày 1: Trải nghiệm lưu trú & ẩm thực xanh**
-  - **Sáng (08:30)**: Check-in tại **Silk Sense Hội An River Eco-Resort** (Khu nghỉ không rác thải nhựa, quét mã QR phòng không thay khăn ga: **+10 CP**).
-  - **Trưa (12:00)**: Thưởng thức mâm cơm thực dưỡng tại **Nhà Hàng Chay & Organic An Lạc** (Đặt bàn qua app: **+15 CP**, ăn sạch đĩa không lãng phí).
-  - **Chiều (15:00)**: Mở khóa **Xe đạp điện E-Bike** vi vu phố cổ và bãi biển An Bàng (**+20 CP**).
-  - **Tối (19:00)**: Dạo phố lồng đèn, ghé tiệm thảo mộc và check-in đối tác xanh (**+10 CP**).
-
-• **Ngày 2: Hoạt động sinh thái & làng nghề thủ công**
-  - **Sáng (08:00)**: Chèo thuyền thúng tại **Rừng Dừa Bảy Mẫu**, trải nghiệm gom rác bãi nổi cùng ngư dân (**+50 CP**).
-  - **Chiều (14:00)**: Tham gia workshop vuốt gốm tại **Làng Gốm Thanh Hà** (**+40 CP**), mua quà lưu niệm gốm mộc (**+15 CP**).
-  - **17:00**: Chia sẻ Hộ Chiếu Xanh lên mạng xã hội (**+20 CP**).
-
-👉 **Tổng điểm tích lũy: +140 CP** và giúp cắt giảm hơn **12.5 kg CO₂**!`,
-        suggestions: ['Cách đổi quà từ 270 CP', 'Quy tắc trừ điểm lãng phí', 'Lịch trình tại Cúc Phương'],
-      };
+  const formatFriendlyError = (code?: string, rawMessage?: string): string => {
+    if (code === 'MISSING_API_KEY') {
+      return isEn
+        ? 'OpenRouter API key is not configured yet. Please paste your key into `OPENROUTER_API_KEY` inside `.env.local` and restart `npm run dev`.'
+        : 'Chưa cấu hình khóa OpenRouter API. Bạn hãy dán API Key vào biến `OPENROUTER_API_KEY` trong file `.env.local` rồi khởi động lại `npm run dev` nhé!';
     }
-
-    // 2. Cách tích điểm / Nhiệm vụ
-    if (q.includes('tích điểm') || q.includes('earn') || q.includes('nhiệm vụ') || q.includes('mission')) {
-      if (isEn) {
-        return {
-          reply: `🌟 **How to earn Carbon Points (CP) with EcoStay**:
-1. **In-Room**: Refuse daily linen change (+10 CP); Turn off AC & lights when leaving (+10 CP).
-2. **Dining**: Reserve table in advance (+15 CP); Finish meal cleanly (Warning: -5 CP penalty if food wasted!).
-3. **Transit**: Ride bicycle/e-bike (+20 CP); Use public bus, train or carpool (+20 CP).
-4. **Eco-Tours**: Craft workshop (+40 CP); Local organic farm tour (+30 CP); Beach cleanup (+50 CP); Plant a native tree (+60 CP).
-5. **App Engagement**: Partner check-in (+10 CP); Share Eco-Passport (+20 CP); Friend referral (+50 CP).
-👉 All missions are verified instantly via **QR code scanning** in the "Earn Points" tab!`,
-          suggestions: ['Plan a 2D1N green trip in Hoi An', 'What can I redeem with 270 CP?'],
-        };
-      }
-      return {
-        reply: `🌟 **5 Cách Tích Lũy Điểm Cacbon (CP) cùng EcoStay**:
-
-1. 🛏️ **Trong phòng:**
-   - Không thay khăn, ga mỗi ngày: **+10 CP**
-   - Tắt điều hòa & điện nước khi ra ngoài: **+10 CP**
-2. 🍲 **Ăn uống:**
-   - Đặt bàn trước qua ứng dụng: **+15 CP**
-   - Ăn hết phần, không lãng phí thức ăn: **+10 CP** *(Lưu ý: Quán phản ánh lãng phí sẽ bị trừ 5 CP)*
-3. 🚲 **Di chuyển:**
-   - Đi xe đạp công cộng, xe điện du lịch: **+20 CP**
-   - Đi xe buýt, tàu hỏa hoặc xe đi chung: **+20 CP**
-4. 🧗 **Trải nghiệm sinh thái:**
-   - Workshop thủ công làng nghề: **+40 CP**
-   - Mua đồ handmade, đặc sản địa phương: **+15 CP**
-   - Thăm trang trại hữu cơ: **+30 CP**
-   - Tham gia dọn rác bãi biển/đường mòn: **+50 CP**
-   - Trồng 1 cây xanh bản địa: **+60 CP**
-5. 📱 **Tương tác ứng dụng:**
-   - Check-in tại đối tác xanh: **+10 CP**
-   - Chia sẻ Hộ Chiếu Xanh lên MXH: **+20 CP**
-   - Đánh giá có ảnh thực tế: **+15 CP**
-   - Giới thiệu bạn bè cài đặt app: **+50 CP**
-
-👉 Toàn bộ nhiệm vụ đều được ghi nhận bằng cách **Quét mã QR** tại Tab "Tích điểm"!`,
-        suggestions: ['Lên lịch trình 2N1Đ tại Hội An xanh', '270 CP của tôi đổi được quà gì?'],
-      };
+    if (code === 'INVALID_API_KEY') {
+      return isEn
+        ? 'Your OpenRouter API key is invalid or expired. Please check `OPENROUTER_API_KEY` in `.env.local`.'
+        : 'Khóa `OPENROUTER_API_KEY` không hợp lệ hoặc đã hết hạn. Vui lòng kiểm tra lại tại openrouter.ai/keys.';
     }
-
-    // 3. Đổi quà / Giỏ hàng xanh
-    if (q.includes('đổi') || q.includes('quà') || q.includes('redeem') || q.includes('reward') || q.includes('giỏ hàng')) {
-      if (isEn) {
-        return {
-          reply: `🎁 **With your current 270 CP balance**, you can redeem:
-• **Eco Cotton Tote Bag**: 50 CP (Free pickup at front desk)
-• **Bamboo Bottle / Straw Set**: 80 CP
-• **Trà Quế Organic Vegetable Basket**: 120 CP
-• **Eco-Resort 200,000đ Dining Voucher**: 200 CP
-• **Plant a Mangrove Tree** in your name: 250 CP
-
-👉 After redeeming, go to **Rewards > Green Cart** to show the Barcode/QR code to staff at the venue!`,
-          suggestions: ['How to use My QR Code?', 'Plan a 2D1N green trip in Hoi An'],
-        };
-      }
-      return {
-        reply: `🎁 **Với số dư 270 CP hiện tại của bạn**, bạn có thể đổi ngay:
-• 🛍️ **Túi vải Canvas EcoStay tái sinh**: 50 CP
-• 🎋 **Bộ bình tre & ống hút cỏ bàng**: 80 CP
-• 🥗 **Giỏ rau củ hữu cơ Trà Quế 3kg**: 120 CP
-• 🎟️ **Voucher ẩm thực 200.000đ tại resort**: 200 CP
-• 🌲 **Tài trợ trồng 1 cây bần chua tại rừng ngập mặn**: 250 CP
-
-👉 Sau khi đổi, quà sẽ được lưu tại mục **"Giỏ hàng xanh"** trong Tab Quà Tặng kèm mã Barcode/QR để nhân viên quét xác nhận!`,
-        suggestions: ['Lên lịch trình 2N1Đ tại Hội An xanh', 'Làm sao để tích điểm CP khi lưu trú?'],
-      };
+    if (code === 'RATE_LIMITED') {
+      return isEn
+        ? 'The free model (`inclusionai/ling-3.2-flash:free`) is currently rate-limited. Please wait a few seconds and tap Retry.'
+        : 'Model miễn phí (`inclusionai/ling-3.2-flash:free`) đang tạm quá tải (HTTP 429). Vui lòng đợi vài giây rồi bấm Thử lại nhé!';
     }
-
-    // 4. Mặc định
-    if (isEn) {
-      return {
-        reply: `🌿 EcoBot is here to assist! I can help you:
-1. Recommend certified green hotels, organic dining, and bike rentals.
-2. Build custom eco-travel itineraries.
-3. Guide you through earning Carbon Points via QR codes and redeeming them in your Green Cart.
-Feel free to ask me anything!`,
-        suggestions: ['Plan a 2D1N green trip in Hoi An', 'How do I earn CP at hotels?'],
-      };
+    if (code === 'MODEL_NOT_FOUND') {
+      return isEn
+        ? 'The configured OpenRouter model ID was not found. Please verify `OPENROUTER_MODEL` in `.env.local`.'
+        : 'Không tìm thấy mã model trong `OPENROUTER_MODEL`. Vui lòng kiểm tra lại tên model trên OpenRouter.';
     }
-
-    return {
-      reply: `🌿 EcoBot luôn sẵn sàng đồng hành cùng bạn trên hành trình du lịch bền vững! Bạn có thể hỏi mình:
-1. Gợi ý khách sạn xanh, quán ăn hữu cơ, điểm thuê xe đạp điện tại Hội An, Đà Lạt, Cúc Phương...
-2. Tự động lên lịch trình du lịch xanh 1-3 ngày kèm ước tính điểm thưởng CP.
-3. Cách quét mã QR để tích điểm hoặc dùng điểm đổi quà trong Giỏ hàng xanh.
-Bạn hãy chọn gợi ý hoặc gõ câu hỏi bên dưới nhé!`,
-      suggestions: ['Lên lịch trình 2N1Đ tại Hội An xanh', 'Làm sao để tích điểm CP khi lưu trú?', '270 CP của tôi đổi được quà gì?'],
-    };
+    return isEn
+      ? `Unable to reach EcoBot AI (${rawMessage || 'Network error'}). Please try again.`
+      : `Không thể kết nối EcoBot AI (${rawMessage || 'Lỗi mạng'}). Vui lòng bấm Thử lại.`;
   };
 
-  const handleSendMessage = (textToSend?: string) => {
-    const text = textToSend || inputText;
-    if (!text.trim()) return;
+  const handleStopStreaming = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setIsStreaming(false);
+    }
+  };
+
+  const handleResetChat = () => {
+    handleStopStreaming();
+    setLastFailedPrompt(null);
+    setMessages([buildWelcomeMessage()]);
+  };
+
+  const handleSendMessage = async (textToSend?: string) => {
+    const text = (textToSend ?? inputText).trim();
+    if (!text || isStreaming) return;
+
+    setLastFailedPrompt(null);
 
     const userMsg: Message = {
-      id: `msg-${Date.now()}`,
+      id: `msg-user-${Date.now()}`,
       sender: 'user',
       text,
-      time: 'Vừa xong',
+      time: formatCurrentTime(),
     };
 
-    setMessages((prev) => [...prev, userMsg]);
-    setInputText('');
-    setIsTyping(true);
+    const botMsgId = `msg-bot-${Date.now() + 1}`;
+    const placeholderBotMsg: Message = {
+      id: botMsgId,
+      sender: 'bot',
+      text: '',
+      time: formatCurrentTime(),
+    };
 
-    setTimeout(() => {
-      const response = generateAIResponse(text);
-      const botMsg: Message = {
-        id: `msg-${Date.now() + 1}`,
-        sender: 'bot',
-        text: response.reply,
-        time: 'Vừa xong',
-        suggestions: response.suggestions,
-      };
-      setIsTyping(false);
-      setMessages((prev) => [...prev, botMsg]);
-    }, 700);
+    // Build history payload (exclude welcome message & previous error bubbles)
+    const historyPayload = [
+      ...messages
+        .filter((m) => m.id !== 'msg-init' && !m.isError && m.text.trim().length > 0)
+        .map((m) => ({
+          role: m.sender === 'user' ? ('user' as const) : ('assistant' as const),
+          content: m.text,
+        })),
+      { role: 'user' as const, content: text },
+    ];
+
+    setMessages((prev) => [...prev, userMsg, placeholderBotMsg]);
+    if (!textToSend) setInputText('');
+    setIsStreaming(true);
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: historyPayload,
+          lang: currentLang,
+          userContext: {
+            name: user.name,
+            carbonPoints: user.carbonPoints,
+            hotelName: user.hotelName,
+            roomNumber: user.roomNumber,
+            rank: user.rank,
+            co2Saved: user.co2Saved,
+            waterSaved: user.waterSaved,
+            treesPlanted: user.treesPlanted,
+          },
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        let errCode = 'UPSTREAM_ERROR';
+        let errMessage = `HTTP ${response.status}`;
+        try {
+          const errJson = await response.json();
+          errCode = errJson.code || errCode;
+          errMessage = errJson.error || errMessage;
+        } catch {
+          // ignore
+        }
+
+        setLastFailedPrompt(text);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === botMsgId
+              ? {
+                  ...m,
+                  text: formatFriendlyError(errCode, errMessage),
+                  isError: true,
+                  errorCode: errCode,
+                }
+              : m
+          )
+        );
+        return;
+      }
+
+      if (!response.body) {
+        throw new Error('Empty response body');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        accumulated += decoder.decode(value, { stream: true });
+        const currentText = accumulated;
+        setMessages((prev) =>
+          prev.map((m) => (m.id === botMsgId ? { ...m, text: currentText } : m))
+        );
+      }
+
+      accumulated += decoder.decode();
+      if (!accumulated.trim()) {
+        setLastFailedPrompt(text);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === botMsgId
+              ? {
+                  ...m,
+                  text: isEn
+                    ? 'The model returned an empty response. Please try again.'
+                    : 'Model không trả về nội dung. Bạn vui lòng bấm Thử lại nhé!',
+                  isError: true,
+                }
+              : m
+          )
+        );
+      } else {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === botMsgId ? { ...m, text: accumulated.trim() } : m
+          )
+        );
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        // User stopped stream manually; keep partial text or clean up empty bubble
+        setMessages((prev) =>
+          prev.filter((m) => !(m.id === botMsgId && !m.text.trim()))
+        );
+        return;
+      }
+
+      const msg = error instanceof Error ? error.message : 'Network error';
+      setLastFailedPrompt(text);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === botMsgId
+            ? {
+                ...m,
+                text: formatFriendlyError('NETWORK_ERROR', msg),
+                isError: true,
+              }
+            : m
+        )
+      );
+    } finally {
+      abortControllerRef.current = null;
+      setIsStreaming(false);
+    }
   };
 
   return (
@@ -248,7 +384,6 @@ Bạn hãy chọn gợi ý hoặc gõ câu hỏi bên dưới nhé!`,
                 alt="EcoBot Avatar"
                 className="h-full w-full object-cover"
                 onError={(e) => {
-                  // Fallback if image not rendered
                   (e.target as HTMLElement).style.display = 'none';
                 }}
               />
@@ -258,49 +393,99 @@ Bạn hãy chọn gợi ý hoặc gõ câu hỏi bên dưới nhé!`,
               <div className="flex items-center gap-1.5">
                 <h3 className="text-sm font-bold text-white">EcoBot AI</h3>
                 <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="rounded-md bg-white/15 px-1.5 py-0.5 text-[9px] font-bold text-emerald-200 flex items-center gap-0.5">
+                  <Sparkles size={9} className="text-amber-300" />
+                  Ling 3.2
+                </span>
               </div>
               <p className="text-[10px] text-emerald-200">
-                {isEn ? 'Green Travel & Points AI Assistant' : 'Trợ Lý Du Lịch Xanh & Điểm Thưởng'}
+                {isEn
+                  ? 'OpenRouter Live AI • Green Travel Assistant'
+                  : 'OpenRouter AI • Trợ Lý Du Lịch Xanh'}
               </p>
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="rounded-full bg-white/10 p-1.5 text-white hover:bg-white/20 transition-colors"
-          >
-            <X size={16} />
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={handleResetChat}
+              className="rounded-full bg-white/10 p-1.5 text-white hover:bg-white/20 transition-colors"
+              title={isEn ? 'New conversation' : 'Làm mới cuộc trò chuyện'}
+            >
+              <RefreshCw size={14} />
+            </button>
+            <button
+              onClick={onClose}
+              className="rounded-full bg-white/10 p-1.5 text-white hover:bg-white/20 transition-colors"
+              title={isEn ? 'Close' : 'Đóng'}
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Chat message history */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-slate-50/70 text-xs">
           {messages.map((msg) => {
             const isUser = msg.sender === 'user';
+            const isEmptyPending = !isUser && !msg.text && isStreaming;
+
             return (
               <div
                 key={msg.id}
                 className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
               >
-                <div className="flex items-start gap-2 max-w-[88%]">
+                <div className="flex items-start gap-2 max-w-[90%]">
                   {!isUser && (
-                    <div className="h-7 w-7 rounded-full overflow-hidden shrink-0 border border-emerald-300 bg-[#1E4D3E]">
+                    <div className="h-7 w-7 rounded-full overflow-hidden shrink-0 border border-emerald-300 bg-[#1E4D3E] flex items-center justify-center relative">
                       <img
                         src="/chatbot-avatar.png"
                         alt="EcoBot"
                         className="h-full w-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = 'none';
+                        }}
                       />
+                      <Bot size={14} className="text-emerald-200 absolute -z-10" />
                     </div>
                   )}
 
                   <div
-                    className={`rounded-2xl p-3 shadow-xs leading-relaxed whitespace-pre-line ${
+                    className={`rounded-2xl p-3 shadow-xs leading-relaxed ${
                       isUser
-                        ? 'bg-[#1E4D3E] text-white rounded-tr-none'
+                        ? 'bg-[#1E4D3E] text-white rounded-tr-none whitespace-pre-line'
+                        : msg.isError
+                        ? 'bg-amber-50 text-amber-950 border border-amber-200 rounded-tl-none'
                         : 'bg-white text-slate-800 border border-slate-200/80 rounded-tl-none'
                     }`}
                   >
-                    {msg.text}
+                    {isEmptyPending ? (
+                      <div className="flex items-center gap-2 text-slate-400">
+                        <span className="flex h-2 w-2 rounded-full bg-emerald-600 animate-ping" />
+                        <span>
+                          {isEn ? 'EcoBot is thinking...' : 'EcoBot đang trả lời...'}
+                        </span>
+                      </div>
+                    ) : (
+                      <>
+                        {msg.isError && (
+                          <div className="flex items-center gap-1.5 font-bold text-amber-800 mb-1">
+                            <AlertCircle size={13} />
+                            <span>{isEn ? 'Connection Notice' : 'Thông báo kết nối'}</span>
+                          </div>
+                        )}
+                        <div>{renderMessageText(msg.text, isUser)}</div>
+                        {msg.isError && lastFailedPrompt && !isStreaming && (
+                          <button
+                            onClick={() => handleSendMessage(lastFailedPrompt)}
+                            className="mt-2 inline-flex items-center gap-1 rounded-xl bg-[#1E4D3E] px-2.5 py-1 text-[10px] font-bold text-white hover:bg-[#16392E] transition-colors"
+                          >
+                            <RotateCcw size={11} />
+                            <span>{isEn ? 'Retry' : 'Thử lại'}</span>
+                          </button>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -310,8 +495,9 @@ Bạn hãy chọn gợi ý hoặc gõ câu hỏi bên dưới nhé!`,
                     {msg.suggestions.map((sug, idx) => (
                       <button
                         key={idx}
+                        disabled={isStreaming}
                         onClick={() => handleSendMessage(sug)}
-                        className="rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-[#1E4D3E] hover:bg-emerald-100 transition-colors shadow-2xs"
+                        className="rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-[#1E4D3E] hover:bg-emerald-100 disabled:opacity-50 transition-colors shadow-2xs"
                       >
                         💡 {sug}
                       </button>
@@ -321,13 +507,6 @@ Bạn hãy chọn gợi ý hoặc gõ câu hỏi bên dưới nhé!`,
               </div>
             );
           })}
-
-          {isTyping && (
-            <div className="flex items-center gap-2 text-slate-400 text-xs pl-9">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-600 animate-ping" />
-              <span>EcoBot đang soạn câu trả lời...</span>
-            </div>
-          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -343,17 +522,34 @@ Bạn hãy chọn gợi ý hoặc gõ câu hỏi bên dưới nhé!`,
             <input
               type="text"
               value={inputText}
+              disabled={isStreaming}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder={isEn ? 'Ask EcoBot anything...' : 'Hỏi EcoBot về lịch trình, cách tích điểm...'}
-              className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:border-emerald-600 focus:bg-white focus:outline-none transition-all"
+              placeholder={
+                isEn
+                  ? 'Ask EcoBot anything...'
+                  : 'Hỏi EcoBot về lịch trình, cách tích điểm...'
+              }
+              className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:border-emerald-600 focus:bg-white focus:outline-none disabled:opacity-60 transition-all"
             />
-            <button
-              type="submit"
-              disabled={!inputText.trim()}
-              className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#1E4D3E] text-white shadow-sm hover:bg-[#16392E] disabled:opacity-40 transition-all shrink-0"
-            >
-              <Send size={15} />
-            </button>
+            {isStreaming ? (
+              <button
+                type="button"
+                onClick={handleStopStreaming}
+                className="flex h-9 w-9 items-center justify-center rounded-2xl bg-rose-600 text-white shadow-sm hover:bg-rose-700 transition-all shrink-0"
+                title={isEn ? 'Stop generating' : 'Dừng trả lời'}
+              >
+                <Square size={13} className="fill-current" />
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={!inputText.trim()}
+                className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#1E4D3E] text-white shadow-sm hover:bg-[#16392E] disabled:opacity-40 transition-all shrink-0"
+                title={isEn ? 'Send' : 'Gửi'}
+              >
+                <Send size={15} />
+              </button>
+            )}
           </form>
         </div>
       </div>
