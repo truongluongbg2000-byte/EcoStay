@@ -15,16 +15,25 @@ import {
   VideoOff,
   Copy,
   Check,
-  Building2
+  Building2,
+  ImageUp,
+  XCircle,
+  AlertTriangle
 } from 'lucide-react';
 import { UserProfile } from '@/data/types';
 import { triggerEcoConfetti } from './Confetti';
+
+export interface LiveQRScanResult {
+  status: 'success' | 'already_completed' | 'invalid';
+  message: string;
+  points?: number;
+}
 
 interface TabScannerProps {
   user: UserProfile;
   currentLang?: 'vi' | 'en';
   onSimulateQRScan: (type: 'room' | 'food' | 'transport') => void;
-  onLiveQRScan: (decodedData: string) => void;
+  onLiveQRScan: (decodedData: string) => LiveQRScanResult | void;
 }
 
 export const TabScanner: React.FC<TabScannerProps> = ({
@@ -40,17 +49,47 @@ export const TabScanner: React.FC<TabScannerProps> = ({
   // Camera Refs & States
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const animFrameIdRef = useRef<number | null>(null);
   const lastScannedTimeRef = useRef<number>(0);
   const lastScannedCodeRef = useRef<string>('');
+  const resultTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [cameraActive, setCameraActive] = useState<boolean>(false);
   const [cameraPermissionError, setCameraPermissionError] = useState<string | null>(null);
   const [flashlightOn, setFlashlightOn] = useState<boolean>(false);
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
-  const [scanResult, setScanResult] = useState<string | null>(null);
+  const [scanFeedback, setScanFeedback] = useState<LiveQRScanResult | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+  const processDecodedCode = useCallback(
+    (decodedText: string) => {
+      const result = onLiveQRScan(decodedText);
+      const feedback: LiveQRScanResult = result || {
+        status: 'success',
+        message: isEn
+          ? `Recognized: ${decodedText.slice(0, 36)}`
+          : `Đã nhận diện: ${decodedText.slice(0, 36)}`,
+      };
+
+      if (feedback.status === 'success') {
+        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+          navigator.vibrate([100, 50, 100]);
+        }
+        triggerEcoConfetti();
+      } else if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        navigator.vibrate(140);
+      }
+
+      setScanFeedback(feedback);
+      if (resultTimerRef.current) clearTimeout(resultTimerRef.current);
+      resultTimerRef.current = setTimeout(() => {
+        setScanFeedback(null);
+      }, 3800);
+    },
+    [isEn, onLiveQRScan]
+  );
 
   // Stop camera tracks cleanly
   const stopCamera = useCallback(() => {
@@ -70,7 +109,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
-    if (video && canvas && video.readyState === video.HAVE_ENOUGH_DATA) {
+    if (video && canvas && video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
       if (ctx) {
         canvas.width = video.videoWidth;
@@ -79,7 +118,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
 
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: 'dontInvert',
+          inversionAttempts: 'attemptBoth',
         });
 
         if (code && code.data) {
@@ -87,29 +126,14 @@ export const TabScanner: React.FC<TabScannerProps> = ({
           if (code.data !== lastScannedCodeRef.current || now - lastScannedTimeRef.current > 3000) {
             lastScannedTimeRef.current = now;
             lastScannedCodeRef.current = code.data;
-
-            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-              navigator.vibrate([100, 50, 100]);
-            }
-
-            triggerEcoConfetti();
-            setScanResult(
-              isEn
-                ? `Recognized: ${code.data.slice(0, 36)}${code.data.length > 36 ? '...' : ''}`
-                : `Đã nhận diện: ${code.data.slice(0, 36)}${code.data.length > 36 ? '...' : ''}`
-            );
-            onLiveQRScan(code.data);
-
-            setTimeout(() => {
-              setScanResult(null);
-            }, 4000);
+            processDecodedCode(code.data);
           }
         }
       }
     }
 
     animFrameIdRef.current = requestAnimationFrame(scanFrame);
-  }, [onLiveQRScan]);
+  }, [processDecodedCode]);
 
   // Start live camera stream
   const startCamera = useCallback(async () => {
@@ -192,16 +216,45 @@ export const TabScanner: React.FC<TabScannerProps> = ({
     setFacingMode((prev) => (prev === 'environment' ? 'user' : 'environment'));
   };
 
-  const handleSimulateScan = (type: 'room' | 'food' | 'transport', title: string) => {
-    setScanResult(isEn ? `Recognizing: ${title}...` : `Đang nhận diện: ${title}...`);
-    setTimeout(() => {
-      triggerEcoConfetti();
-      onSimulateQRScan(type);
-      setScanResult(
-        isEn ? `Success! Verified QR: ${title}` : `Thành công! Đã ghi nhận mã QR ${title}`
-      );
-      setTimeout(() => setScanResult(null), 3500);
-    }, 700);
+  const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    const imgUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const offscreen = document.createElement('canvas');
+        offscreen.width = img.width;
+        offscreen.height = img.height;
+        const ctx = offscreen.getContext('2d', { willReadFrequently: true });
+        if (!ctx) return;
+
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, offscreen.width, offscreen.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: 'attemptBoth',
+        });
+
+        if (code && code.data) {
+          processDecodedCode(code.data);
+        } else {
+          setScanFeedback({
+            status: 'invalid',
+            message: isEn
+              ? 'No readable QR code found in the selected image.'
+              : 'Không tìm thấy mã QR hợp lệ trong ảnh vừa chọn.',
+          });
+          if (resultTimerRef.current) clearTimeout(resultTimerRef.current);
+          resultTimerRef.current = setTimeout(() => setScanFeedback(null), 3500);
+        }
+      } finally {
+        URL.revokeObjectURL(imgUrl);
+      }
+    };
+    img.onerror = () => URL.revokeObjectURL(imgUrl);
+    img.src = imgUrl;
   };
 
   const handleCopyMemberCode = () => {
@@ -213,6 +266,13 @@ export const TabScanner: React.FC<TabScannerProps> = ({
   return (
     <div className="space-y-4 px-4 pt-3 pb-8 text-left">
       <canvas ref={canvasRef} className="hidden" />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageFileUpload}
+        className="hidden"
+      />
 
       {/* 1. Mode Switcher: [ Quét mã QR ] vs [ MÃ QR CỦA TÔI ] */}
       <div className="flex rounded-2xl bg-emerald-100/60 p-1">
@@ -357,52 +417,38 @@ export const TabScanner: React.FC<TabScannerProps> = ({
               )}
             </div>
 
-            {scanResult && (
-              <div className="mt-2 rounded-2xl bg-emerald-500/25 border border-emerald-400/60 p-2.5 text-center text-xs font-bold text-emerald-300 animate-fadeIn">
-                ✨ {scanResult}
+            {scanFeedback && (
+              <div
+                className={`mt-2 rounded-2xl p-2.5 text-center text-xs font-bold animate-fadeIn flex items-center justify-center gap-1.5 border ${
+                  scanFeedback.status === 'success'
+                    ? 'bg-emerald-500/25 border-emerald-400/60 text-emerald-300'
+                    : scanFeedback.status === 'already_completed'
+                    ? 'bg-amber-500/20 border-amber-400/60 text-amber-200'
+                    : 'bg-rose-500/25 border-rose-400/60 text-rose-200'
+                }`}
+              >
+                {scanFeedback.status === 'success' && <CheckCircle2 size={15} className="shrink-0" />}
+                {scanFeedback.status === 'already_completed' && <AlertTriangle size={15} className="shrink-0" />}
+                {scanFeedback.status === 'invalid' && <XCircle size={15} className="shrink-0" />}
+                <span>{scanFeedback.message}</span>
               </div>
             )}
 
-            {/* Quick Simulation Buttons */}
+            {/* Scan from Real QR Image File (decodes via jsQR) */}
             <div className="mt-3 text-center border-t border-white/10 pt-2.5">
-              <p className="text-[10px] uppercase tracking-wider text-emerald-300/80 font-semibold mb-2">
-                {isEn ? 'Or choose test scenarios:' : 'Hoặc chọn kịch bản mẫu nhanh:'}
+              <p className="text-[10px] text-slate-400 mb-2">
+                {isEn
+                  ? 'Scan any of the 15 official EcoStay mission QR codes to earn real CP'
+                  : 'Quét bất kỳ mã nào trong 15 mã nhiệm vụ EcoStay để cộng điểm CP thật'}
               </p>
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  onClick={() =>
-                    handleSimulateScan(
-                      'room',
-                      isEn ? 'In-Room Eco Card' : 'Thẻ Phòng Xanh'
-                    )
-                  }
-                  className="rounded-xl bg-white/10 p-2 text-[11px] font-semibold text-white hover:bg-emerald-600/40 active:scale-95 transition-all border border-white/10"
-                >
-                  {isEn ? '🏷️ In-Room' : '🏷️ Buồng phòng'}
-                </button>
-                <button
-                  onClick={() =>
-                    handleSimulateScan(
-                      'food',
-                      isEn ? 'Clean Plate Zero Waste' : 'Bàn Ăn Zero Waste'
-                    )
-                  }
-                  className="rounded-xl bg-white/10 p-2 text-[11px] font-semibold text-white hover:bg-emerald-600/40 active:scale-95 transition-all border border-white/10"
-                >
-                  {isEn ? '🍽️ Clean Plate' : '🍽️ Ăn sạch đĩa'}
-                </button>
-                <button
-                  onClick={() =>
-                    handleSimulateScan(
-                      'transport',
-                      isEn ? 'Green E-Bike Ride' : 'Xe Điện Xanh SM'
-                    )
-                  }
-                  className="rounded-xl bg-white/10 p-2 text-[11px] font-semibold text-white hover:bg-emerald-600/40 active:scale-95 transition-all border border-white/10"
-                >
-                  {isEn ? '🚗 E-Bike / Bus' : '🚗 Xe điện / Bus'}
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 px-3 py-2.5 text-xs font-bold text-emerald-200 hover:bg-emerald-600/30 active:scale-98 transition-all border border-white/15"
+              >
+                <ImageUp size={15} />
+                <span>{isEn ? 'Scan from QR Image File' : 'Quét từ ảnh mã QR có sẵn'}</span>
+              </button>
             </div>
           </div>
         </div>

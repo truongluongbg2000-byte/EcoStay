@@ -293,45 +293,40 @@ export default function EcoStayApp() {
     handleCompleteMission(targetMissionId);
   };
 
-  // Handler: Live Camera QR Scan (jsQR)
-  const handleLiveQRScan = (decodedData: string) => {
-    triggerEcoConfetti();
+  // Handler: Live Camera QR Scan (Strict verification against all 15 EcoStay missions)
+  const handleLiveQRScan = (
+    decodedData: string
+  ): { status: 'success' | 'already_completed' | 'invalid'; message: string; points?: number } => {
+    const cleaned = decodedData.trim();
 
-    // Check if matches mission
     const matchingMission = missions.find(
-      (m) => m.qrSampleCode && decodedData.includes(m.qrSampleCode)
+      (m) => m.qrSampleCode && (cleaned === m.qrSampleCode || cleaned.includes(m.qrSampleCode))
     );
 
-    if (matchingMission) {
-      handleCompleteMission(matchingMission.id);
-      return;
+    if (!matchingMission) {
+      const invalidMsg =
+        currentLang === 'en'
+          ? 'Invalid QR code — not a certified EcoStay mission QR.'
+          : 'Mã QR không hợp lệ — không thuộc hệ thống nhiệm vụ EcoStay.';
+      showToast(invalidMsg);
+      return { status: 'invalid', message: invalidMsg };
     }
 
-    // Default recognition
-    const pointsAwarded = 25;
-    setUser((prev) => ({
-      ...prev,
-      carbonPoints: prev.carbonPoints + pointsAwarded,
-      co2Saved: Number((prev.co2Saved + 1.8).toFixed(1)),
-    }));
+    if (matchingMission.completed) {
+      const alreadyMsg =
+        currentLang === 'en'
+          ? `Mission "${matchingMission.title}" was already completed!`
+          : `Nhiệm vụ "${matchingMission.title}" đã được quét trước đó rồi!`;
+      showToast(alreadyMsg);
+      return { status: 'already_completed', message: alreadyMsg };
+    }
 
-    const newLog: ImpactLog = {
-      id: `log-${Date.now()}`,
-      date: currentLang === 'en' ? 'Just now' : 'Vừa xong',
-      title: 'Quét mã QR đối tác xanh',
-      points: pointsAwarded,
-      type: 'earn',
-      detail: `Mã: ${decodedData.slice(0, 32)}... (+${pointsAwarded} CP)`,
-    };
-
-    setLogs((prev) => [newLog, ...prev]);
-
-    showToast(
+    handleCompleteMission(matchingMission.id);
+    const successMsg =
       currentLang === 'en'
-        ? `QR Code verified! +${pointsAwarded} CP added.`
-        : `Quét mã thành công! +${pointsAwarded} CP đã cộng vào tài khoản.`,
-      <CheckCircle2 size={16} className="text-emerald-400" />
-    );
+        ? `+${matchingMission.points} CP! Completed "${matchingMission.title}"`
+        : `+${matchingMission.points} CP! Đã xác thực "${matchingMission.title}"`;
+    return { status: 'success', message: successMsg, points: matchingMission.points };
   };
 
   // Handler: Feedback Submit
