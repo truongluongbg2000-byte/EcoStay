@@ -111,7 +111,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
   currentLang = 'vi',
 }) => {
   const isEn = currentLang === 'en';
-  const pointsTerm = isEn ? 'Carbon Points (CP)' : 'Điểm Cacbon (CP)';
+  const pointsTerm = isEn ? 'Carbon Points (CB)' : 'Điểm Cacbon (CB)';
 
   const buildWelcomeMessage = useCallback((): Message => {
     const cp = user.carbonPoints;
@@ -125,14 +125,14 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
       suggestions: isEn
         ? [
             'Plan a 2D1N green trip in Hoi An',
-            'How do I earn CP at hotels?',
-            `What can I redeem with ${cp} CP?`,
+            'How do I earn CB at hotels?',
+            `What can I redeem with ${cp} CB?`,
             'Best vegan & organic restaurants',
           ]
         : [
             'Lên lịch trình 2N1Đ tại Hội An xanh',
-            'Làm sao để tích điểm CP khi lưu trú?',
-            `${cp} CP của tôi đổi được quà gì?`,
+            'Làm sao để tích điểm CB khi lưu trú?',
+            `${cp} CB của tôi đổi được quà gì?`,
             'Gợi ý quán ăn thuần chay hữu cơ',
           ],
     };

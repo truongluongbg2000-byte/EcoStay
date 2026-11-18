@@ -105,8 +105,8 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
         setScanStatus('success');
         setStatusMessage(
           isEn
-            ? `+${activeMission.points} CP has been added to your account!`
-            : `Đã cộng thật +${activeMission.points} CP vào tài khoản của bạn!`
+            ? `+${activeMission.points} CB has been added to your account!`
+            : `Đã cộng thật +${activeMission.points} CB vào tài khoản của bạn!`
         );
 
         if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
@@ -114,7 +114,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
         }
 
         triggerEcoConfetti();
-        // 3. Award real CP points & save to LocalStorage
+        // 3. Award real CB points & save to LocalStorage
         onSuccessRef.current(activeMission.id);
         return;
       }
@@ -321,11 +321,10 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
         <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
           <div className="flex items-center gap-2">
             <div
-              className={`flex h-8 w-8 items-center justify-center rounded-xl ${
-                scanStatus === 'success'
+              className={`flex h-8 w-8 items-center justify-center rounded-xl ${scanStatus === 'success'
                   ? 'bg-emerald-500 text-white'
                   : 'bg-emerald-100 text-emerald-800'
-              }`}
+                }`}
             >
               {scanStatus === 'success' ? <CheckCircle2 size={18} /> : <Camera size={17} />}
             </div>
@@ -336,8 +335,8 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
                     ? 'Mission Completed!'
                     : 'Hoàn Thành Nhiệm Vụ!'
                   : isEn
-                  ? 'Live Mission QR Scanner'
-                  : 'Quét Camera Nhiệm Vụ Xanh'}
+                    ? 'Live Mission QR Scanner'
+                    : 'Quét Camera Nhiệm Vụ Xanh'}
               </h3>
               <p className="text-[10px] text-emerald-700 font-semibold">
                 {mission.categoryName}
@@ -365,7 +364,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
 
             <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3.5 py-1 text-sm font-black text-[#1E4D3E] border border-emerald-200">
               <Sparkles size={15} className="text-amber-500" />
-              <span>+{mission.points} CP</span>
+              <span>+{mission.points} CB</span>
             </div>
 
             <h4 className="mt-2.5 text-sm font-extrabold text-slate-900 px-2 leading-snug">
@@ -379,10 +378,10 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
             {typeof userPoints === 'number' && (
               <div className="mt-3 rounded-2xl bg-emerald-50/80 border border-emerald-100 px-3.5 py-2.5 flex items-center justify-between text-xs">
                 <span className="font-semibold text-slate-600">
-                  {isEn ? 'Updated CP Balance:' : 'Số dư điểm CP hiện tại:'}
+                  {isEn ? 'Updated CB Balance:' : 'Số dư điểm CB hiện tại:'}
                 </span>
                 <span className="text-sm font-black text-[#1E4D3E]">
-                  {userPoints.toLocaleString()} CP
+                  {userPoints.toLocaleString()} CB
                 </span>
               </div>
             )}
@@ -434,7 +433,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
                   {mission.title}
                 </h4>
                 <span className="shrink-0 rounded-full bg-[#1E4D3E] px-2.5 py-0.5 text-xs font-extrabold text-white">
-                  +{mission.points} CP
+                  +{mission.points} CB
                 </span>
               </div>
               {mission.subtitle && (
@@ -447,8 +446,8 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
                   <AlertTriangle size={12} className="shrink-0" />
                   <span>
                     {isEn
-                      ? 'Partner food-waste report applies a -5 CP penalty.'
-                      : 'Nếu quán đối tác phản ánh lãng phí thức ăn sẽ bị trừ 5 CP.'}
+                      ? 'Partner food-waste report applies a -5 CB penalty.'
+                      : 'Nếu quán đối tác phản ánh lãng phí thức ăn sẽ bị trừ 5 CB.'}
                   </span>
                 </div>
               )}
@@ -456,11 +455,10 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
 
             {/* Live Camera Viewfinder */}
             <div
-              className={`relative mx-auto h-64 w-full overflow-hidden rounded-2xl bg-slate-950 border-2 shadow-inner transition-colors ${
-                scanStatus === 'mismatch'
+              className={`relative mx-auto h-64 w-full overflow-hidden rounded-2xl bg-slate-950 border-2 shadow-inner transition-colors ${scanStatus === 'mismatch'
                   ? 'border-rose-500'
                   : 'border-emerald-500/70'
-              }`}
+                }`}
             >
               <video
                 ref={videoRef}
@@ -475,24 +473,20 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                   <div className="relative h-44 w-44 rounded-2xl border border-white/25 shadow-[0_0_0_9999px_rgba(0,0,0,0.42)]">
                     <div
-                      className={`absolute -top-0.5 -left-0.5 h-6 w-6 rounded-tl-xl border-t-4 border-l-4 ${
-                        scanStatus === 'mismatch' ? 'border-rose-400' : 'border-emerald-400'
-                      }`}
+                      className={`absolute -top-0.5 -left-0.5 h-6 w-6 rounded-tl-xl border-t-4 border-l-4 ${scanStatus === 'mismatch' ? 'border-rose-400' : 'border-emerald-400'
+                        }`}
                     />
                     <div
-                      className={`absolute -top-0.5 -right-0.5 h-6 w-6 rounded-tr-xl border-t-4 border-r-4 ${
-                        scanStatus === 'mismatch' ? 'border-rose-400' : 'border-emerald-400'
-                      }`}
+                      className={`absolute -top-0.5 -right-0.5 h-6 w-6 rounded-tr-xl border-t-4 border-r-4 ${scanStatus === 'mismatch' ? 'border-rose-400' : 'border-emerald-400'
+                        }`}
                     />
                     <div
-                      className={`absolute -bottom-0.5 -left-0.5 h-6 w-6 rounded-bl-xl border-b-4 border-l-4 ${
-                        scanStatus === 'mismatch' ? 'border-rose-400' : 'border-emerald-400'
-                      }`}
+                      className={`absolute -bottom-0.5 -left-0.5 h-6 w-6 rounded-bl-xl border-b-4 border-l-4 ${scanStatus === 'mismatch' ? 'border-rose-400' : 'border-emerald-400'
+                        }`}
                     />
                     <div
-                      className={`absolute -bottom-0.5 -right-0.5 h-6 w-6 rounded-br-xl border-b-4 border-r-4 ${
-                        scanStatus === 'mismatch' ? 'border-rose-400' : 'border-emerald-400'
-                      }`}
+                      className={`absolute -bottom-0.5 -right-0.5 h-6 w-6 rounded-br-xl border-b-4 border-r-4 ${scanStatus === 'mismatch' ? 'border-rose-400' : 'border-emerald-400'
+                        }`}
                     />
                     <div className="absolute top-2 left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_12px_#34d399] animate-[bounce_2s_infinite]" />
                   </div>
@@ -505,11 +499,10 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
                   <button
                     type="button"
                     onClick={toggleFlashlight}
-                    className={`flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-md transition-colors ${
-                      flashlightOn
+                    className={`flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-md transition-colors ${flashlightOn
                         ? 'bg-amber-400 text-slate-900'
                         : 'bg-black/50 text-white hover:bg-black/70'
-                    }`}
+                      }`}
                     title={isEn ? 'Toggle Flashlight' : 'Bật/Tắt đèn Flash'}
                   >
                     <Flashlight size={14} />

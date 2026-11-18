@@ -1,24 +1,24 @@
 'use client';
 
 import React from 'react';
-import { Bell, Sparkles, UserCheck } from 'lucide-react';
+import { Bell, Sparkles } from 'lucide-react';
 import { UserProfile } from '@/data/types';
 import { rankTranslations } from '@/data/translations';
 
 interface HeaderProps {
   user: UserProfile;
   currentLang?: 'vi' | 'en';
+  unreadNotificationsCount?: number;
   onOpenNotifications: () => void;
   onOpenProfile: () => void;
-  onOpenAuth?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   user,
   currentLang = 'vi',
+  unreadNotificationsCount = 0,
   onOpenNotifications,
   onOpenProfile,
-  onOpenAuth,
 }) => {
   const isEn = currentLang === 'en';
   const displayRank = isEn ? rankTranslations[user.rank] || user.rank : user.rank;
@@ -28,9 +28,9 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center justify-between">
         {/* User Info & Avatar */}
         <div
-          onClick={onOpenAuth || onOpenProfile}
+          onClick={onOpenProfile}
           className="flex items-center gap-3 cursor-pointer group"
-          title={isEn ? 'Click to switch account' : 'Nhấn để đổi tài khoản'}
+          title={isEn ? 'Open Profile & Settings' : 'Mở Hồ sơ & Cài đặt'}
         >
           <div className="relative">
             <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-emerald-300 shadow-sm transition-transform group-hover:scale-105">
@@ -57,22 +57,15 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Right side: Switch button + Points pill + Bell */}
-        <div className="flex items-center gap-1.5">
-          {onOpenAuth && (
-            <button
-              onClick={onOpenAuth}
-              className="flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-[10px] font-bold text-emerald-200 border border-white/10 hover:bg-white/20 transition-colors shadow-2xs"
-              title={isEn ? 'Switch Account' : 'Đổi tài khoản'}
-            >
-              <UserCheck size={12} className="text-amber-300" />
-              <span>{isEn ? 'Switch' : 'Đổi TK'}</span>
-            </button>
-          )}
-
+        {/* Right side: CB Points pill + Bell (red dot only when unread > 0) */}
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-xs font-bold text-emerald-300 border border-white/10 backdrop-blur-sm">
-            <Sparkles size={13} className="text-amber-400 animate-spin" style={{ animationDuration: '6s' }} />
-            <span>{user.carbonPoints} CP</span>
+            <Sparkles
+              size={13}
+              className="text-amber-400 animate-spin"
+              style={{ animationDuration: '6s' }}
+            />
+            <span>{user.carbonPoints} CB</span>
           </div>
 
           <button
@@ -81,9 +74,11 @@ export const Header: React.FC<HeaderProps> = ({
             aria-label={isEn ? 'Notifications' : 'Thông báo'}
           >
             <Bell size={18} />
-            <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#D97736] px-1 text-[9px] font-extrabold text-white shadow">
-              99+
-            </span>
+            {unreadNotificationsCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-extrabold text-white shadow ring-2 ring-[#1E4D3E]">
+                {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+              </span>
+            )}
           </button>
         </div>
       </div>

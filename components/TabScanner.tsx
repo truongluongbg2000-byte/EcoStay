@@ -65,7 +65,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
   const resultTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isPausedForSuccessRef = useRef<boolean>(false);
 
-  // Keep latest scan handler in ref so parent CP/mission updates never restart camera
+  // Keep latest scan handler in ref so parent CB/mission updates never restart camera
   const onLiveQRScanRef = useRef(onLiveQRScan);
   onLiveQRScanRef.current = onLiveQRScan;
 
@@ -335,7 +335,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
               {typeof completedScan.points === 'number' && (
                 <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-4 py-1 text-base font-black text-[#1E4D3E] border border-emerald-200">
                   <Sparkles size={16} className="text-amber-500" />
-                  <span>+{completedScan.points} CP</span>
+                  <span>+{completedScan.points} CB</span>
                 </div>
               )}
 
@@ -354,10 +354,10 @@ export const TabScanner: React.FC<TabScannerProps> = ({
               {/* Live Updated Balance Box */}
               <div className="mt-4 rounded-2xl bg-emerald-50/80 border border-emerald-100 px-4 py-3 flex items-center justify-between text-xs">
                 <span className="font-semibold text-slate-600">
-                  {isEn ? 'Current Carbon Points:' : 'Số dư điểm CP hiện tại:'}
+                  {isEn ? 'Current Carbon Points:' : 'Số dư điểm CB hiện tại:'}
                 </span>
                 <span className="text-base font-black text-[#1E4D3E]">
-                  {user.carbonPoints.toLocaleString()} CP
+                  {user.carbonPoints.toLocaleString()} CB
                 </span>
               </div>
 
@@ -524,8 +524,8 @@ export const TabScanner: React.FC<TabScannerProps> = ({
                 <div className="mt-3 text-center border-t border-white/10 pt-2.5">
                   <p className="text-[10px] text-slate-400 mb-2">
                     {isEn
-                      ? 'Scan any of the 15 official EcoStay mission QR codes to earn real CP'
-                      : 'Quét bất kỳ mã nào trong 15 mã nhiệm vụ EcoStay để cộng điểm CP thật'}
+                      ? 'Scan any of the 15 official EcoStay mission QR codes to earn real CB'
+                      : 'Quét bất kỳ mã nào trong 15 mã nhiệm vụ EcoStay để cộng điểm CB thật'}
                   </p>
                   <button
                     type="button"
@@ -566,7 +566,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
             <p className="text-[10px] text-emerald-200">
               {isEn ? 'CURRENT BALANCE' : 'SỐ DƯ HIỆN CÓ'}
             </p>
-            <p className="text-2xl font-black">{user.carbonPoints} CP</p>
+            <p className="text-2xl font-black">{user.carbonPoints} CB</p>
           </div>
 
           {/* Member QR Code */}

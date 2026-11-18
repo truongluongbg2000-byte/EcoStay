@@ -7,7 +7,8 @@ import {
   initialRewards,
   initialVouchers,
   initialImpactLogs,
-  initialMissions
+  initialMissions,
+  initialNotifications
 } from '@/data/mockData';
 import {
   UserProfile,
@@ -15,7 +16,8 @@ import {
   RewardItem,
   Voucher,
   ImpactLog,
-  DetailedMission
+  DetailedMission,
+  AppNotification
 } from '@/data/types';
 import { Header } from '@/components/Header';
 import { BottomNav, TabId } from '@/components/BottomNav';
@@ -46,6 +48,7 @@ const STORAGE_KEY_LOGS = 'ecostay_logs_v5';
 const STORAGE_KEY_MISSIONS = 'ecostay_missions_v5';
 const STORAGE_KEY_LANG = 'ecostay_lang_v5';
 const STORAGE_KEY_ACTIVE_ACCOUNT = 'ecostay_active_account_v5';
+const STORAGE_KEY_NOTIFICATIONS = 'ecostay_notifications_v5';
 
 export default function EcoStayApp() {
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -59,6 +62,7 @@ export default function EcoStayApp() {
   const [vouchers, setVouchers] = useState<Voucher[]>(initialVouchers);
   const [logs, setLogs] = useState<ImpactLog[]>(initialImpactLogs);
   const [missions, setMissions] = useState<DetailedMission[]>(initialMissions);
+  const [notifications, setNotifications] = useState<AppNotification[]>(initialNotifications);
   const [currentLang, setCurrentLang] = useState<'vi' | 'en'>('vi');
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -108,6 +112,9 @@ export default function EcoStayApp() {
 
       const savedLang = localStorage.getItem(STORAGE_KEY_LANG);
       if (savedLang === 'vi' || savedLang === 'en') setCurrentLang(savedLang);
+
+      const savedNotifs = localStorage.getItem(STORAGE_KEY_NOTIFICATIONS);
+      if (savedNotifs) setNotifications(JSON.parse(savedNotifs));
     } catch (e) {
       console.warn('LocalStorage load failed', e);
     } finally {
@@ -125,10 +132,28 @@ export default function EcoStayApp() {
       localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));
       localStorage.setItem(STORAGE_KEY_MISSIONS, JSON.stringify(missions));
       localStorage.setItem(STORAGE_KEY_LANG, currentLang);
+      localStorage.setItem(STORAGE_KEY_NOTIFICATIONS, JSON.stringify(notifications));
     } catch (e) {
       console.warn('LocalStorage save failed', e);
     }
-  }, [user, vouchers, logs, missions, currentLang, currentAccountId, isLoaded]);
+  }, [user, vouchers, logs, missions, notifications, currentLang, currentAccountId, isLoaded]);
+
+  const handleMarkNotificationRead = (notifId: string) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === notifId ? { ...n, isRead: true } : n))
+    );
+  };
+
+  const handleMarkAllNotificationsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    showToast(
+      currentLang === 'en'
+        ? 'All notifications marked as read.'
+        : 'Đã đánh dấu đọc tất cả thông báo.',
+      <CheckCircle2 size={16} className="text-emerald-400" />,
+      2000
+    );
+  };
 
   // Handler: Complete Mission in "Tích Điểm" via QR Scan
   const handleCompleteMission = (missionId: string) => {
@@ -172,15 +197,30 @@ export default function EcoStayApp() {
       type: 'earn',
       detail:
         mission.subtitle ||
-        `Quét mã QR hoàn thành nhiệm vụ ${mission.categoryName} (+${pointsAdded} CP)`,
+        `Quét mã QR hoàn thành nhiệm vụ ${mission.categoryName} (+${pointsAdded} CB)`,
     };
 
     setLogs((prev) => [newLog, ...prev]);
 
+    const newNotif: AppNotification = {
+      id: `notif-${Date.now()}`,
+      title: `Cộng +${pointsAdded} CB từ nhiệm vụ xanh`,
+      titleEn: `+${pointsAdded} CB Earned from Eco Mission`,
+      desc: mission.title,
+      descEn: mission.title,
+      detail: `Chúc mừng! Bạn vừa quét mã QR xác nhận hoàn thành nhiệm vụ "${mission.title}" và nhận ngay +${pointsAdded} CB vào tài khoản.`,
+      detailEn: `Congratulations! You verified "${mission.title}" via QR scan and received +${pointsAdded} CB in your balance.`,
+      time: 'Vừa xong',
+      timeEn: 'Just now',
+      category: 'points',
+      isRead: false,
+    };
+    setNotifications((prev) => [newNotif, ...prev]);
+
     showToast(
       currentLang === 'en'
-        ? `+${pointsAdded} CP earned from "${mission.title}"!`
-        : `+${pointsAdded} CP! Đã quét mã xác nhận "${mission.title}"`,
+        ? `+${pointsAdded} CB earned from "${mission.title}"!`
+        : `+${pointsAdded} CB! Đã quét mã xác nhận "${mission.title}"`,
       <CheckCircle2 size={16} className="text-emerald-400" />
     );
   };
@@ -199,15 +239,15 @@ export default function EcoStayApp() {
       title: `Đặt dịch vụ xanh: ${dest.name}`,
       points: dest.pointsReward,
       type: 'earn',
-      detail: `Check-in cơ sở xanh ${dest.location} (+${dest.pointsReward} CP)`,
+      detail: `Check-in cơ sở xanh ${dest.location} (+${dest.pointsReward} CB)`,
     };
 
     setLogs((prev) => [newLog, ...prev]);
 
     showToast(
       currentLang === 'en'
-        ? `Booked at ${dest.name}! +${dest.pointsReward} CP added.`
-        : `Đã kết nối dịch vụ ${dest.name}! +${dest.pointsReward} CP`,
+        ? `Booked at ${dest.name}! +${dest.pointsReward} CB added.`
+        : `Đã kết nối dịch vụ ${dest.name}! +${dest.pointsReward} CB`,
       <Sparkles size={16} className="text-amber-400" />
     );
   };
@@ -259,7 +299,7 @@ export default function EcoStayApp() {
       title: `Đổi quà: ${reward.title}`,
       points: -reward.points,
       type: 'redeem',
-      detail: `Đã đổi quà thành công và lưu vào Giỏ hàng xanh (-${reward.points} CP)`,
+      detail: `Đã đổi quà thành công và lưu vào Giỏ hàng xanh (-${reward.points} CB)`,
     };
 
     setLogs((prev) => [newLog, ...prev]);
@@ -345,8 +385,8 @@ export default function EcoStayApp() {
     handleCompleteMission(matchingMission.id);
     const successMsg =
       currentLang === 'en'
-        ? `+${matchingMission.points} CP! Completed "${matchingMission.title}"`
-        : `+${matchingMission.points} CP! Đã xác thực "${matchingMission.title}"`;
+        ? `+${matchingMission.points} CB! Completed "${matchingMission.title}"`
+        : `+${matchingMission.points} CB! Đã xác thực "${matchingMission.title}"`;
     return {
       status: 'success',
       message: successMsg,
@@ -370,15 +410,15 @@ export default function EcoStayApp() {
       title: 'Khảo sát ý kiến du khách sống xanh',
       points: pointsAwarded,
       type: 'earn',
-      detail: `Đóng góp ${rating} sao giúp nâng cao chất lượng dịch vụ (+${pointsAwarded} CP)`,
+      detail: `Đóng góp ${rating} sao giúp nâng cao chất lượng dịch vụ (+${pointsAwarded} CB)`,
     };
 
     setLogs((prev) => [newLog, ...prev]);
 
     showToast(
       currentLang === 'en'
-        ? `Thank you for your review! +${pointsAwarded} CP.`
-        : `Cảm ơn bạn đã đóng góp ý kiến! +${pointsAwarded} CP`,
+        ? `Thank you for your review! +${pointsAwarded} CB.`
+        : `Cảm ơn bạn đã đóng góp ý kiến! +${pointsAwarded} CB`,
       <Sparkles size={16} className="text-amber-400" />
     );
   };
@@ -410,7 +450,7 @@ export default function EcoStayApp() {
     );
   };
 
-  // Handler: Register New Account (+50 CP Bonus)
+  // Handler: Register New Account (+50 CB Bonus)
   const handleRegisterNewAccount = (data: {
     name: string;
     phone: string;
@@ -441,8 +481,8 @@ export default function EcoStayApp() {
         date: currentLang === 'en' ? 'Just now' : 'Vừa xong',
         title:
           currentLang === 'en'
-            ? 'New Member Welcome Bonus (+50 CP)'
-            : 'Thưởng chào mừng thành viên mới (+50 CP)',
+            ? 'New Member Welcome Bonus (+50 CB)'
+            : 'Thưởng chào mừng thành viên mới (+50 CB)',
         points: 50,
         type: 'earn',
         detail:
@@ -468,8 +508,8 @@ export default function EcoStayApp() {
 
     showToast(
       currentLang === 'en'
-        ? `Account created & signed in! (+50 CP)`
-        : `Đăng ký & đăng nhập thành công! (+50 CP)`,
+        ? `Account created & signed in! (+50 CB)`
+        : `Đăng ký & đăng nhập thành công! (+50 CB)`,
       <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />,
       2000
     );
@@ -494,11 +534,13 @@ export default function EcoStayApp() {
       localStorage.removeItem(STORAGE_KEY_LOGS);
       localStorage.removeItem(STORAGE_KEY_MISSIONS);
       localStorage.removeItem(STORAGE_KEY_LANG);
+      localStorage.removeItem(STORAGE_KEY_NOTIFICATIONS);
       setCurrentAccountId('user-1');
       setUser(initialUserProfile);
       setVouchers(initialVouchers);
       setLogs(initialImpactLogs);
       setMissions(initialMissions);
+      setNotifications(initialNotifications);
       setCurrentLang('vi');
       showToast('Đã khôi phục dữ liệu Demo thành công.');
     }
@@ -548,9 +590,9 @@ export default function EcoStayApp() {
       <Header
         user={user}
         currentLang={currentLang}
+        unreadNotificationsCount={notifications.filter((n) => !n.isRead).length}
         onOpenNotifications={() => setIsNotificationOpen(true)}
         onOpenProfile={() => setActiveTab('more')}
-        onOpenAuth={() => setIsAuthOpen(true)}
       />
 
       {/* Main Content Rendered by Tab */}
@@ -688,6 +730,9 @@ export default function EcoStayApp() {
       <NotificationModal
         isOpen={isNotificationOpen}
         onClose={() => setIsNotificationOpen(false)}
+        notifications={notifications}
+        onMarkRead={handleMarkNotificationRead}
+        onMarkAllRead={handleMarkAllNotificationsRead}
         currentLang={currentLang}
       />
 

@@ -100,8 +100,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const handleSocialInDev = (provider: 'Google' | 'Facebook') => {
     showTempNotice(
       isEn
-        ? `${provider} sign-in is currently under development.`
-        : `Chức năng đăng nhập bằng ${provider} đang phát triển.`
+        ? `${provider} sign-in is currently under development. Please use "Sign in with Demo Accounts" below.`
+        : `Tính năng đăng nhập bằng ${provider} đang phát triển. Vui lòng chọn "Đăng nhập bằng tài khoản mẫu" bên dưới.`
     );
   };
 
@@ -113,34 +113,20 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
   const handleManualLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const cleaned = emailInput.toLowerCase().trim();
-    const found = cleaned
-      ? mockAccounts.find(
-          (a) => a.email.toLowerCase() === cleaned || a.phone === emailInput.trim()
-        )
-      : mockAccounts[0];
-
-    playSuccessTickSound();
-    onLoginSuccess(found || mockAccounts[0]);
+    showTempNotice(
+      isEn
+        ? 'Direct email/password login is currently under development. Please use "Sign in with Demo Accounts" below.'
+        : 'Tính năng đăng nhập trực tiếp đang phát triển. Vui lòng sử dụng "Đăng nhập bằng tài khoản mẫu" bên dưới.'
+    );
   };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!regName.trim()) {
-      showTempNotice(
-        isEn ? 'Please enter your full name.' : 'Vui lòng nhập họ và tên của bạn.'
-      );
-      return;
-    }
-
-    playSuccessTickSound();
-    onRegisterSuccess({
-      name: regName.trim(),
-      phone: regPhone.trim() || '0988 888 999',
-      email: regEmail.trim() || 'new.user@ecostay.vn',
-      hotel: regHotel,
-      room: regRoom || 'Room Eco-101',
-    });
+    showTempNotice(
+      isEn
+        ? 'Account registration is currently under development. Please use "Sign in with Demo Accounts" below.'
+        : 'Tính năng đăng ký tài khoản đang phát triển. Vui lòng sử dụng "Đăng nhập bằng tài khoản mẫu" bên dưới.'
+    );
   };
 
   return (
@@ -391,8 +377,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 <Sparkles size={16} className="text-[#2E7D32] shrink-0" />
                 <p className="text-[11px] font-semibold text-[#1B5E20]">
                   {isEn
-                    ? 'New members receive +50 Carbon Points (CP) immediately!'
-                    : 'Thành viên mới nhận ngay +50 Điểm Cacbon (CP) chào mừng!'}
+                    ? 'New members receive +50 Carbon Points (CB) immediately!'
+                    : 'Thành viên mới nhận ngay +50 Điểm Cacbon (CB) chào mừng!'}
                 </p>
               </div>
 
@@ -465,7 +451,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 type="submit"
                 className="mt-1 w-full rounded-full bg-gradient-to-r from-[#66BB6A] to-[#4CAF50] py-3 text-sm font-bold text-white shadow-md shadow-green-500/20 hover:from-[#57AE5B] hover:to-[#43A047] active:scale-98 transition-all"
               >
-                {isEn ? 'Create Account (+50 CP)' : 'Đăng ký & Nhận +50 CP'}
+                {isEn ? 'Create Account (+50 CB)' : 'Đăng ký & Nhận +50 CB'}
               </button>
 
               <p className="pt-1 text-center text-xs text-slate-600">
@@ -493,8 +479,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
         </div>
       </div>
 
-      {/* Bottom Section: Demo Accounts Trigger (Hidden until tapped!) + Guest Mode */}
-      <div className="relative z-10 pt-3 space-y-2">
+      {/* Bottom Section: Demo Accounts Trigger (Only active login method!) */}
+      <div className="relative z-10 pt-3">
         <button
           type="button"
           onClick={() => setIsDemoSheetOpen(true)}
@@ -503,20 +489,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           <Users size={15} className="text-[#2E7D32]" />
           <span>
             {isEn ? 'Sign in with Demo Accounts' : 'Đăng nhập bằng tài khoản mẫu'}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => {
-            playSuccessTickSound();
-            onContinueAsGuest();
-          }}
-          className="flex w-full items-center justify-center gap-1.5 py-1.5 text-[11px] font-semibold text-slate-500 hover:text-[#2E7D32] transition-colors"
-        >
-          <Compass size={13} />
-          <span>
-            {isEn ? 'Preview as Guest' : 'Xem trước dạng Khách'}
           </span>
         </button>
       </div>
@@ -598,7 +570,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
                       <div className="shrink-0 text-right">
                         <span className="inline-block rounded-xl bg-[#E8F5E9] border border-[#A5D6A7] px-2.5 py-1 text-xs font-black text-[#1B5E20]">
-                          {acc.profile.carbonPoints.toLocaleString()} CP
+                          {acc.profile.carbonPoints.toLocaleString()} CB
                         </span>
                       </div>
                     </div>

@@ -95,35 +95,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleManualLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const cleaned = loginIdentifier.toLowerCase().trim();
-    const found = cleaned
-      ? mockAccounts.find(
-          (a) =>
-            a.email.toLowerCase() === cleaned || a.phone === loginIdentifier.trim()
-        )
-      : mockAccounts[0];
-
-    handleQuickSelect(found || mockAccounts[0]);
+    showTempNotice(
+      isEn
+        ? 'Direct login is under development. Please select one of the 4 demo accounts.'
+        : 'Tính năng đăng nhập trực tiếp đang phát triển. Vui lòng chọn 1 trong 4 tài khoản mẫu.'
+    );
   };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!regName.trim()) {
-      showTempNotice(
-        isEn ? 'Please enter your full name.' : 'Vui lòng nhập họ và tên của bạn.'
-      );
-      return;
-    }
-
-    playSuccessTickSound();
-    onRegisterNewAccount({
-      name: regName.trim(),
-      phone: regPhone.trim() || '0988 888 999',
-      email: regEmail.trim() || 'new.user@ecostay.vn',
-      hotel: regHotel,
-      room: regRoom || 'Room Eco-101',
-    });
-    onClose();
+    showTempNotice(
+      isEn
+        ? 'Account registration is under development. Please select one of the 4 demo accounts.'
+        : 'Tính năng đăng ký đang phát triển. Vui lòng chọn 1 trong 4 tài khoản mẫu.'
+    );
   };
 
   return (
@@ -271,7 +256,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     </div>
 
                     <span className="shrink-0 rounded-xl bg-white border border-[#A5D6A7] px-2.5 py-1 text-xs font-black text-[#1B5E20]">
-                      {acc.profile.carbonPoints.toLocaleString()} CP
+                      {acc.profile.carbonPoints.toLocaleString()} CB
                     </span>
                   </div>
 
@@ -439,7 +424,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               type="submit"
               className="w-full rounded-full bg-gradient-to-r from-[#66BB6A] to-[#4CAF50] py-3 text-xs font-bold text-white shadow-md hover:from-[#57AE5B] hover:to-[#43A047] active:scale-98 transition-all"
             >
-              {isEn ? 'Create Account (+50 CP)' : 'Đăng ký & Nhận +50 CP'}
+              {isEn ? 'Create Account (+50 CB)' : 'Đăng ký & Nhận +50 CB'}
             </button>
           </form>
         )}

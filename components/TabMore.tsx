@@ -75,17 +75,6 @@ export const TabMore: React.FC<TabMoreProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5">
-          {onOpenAuth && (
-            <button
-              onClick={onOpenAuth}
-              className="rounded-xl bg-emerald-100/70 px-2.5 py-1.5 text-[11px] font-bold text-[#1E4D3E] hover:bg-emerald-200 transition-colors flex items-center gap-1"
-              title={isEn ? 'Switch Account' : 'Đổi tài khoản'}
-            >
-              <UserCheck size={14} className="text-emerald-700" />
-              <span>{isEn ? 'Switch' : 'Đổi TK'}</span>
-            </button>
-          )}
-
           <button
             onClick={onOpenEcoImpact}
             className="rounded-xl bg-emerald-50 p-2 text-emerald-800 hover:bg-emerald-100 transition-colors"
@@ -249,24 +238,6 @@ export const TabMore: React.FC<TabMoreProps> = ({
             {currentLang === 'vi' ? '🇻🇳 Tiếng Việt' : '🇬🇧 English'}
           </span>
         </button>
-
-        {/* Đổi tài khoản (4 TK mẫu) */}
-        {onOpenAuth && (
-          <button
-            onClick={onOpenAuth}
-            className="flex w-full items-center justify-between p-3 hover:bg-emerald-50/60 rounded-2xl transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="text-emerald-800">
-                <UserCheck size={18} />
-              </div>
-              <span className="text-xs font-semibold text-slate-700">
-                {isEn ? 'Switch Account (4 Demo Profiles)' : 'Đổi tài khoản (4 TK mẫu)'}
-              </span>
-            </div>
-            <ChevronRight size={16} className="text-slate-300" />
-          </button>
-        )}
 
         {/* Đăng xuất tài khoản */}
         {onLogout && (
@@ -438,7 +409,7 @@ export const TabMore: React.FC<TabMoreProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between py-2">
+              <div className="flex items-center justify-between py-2 border-b border-slate-100">
                 <div>
                   <p className="font-semibold text-slate-800">
                     {isEn ? 'Offline Local Storage' : 'Tự động đồng bộ Offline'}
@@ -453,6 +424,34 @@ export const TabMore: React.FC<TabMoreProps> = ({
                   <div className="h-4 w-4 bg-white rounded-full shadow" />
                 </div>
               </div>
+
+              {onOpenAuth && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSettingsOpen(false);
+                    onOpenAuth();
+                  }}
+                  className="w-full flex items-center justify-between rounded-2xl bg-emerald-50/80 border border-emerald-200/80 p-3 hover:bg-emerald-100/70 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5 text-left">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white text-[#1E4D3E] border border-emerald-200">
+                      <UserCheck size={16} />
+                    </div>
+                    <div>
+                      <p className="font-bold text-[#1E4D3E]">
+                        {isEn ? 'Switch Account' : 'Đổi tài khoản'}
+                      </p>
+                      <p className="text-[10px] text-slate-500">
+                        {isEn
+                          ? 'Choose from 4 demo profiles'
+                          : 'Chọn trong 4 tài khoản mẫu'}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight size={16} className="text-emerald-700" />
+                </button>
+              )}
             </div>
 
             <button

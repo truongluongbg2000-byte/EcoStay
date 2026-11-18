@@ -194,7 +194,7 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
                 {/* Right action button: 100% QR Scanning */}
                 <div className="shrink-0 text-right">
                   <span className="block text-xs font-extrabold text-[#1E4D3E] mb-1.5">
-                    +{item.points} CP
+                    +{item.points} CB
                   </span>
 
                   {isDone ? (

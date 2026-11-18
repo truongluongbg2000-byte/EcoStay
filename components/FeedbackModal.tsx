@@ -54,8 +54,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
             </h3>
             <p className="mt-1 text-xs text-slate-600">
               {isEn
-                ? 'Your feedback has been recorded. You received +15 Carbon Points (CP)!'
-                : 'Ý kiến của bạn đã được ghi nhận. Bạn được cộng +15 Điểm CP!'}
+                ? 'Your feedback has been recorded. You received +15 Carbon Points (CB)!'
+                : 'Ý kiến của bạn đã được ghi nhận. Bạn được cộng +15 Điểm CB!'}
             </p>
           </div>
         ) : (
@@ -121,7 +121,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
               type="submit"
               className="mt-4 w-full rounded-2xl bg-[#1E4D3E] py-2.5 text-xs font-bold text-white shadow hover:bg-[#16392E]"
             >
-              {isEn ? 'Submit & Earn 15 CP' : 'Gửi đánh giá & Nhận 15 CP'}
+              {isEn ? 'Submit & Earn 15 CB' : 'Gửi đánh giá & Nhận 15 CB'}
             </button>
           </form>
         )}

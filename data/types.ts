@@ -107,3 +107,17 @@ export interface MockAccount {
   initialVouchers: Voucher[];
   initialLogs: ImpactLog[];
 }
+
+export interface AppNotification {
+  id: string;
+  title: string;
+  titleEn: string;
+  desc: string;
+  descEn: string;
+  detail: string;
+  detailEn: string;
+  time: string;
+  timeEn: string;
+  category: 'points' | 'welcome' | 'event' | 'reward';
+  isRead: boolean;
+}

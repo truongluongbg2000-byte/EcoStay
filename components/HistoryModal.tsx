@@ -111,7 +111,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                           item.type === 'earn' ? 'text-emerald-700' : 'text-amber-700'
                         }`}
                       >
-                        {item.type === 'earn' ? `+${item.points}` : item.points} CP
+                        {item.type === 'earn' ? `+${item.points}` : item.points} CB
                       </span>
                     </div>
                   </div>
@@ -142,7 +142,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                   </div>
                   <div className="text-right shrink-0">
                     <span className="text-[11px] font-semibold text-slate-700">
-                      -{v.pointsUsed} CP
+                      -{v.pointsUsed} CB
                     </span>
                   </div>
                 </div>

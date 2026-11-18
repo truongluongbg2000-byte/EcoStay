@@ -292,7 +292,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
             <!-- Points Badge -->
             <div class="mb-1 rounded-full px-2 py-0.5 text-[10px] font-black text-white shadow-md flex items-center gap-0.5 border border-white/60 transition-transform group-hover:scale-110" style="background-color: ${categoryColor};">
               <span>+${dest.pointsReward}</span>
-              <span class="text-[8px] opacity-90">CP</span>
+              <span class="text-[8px] opacity-90">CB</span>
             </div>
             <!-- Google Maps Style Teardrop Pin -->
             <div class="relative flex h-8 w-8 items-center justify-center rounded-full text-white shadow-lg border-2 border-white transition-transform group-hover:scale-110" style="background-color: ${categoryColor};">
@@ -332,7 +332,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
           <p class="text-[10px] text-slate-500 mt-0.5">${dest.address || dest.location}</p>
           <div class="mt-1.5 pt-1.5 border-t border-slate-100 flex items-center justify-between">
             <span class="rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 text-[10px] font-black">
-              +${dest.pointsReward} CP
+              +${dest.pointsReward} CB
             </span>
             <span class="text-[10px] font-bold text-slate-700">${dest.priceEstimate || ''}</span>
           </div>
@@ -539,7 +539,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
             <div className="min-w-0">
               <div className="flex items-center gap-1">
                 <span className="rounded bg-emerald-600 px-1 py-0.2 text-[8px] font-bold uppercase text-white">
-                  +{activeVenue.pointsReward} CP
+                  +{activeVenue.pointsReward} CB
                 </span>
                 <span className="text-[9px] font-semibold text-slate-500 truncate">
                   {activeVenue.categoryName} • {activeVenue.location}

@@ -53,7 +53,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, current
             </h5>
             <ul className="list-disc pl-4 space-y-1 text-[11px]">
               <li>
-                <strong>{isEn ? '1 CARBON POINT (CP)' : '1 CACBON POINT (CP)'}</strong>{' '}
+                <strong>{isEn ? '1 CARBON POINT (CB)' : '1 CACBON POINT (CB)'}</strong>{' '}
                 {isEn
                   ? 'is the unit measuring and rewarding your eco-actions and planet protection.'
                   : 'là đơn vị ghi nhận đóng góp sống xanh và bảo vệ môi trường.'}

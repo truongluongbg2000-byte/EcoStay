@@ -28,7 +28,7 @@ export const missionTranslations: Record<string, MissionTranslation> = {
   },
   'mis-f2': {
     title: 'Finish meal with zero food waste (Clean Plate)',
-    subtitle: 'Staff verifies clean plate (Warning: -5 CP penalty if wasted)',
+    subtitle: 'Staff verifies clean plate (Warning: -5 CB penalty if wasted)',
     categoryName: 'Dining',
     qrInstruction: 'Scan QR code on bill or payment receipt for clean plate',
   },
@@ -94,7 +94,7 @@ export const missionTranslations: Record<string, MissionTranslation> = {
   },
   'mis-a4': {
     title: 'Refer friends to download and use EcoStay',
-    subtitle: 'Get 50 CP for each friend who registers successfully',
+    subtitle: 'Get 50 CB for each friend who registers successfully',
     categoryName: 'App Tasks',
     qrInstruction: 'Let friends scan your personal referral code from My QR Code',
   },

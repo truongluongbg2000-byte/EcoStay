@@ -85,7 +85,7 @@ export default function QRCodesSheetPage() {
     if (!dataUrl) return;
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = `EcoStay-QR-${mission.id}-${mission.points}CP.png`;
+    link.download = `EcoStay-QR-${mission.id}-${mission.points}CB.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -118,7 +118,7 @@ export default function QRCodesSheetPage() {
                 </span>
               </h1>
               <p className="text-xs text-slate-500">
-                Mở trang này trên màn hình khác hoặc in A4, rồi dùng Camera thật trong app EcoStay để quét cộng điểm CP.
+                Mở trang này trên màn hình khác hoặc in A4, rồi dùng Camera thật trong app EcoStay để quét cộng điểm CB.
               </p>
             </div>
           </div>
@@ -151,7 +151,7 @@ export default function QRCodesSheetPage() {
             BỘ MÃ QR NHIỆM VỤ XANH • HỆ SINH THÁI DU LỊCH NET ZERO ECOSTAY
           </h1>
           <p className="text-xs text-slate-600">
-            Dùng Camera trong ứng dụng EcoStay (Tab Tích điểm hoặc Tab Quét mã) để quét xác thực và cộng điểm Carbon Points (CP)
+            Dùng Camera trong ứng dụng EcoStay (Tab Tích điểm hoặc Tab Quét mã) để quét xác thực và cộng điểm Carbon Points (CB)
           </p>
         </div>
 
@@ -192,7 +192,7 @@ export default function QRCodesSheetPage() {
                       {mission.categoryName}
                     </span>
                     <span className="rounded-full bg-[#1E4D3E] px-2.5 py-0.5 text-xs font-black text-white">
-                      +{mission.points} CP
+                      +{mission.points} CB
                     </span>
                   </div>
 
@@ -297,7 +297,7 @@ export default function QRCodesSheetPage() {
             <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-800">
               <span>{spotlightMission.categoryName}</span>
               <span>•</span>
-              <span className="text-[#1E4D3E] font-black">+{spotlightMission.points} CP</span>
+              <span className="text-[#1E4D3E] font-black">+{spotlightMission.points} CB</span>
             </div>
 
             <h3 className="mt-3 text-base font-black text-slate-900 px-4">
@@ -320,7 +320,7 @@ export default function QRCodesSheetPage() {
             </code>
 
             <p className="mt-2 text-xs text-slate-500">
-              Đưa camera trong ứng dụng EcoStay vào mã QR này để cộng thật +{spotlightMission.points} CP
+              Đưa camera trong ứng dụng EcoStay vào mã QR này để cộng thật +{spotlightMission.points} CB
             </p>
 
             {/* Prev / Next Navigation */}

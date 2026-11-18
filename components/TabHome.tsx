@@ -144,7 +144,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
               <span className="text-3xl font-black text-[#1E4D3E] tracking-tight">
                 {user.carbonPoints}
               </span>
-              <span className="text-sm font-extrabold text-emerald-600">CP</span>
+              <span className="text-sm font-extrabold text-emerald-600">CB</span>
             </div>
             <p className="mt-0.5 text-[10px] text-slate-400">
               {isEn
@@ -293,7 +293,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
                 key={item.id}
                 className="rounded-3xl bg-white p-4 shadow-sm border border-emerald-950/5 hover:border-emerald-200 hover:shadow-md transition-all text-left"
               >
-                {/* Top row: 100% Xanh pill on left & +300 CP on right (matching mockup) */}
+                {/* Top row: 100% Xanh pill on left & +300 CB on right (matching mockup) */}
                 <div className="flex items-center justify-between">
                   <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200/80 flex items-center gap-1">
                     <CheckCircle2 size={11} className="text-emerald-600" />
@@ -301,7 +301,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
                   </span>
 
                   <span className="rounded-full bg-[#1E4D3E] px-2.5 py-0.5 text-xs font-black text-white shadow-xs">
-                    +{item.pointsReward} CP
+                    +{item.pointsReward} CB
                   </span>
                 </div>
 
@@ -412,7 +412,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
                   className="h-full w-full object-cover"
                 />
                 <div className="absolute top-2 right-2 rounded-full bg-[#1E4D3E] px-2.5 py-0.5 text-xs font-black text-white shadow">
-                  +{viewingDestination.pointsReward} CP
+                  +{viewingDestination.pointsReward} CB
                 </div>
               </div>
 
@@ -436,7 +436,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
                 </p>
                 <p className="text-[11px] text-slate-700">
                   • {isEn ? 'Reward:' : 'Thưởng ngay:'}{' '}
-                  <strong className="text-emerald-700">+{viewingDestination.pointsReward} CP</strong>{' '}
+                  <strong className="text-emerald-700">+{viewingDestination.pointsReward} CB</strong>{' '}
                   {isEn ? 'credited directly to your EcoStay balance.' : 'khi sử dụng dịch vụ tại đây.'}
                 </p>
                 {viewingDestination.priceEstimate && (
@@ -464,7 +464,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
                 <Sparkles size={14} className="text-amber-400" />
                 <span>
                   {isEn ? 'Book Service & Earn' : 'Đặt Dịch Vụ & Tích'}{' '}
-                  +{viewingDestination.pointsReward} CP
+                  +{viewingDestination.pointsReward} CB
                 </span>
               </button>
 

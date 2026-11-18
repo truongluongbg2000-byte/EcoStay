@@ -1,4 +1,4 @@
-import { UserProfile, RewardItem, Voucher, ImpactLog, GreenDestination, DetailedMission, MockAccount } from './types';
+import { UserProfile, RewardItem, Voucher, ImpactLog, GreenDestination, DetailedMission, MockAccount, AppNotification } from './types';
 
 export const initialUserProfile: UserProfile = {
   name: 'Trương Thế Lương',
@@ -272,7 +272,7 @@ export const initialMissions: DetailedMission[] = [
     category: 'food',
     categoryName: 'Ăn uống',
     title: 'Ăn hết phần, không lãng phí thức ăn (Zero Food Waste)',
-    subtitle: 'Nhân viên quét xác nhận dọn dẹp sạch đĩa (Lưu ý: phạt -5 CP nếu lãng phí)',
+    subtitle: 'Nhân viên quét xác nhận dọn dẹp sạch đĩa (Lưu ý: phạt -5 CB nếu lãng phí)',
     points: 10,
     isPenalty: true,
     completed: false,
@@ -411,7 +411,7 @@ export const initialMissions: DetailedMission[] = [
     category: 'app',
     categoryName: 'Tương tác app',
     title: 'Giới thiệu bạn bè tải và sử dụng EcoStay',
-    subtitle: 'Tặng ngay 50 CP cho mỗi người bạn đăng ký thành công',
+    subtitle: 'Tặng ngay 50 CB cho mỗi người bạn đăng ký thành công',
     points: 50,
     completed: false,
     actionType: 'qr',
@@ -774,5 +774,53 @@ export const mockAccounts: MockAccount[] = [
         detail: 'Chúc mừng bạn bắt đầu hành trình du lịch Net Zero cùng EcoStay!',
       },
     ],
+  },
+];
+
+export const initialNotifications: AppNotification[] = [
+  {
+    id: 'notif-1',
+    title: 'Cộng +10 CB từ cam kết buồng phòng',
+    titleEn: '+10 CB Earned from Room Eco-Commitment',
+    desc: 'Bạn đã hoàn thành cam kết không thay khăn ga hôm nay tại Suite Eco-402.',
+    descEn: 'You fulfilled your no-daily-linen-change eco commitment today in Suite Eco-402.',
+    detail:
+      'Cảm ơn bạn đã chung tay bảo vệ nguồn nước sạch! Cam kết không thay khăn tắm và ga giường hôm nay giúp tiết kiệm trung bình 35 lít nước giặt tẩy và giảm 1.2 kg CO₂ phát thải. Số điểm +10 CB đã được cộng trực tiếp vào tài khoản của bạn.',
+    detailEn:
+      'Thank you for helping conserve clean water! Declining daily towel and linen replacement today saved ~35 liters of water and reduced 1.2 kg of CO₂ emissions. +10 CB has been credited directly to your balance.',
+    time: '10 phút trước',
+    timeEn: '10 mins ago',
+    category: 'points',
+    isRead: false,
+  },
+  {
+    id: 'notif-2',
+    title: 'Sự kiện: Ngày hội Xanh cuối tuần (x2 CB)',
+    titleEn: 'Event: Weekend Green Festival (2x CB)',
+    desc: 'Nhân đôi điểm thưởng CB khi sử dụng xe đạp hoặc xe điện nội khu.',
+    descEn: 'Double your CB rewards when riding public bicycles or electric shuttles.',
+    detail:
+      'Từ thứ Sáu đến Chủ Nhật tuần này, toàn bộ lượt quét mã QR sử dụng xe đạp công cộng, E-Bike hoặc xe điện đối tác EcoStay tại Hội An, Đà Lạt và Ninh Bình sẽ được nhân đôi điểm thưởng lên đến +40 CB/lượt. Hãy mở Tab Tích điểm để tham gia ngay!',
+    detailEn:
+      'From Friday through Sunday this week, every verified QR scan for public bicycles, E-Bikes, or partner electric shuttles in Hoi An, Da Lat, and Ninh Binh earns double rewards up to +40 CB per trip. Open the Earn Points tab to join!',
+    time: '2 giờ trước',
+    timeEn: '2 hours ago',
+    category: 'event',
+    isRead: false,
+  },
+  {
+    id: 'notif-3',
+    title: 'Chào mừng bạn đến với hệ sinh thái EcoStay!',
+    titleEn: 'Welcome to the EcoStay Ecosystem!',
+    desc: 'Tài khoản CACBON POINT (CB) của bạn đã kích hoạt và sẵn sàng tích điểm.',
+    descEn: 'Your CARBON POINTS (CB) account is activated and ready to earn rewards.',
+    detail:
+      'Chào mừng bạn gia nhập cộng đồng Du lịch Net Zero 2050! Bạn có thể quét mã QR tại khách sạn, nhà hàng hữu cơ, trạm xe điện và các tour sinh thái để tích lũy CB và quy đổi thành voucher nghỉ dưỡng hoặc tài trợ trồng cây bản địa.',
+    detailEn:
+      'Welcome to the Net Zero Tourism 2050 community! Scan QR codes at eco-hotels, organic restaurants, e-bike stations, and eco-tours to accumulate CB and redeem stay vouchers or sponsor native tree planting.',
+    time: 'Hôm qua',
+    timeEn: 'Yesterday',
+    category: 'welcome',
+    isRead: true,
   },
 ];

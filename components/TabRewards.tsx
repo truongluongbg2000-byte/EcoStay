@@ -158,7 +158,7 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
               </p>
               <div className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-extrabold text-[#1E4D3E] border border-emerald-200">
                 <Sparkles size={12} className="text-amber-500" />
-                <span>{userPoints} CP</span>
+                <span>{userPoints} CB</span>
               </div>
             </div>
           </div>
@@ -244,7 +244,7 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
                         </span>
                         <div className="flex items-baseline gap-1">
                           <span className="text-lg font-black text-[#1E4D3E]">{reward.points}</span>
-                          <span className="text-xs font-bold text-emerald-600">CP</span>
+                          <span className="text-xs font-bold text-emerald-600">CB</span>
                         </div>
                       </div>
 
@@ -262,7 +262,7 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
                             <span>{isEn ? 'Redeem Now' : 'Đổi ngay'}</span>
                           </>
                         ) : (
-                          <span>{isEn ? 'Insufficient CP' : 'Không đủ điểm'}</span>
+                          <span>{isEn ? 'Insufficient CB' : 'Không đủ điểm'}</span>
                         )}
                       </button>
                     </div>
@@ -342,7 +342,7 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
                           <span className="font-mono text-[10px] font-extrabold text-[#1E4D3E] bg-emerald-50 px-2 py-0.5 rounded-md">
                             {voucher.code}
                           </span>
-                          <span className="text-[10px] text-slate-400">-{voucher.pointsUsed} CP</span>
+                          <span className="text-[10px] text-slate-400">-{voucher.pointsUsed} CB</span>
                         </div>
                         <h4 className="mt-1 text-xs font-bold text-slate-900 line-clamp-2 leading-snug">
                           {vTitle}
@@ -388,7 +388,7 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
             </h3>
             <p className="mt-1 text-xs text-slate-600">
               {isEn ? 'Are you sure you want to use' : 'Bạn có chắc muốn dùng'}{' '}
-              <strong className="text-emerald-700">{confirmReward.points} CP</strong>{' '}
+              <strong className="text-emerald-700">{confirmReward.points} CB</strong>{' '}
               {isEn ? 'to redeem:' : 'để đổi:'}
             </p>
 
@@ -451,8 +451,8 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
             </h3>
             <p className="mt-1 text-xs text-slate-600">
               {isEn
-                ? `This reward requires ${insufficientReward.points} CP. You currently have ${userPoints} CP (need ${insufficientReward.points - userPoints} CP more).`
-                : `Phần quà này cần ${insufficientReward.points} Điểm CP, bạn hiện có ${userPoints} Điểm CP (còn thiếu ${insufficientReward.points - userPoints} CP).`}
+                ? `This reward requires ${insufficientReward.points} CB. You currently have ${userPoints} CB (need ${insufficientReward.points - userPoints} CB more).`
+                : `Phần quà này cần ${insufficientReward.points} Điểm CB, bạn hiện có ${userPoints} Điểm CB (còn thiếu ${insufficientReward.points - userPoints} CB).`}
             </p>
 
             <div className="mt-4 flex gap-2">
