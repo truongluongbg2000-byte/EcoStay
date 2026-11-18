@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import jsQR from 'jsqr';
 import {
   QrCode,
   Camera,
@@ -23,6 +22,12 @@ import {
 } from 'lucide-react';
 import { UserProfile } from '@/data/types';
 import { triggerEcoConfetti } from './Confetti';
+import {
+  createFastVideoQRScanner,
+  decodeQRFromImageFile,
+  FastQRScannerController,
+  tryEnableContinuousFocus,
+} from '@/lib/qr/fastScanner';
 
 export interface LiveQRScanResult {
   status: 'success' | 'already_completed' | 'invalid';
@@ -52,10 +57,9 @@ export const TabScanner: React.FC<TabScannerProps> = ({
 
   // Camera Refs & States
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const animFrameIdRef = useRef<number | null>(null);
+  const scannerCtrlRef = useRef<FastQRScannerController | null>(null);
   const lastScannedTimeRef = useRef<number>(0);
   const lastScannedCodeRef = useRef<string>('');
   const resultTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -75,9 +79,9 @@ export const TabScanner: React.FC<TabScannerProps> = ({
 
   // Stop camera tracks cleanly
   const stopCamera = useCallback(() => {
-    if (animFrameIdRef.current) {
-      cancelAnimationFrame(animFrameIdRef.current);
-      animFrameIdRef.current = null;
+    if (scannerCtrlRef.current) {
+      scannerCtrlRef.current.stop();
+      scannerCtrlRef.current = null;
     }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
@@ -130,36 +134,17 @@ export const TabScanner: React.FC<TabScannerProps> = ({
     [isEn, stopCamera]
   );
 
-  // Frame processing loop with jsQR
-  const scanFrame = useCallback(() => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-
-    if (video && canvas && video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      if (ctx) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: 'attemptBoth',
-        });
-
-        if (code && code.data) {
-          const now = Date.now();
-          if (code.data !== lastScannedCodeRef.current || now - lastScannedTimeRef.current > 3000) {
-            lastScannedTimeRef.current = now;
-            lastScannedCodeRef.current = code.data;
-            processDecodedCode(code.data);
-          }
-        }
+  const handleVideoCodeDetected = useCallback(
+    (codeData: string) => {
+      const now = Date.now();
+      if (codeData !== lastScannedCodeRef.current || now - lastScannedTimeRef.current > 2500) {
+        lastScannedTimeRef.current = now;
+        lastScannedCodeRef.current = codeData;
+        processDecodedCode(codeData);
       }
-    }
-
-    animFrameIdRef.current = requestAnimationFrame(scanFrame);
-  }, [processDecodedCode]);
+    },
+    [processDecodedCode]
+  );
 
   // Start live camera stream
   const startCamera = useCallback(async () => {
@@ -178,8 +163,9 @@ export const TabScanner: React.FC<TabScannerProps> = ({
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: { ideal: facingMode },
-          width: { ideal: 1280 },
+          width: { ideal: 720 },
           height: { ideal: 720 },
+          frameRate: { ideal: 30 },
         },
         audio: false,
       });
@@ -190,13 +176,21 @@ export const TabScanner: React.FC<TabScannerProps> = ({
       }
 
       streamRef.current = stream;
+      tryEnableContinuousFocus(stream);
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.setAttribute('playsinline', 'true');
         await videoRef.current.play();
         setCameraActive(true);
-        animFrameIdRef.current = requestAnimationFrame(scanFrame);
+
+        const ctrl = createFastVideoQRScanner({
+          video: videoRef.current,
+          onDetect: handleVideoCodeDetected,
+          intervalMs: 75,
+        });
+        scannerCtrlRef.current = ctrl;
+        ctrl.start();
       }
     } catch (err: unknown) {
       const error = err as Error;
@@ -211,7 +205,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
     } finally {
       setIsProcessing(false);
     }
-  }, [facingMode, scanFrame, stopCamera]);
+  }, [facingMode, handleVideoCodeDetected, stopCamera]);
 
   useEffect(() => {
     if (activeScannerTab === 'camera' && !completedScan) {
@@ -258,45 +252,24 @@ export const TabScanner: React.FC<TabScannerProps> = ({
     setFacingMode((prev) => (prev === 'environment' ? 'user' : 'environment'));
   };
 
-  const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
 
-    const imgUrl = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      try {
-        const offscreen = document.createElement('canvas');
-        offscreen.width = img.width;
-        offscreen.height = img.height;
-        const ctx = offscreen.getContext('2d', { willReadFrequently: true });
-        if (!ctx) return;
-
-        ctx.drawImage(img, 0, 0);
-        const imageData = ctx.getImageData(0, 0, offscreen.width, offscreen.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: 'attemptBoth',
-        });
-
-        if (code && code.data) {
-          processDecodedCode(code.data);
-        } else {
-          setScanFeedback({
-            status: 'invalid',
-            message: isEn
-              ? 'No readable QR code found in the selected image.'
-              : 'Không tìm thấy mã QR hợp lệ trong ảnh vừa chọn.',
-          });
-          if (resultTimerRef.current) clearTimeout(resultTimerRef.current);
-          resultTimerRef.current = setTimeout(() => setScanFeedback(null), 3500);
-        }
-      } finally {
-        URL.revokeObjectURL(imgUrl);
-      }
-    };
-    img.onerror = () => URL.revokeObjectURL(imgUrl);
-    img.src = imgUrl;
+    const decoded = await decodeQRFromImageFile(file);
+    if (decoded) {
+      processDecodedCode(decoded);
+    } else {
+      setScanFeedback({
+        status: 'invalid',
+        message: isEn
+          ? 'No readable QR code found in the selected image.'
+          : 'Không tìm thấy mã QR hợp lệ trong ảnh vừa chọn.',
+      });
+      if (resultTimerRef.current) clearTimeout(resultTimerRef.current);
+      resultTimerRef.current = setTimeout(() => setScanFeedback(null), 3500);
+    }
   };
 
   const handleCopyMemberCode = () => {
@@ -307,7 +280,6 @@ export const TabScanner: React.FC<TabScannerProps> = ({
 
   return (
     <div className="space-y-4 px-4 pt-3 pb-8 text-left">
-      <canvas ref={canvasRef} className="hidden" />
       <input
         ref={fileInputRef}
         type="file"
