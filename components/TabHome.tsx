@@ -22,13 +22,13 @@ import {
 } from 'lucide-react';
 import { UserProfile, GreenDestination, DestinationCategory } from '@/data/types';
 import { triggerEcoConfetti } from './Confetti';
-import { destinationTranslations, destinationCategoryTranslations, mapLocationTranslations } from '@/data/translations';
+import { getDictionary, formatText, Lang } from '@/lib/i18n';
 import { EcoMap } from './EcoMap';
 
 interface TabHomeProps {
   user: UserProfile;
   destinations: GreenDestination[];
-  currentLang?: 'vi' | 'en';
+  currentLang?: Lang;
   onBookService: (destination: GreenDestination) => void;
   onNavigateToEarn: () => void;
   onOpenAIChat: () => void;
@@ -42,46 +42,100 @@ export const TabHome: React.FC<TabHomeProps> = ({
   onNavigateToEarn,
   onOpenAIChat,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('Hội an');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<string>('Hội An');
   const [selectedCategory, setSelectedCategory] = useState<DestinationCategory>('all');
   const [viewingDestination, setViewingDestination] = useState<GreenDestination | null>(null);
 
-  const isEn = currentLang === 'en';
+  const t = getDictionary(currentLang);
 
-  // Automatically fly to location when user types in search
+  // Automatically fly to location when user types in search (supports all 5 languages)
   useEffect(() => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) {
-      // If empty and was set by user typing, don't force
       return;
     }
-    if (q.includes('hội an') || q.includes('hoi an') || q.includes('hoian')) {
+    if (
+      q.includes('hội an') ||
+      q.includes('hoi an') ||
+      q.includes('hoian') ||
+      q.includes('호이안') ||
+      q.includes('ホイアン') ||
+      q.includes('会安')
+    ) {
       setSelectedLocation('Hội An');
-    } else if (q.includes('cúc phương') || q.includes('cuc phuong')) {
+    } else if (
+      q.includes('cúc phương') ||
+      q.includes('cuc phuong') ||
+      q.includes('꾹프엉') ||
+      q.includes('クックフォン') ||
+      q.includes('菊芳')
+    ) {
       setSelectedLocation('Cúc Phương');
-    } else if (q.includes('đà lạt') || q.includes('da lat') || q.includes('dalat')) {
+    } else if (
+      q.includes('đà lạt') ||
+      q.includes('da lat') ||
+      q.includes('dalat') ||
+      q.includes('달랏') ||
+      q.includes('ダラット') ||
+      q.includes('大叻')
+    ) {
       setSelectedLocation('Đà Lạt');
-    } else if (q.includes('nam cát tiên') || q.includes('nam cat tien') || q.includes('cat tien')) {
+    } else if (
+      q.includes('nam cát tiên') ||
+      q.includes('nam cat tien') ||
+      q.includes('cat tien') ||
+      q.includes('남깟띠엔') ||
+      q.includes('ナムカッティエン') ||
+      q.includes('南吉仙')
+    ) {
       setSelectedLocation('Nam Cát Tiên');
-    } else if (q.includes('ninh bình') || q.includes('ninh binh')) {
+    } else if (
+      q.includes('ninh bình') ||
+      q.includes('ninh binh') ||
+      q.includes('닌빈') ||
+      q.includes('ニンビン') ||
+      q.includes('宁平')
+    ) {
       setSelectedLocation('Ninh Bình');
-    } else if (q.includes('tất cả') || q.includes('all') || q.includes('toàn quốc')) {
+    } else if (
+      q.includes('sa pa') ||
+      q.includes('sapa') ||
+      q.includes('사파') ||
+      q.includes('サパ') ||
+      q.includes('沙巴')
+    ) {
+      setSelectedLocation('Sa Pa');
+    } else if (
+      q.includes('tất cả') ||
+      q.includes('all') ||
+      q.includes('toàn quốc') ||
+      q.includes('전체') ||
+      q.includes('すべて') ||
+      q.includes('全部')
+    ) {
       setSelectedLocation('all');
     }
   }, [searchQuery]);
 
   const categories: { id: DestinationCategory; label: string; icon: React.ReactNode }[] = [
-    { id: 'all', label: isEn ? 'All' : 'Tất cả', icon: <LayoutGrid size={15} /> },
-    { id: 'food', label: isEn ? 'Dining' : 'Ăn uống', icon: <UtensilsCrossed size={15} /> },
-    { id: 'hotel', label: isEn ? 'Hotels' : 'Khách sạn', icon: <Building2 size={15} /> },
-    { id: 'transport', label: isEn ? 'Transit' : 'Di chuyển', icon: <Bike size={15} /> },
-    { id: 'activity', label: isEn ? 'Activities' : 'Vui chơi', icon: <Compass size={15} /> },
-    { id: 'shopping', label: isEn ? 'Shopping' : 'Mua sắm', icon: <ShoppingBag size={15} /> },
+    { id: 'all', label: t.data.destinationCategories.all || t.common.all, icon: <LayoutGrid size={15} /> },
+    { id: 'food', label: t.data.destinationCategories.food, icon: <UtensilsCrossed size={15} /> },
+    { id: 'hotel', label: t.data.destinationCategories.hotel, icon: <Building2 size={15} /> },
+    { id: 'transport', label: t.data.destinationCategories.transport, icon: <Bike size={15} /> },
+    { id: 'activity', label: t.data.destinationCategories.activity, icon: <Compass size={15} /> },
+    { id: 'shopping', label: t.data.destinationCategories.shopping, icon: <ShoppingBag size={15} /> },
   ];
 
-  // Filtering destinations
+  // Filtering destinations (supports searching in both canonical and localized text)
   const filtered = destinations.filter((item) => {
+    const trans = t.data.destinations[item.id];
+    const displayName = trans?.name || item.name;
+    const displayLocation = t.data.locations[item.location] || item.location;
+    const displayCategoryName =
+      trans?.categoryName || t.data.destinationCategories[item.category] || item.categoryName;
+    const displayDesc = trans?.desc || item.description;
+
     const matchesLocation =
       selectedLocation === 'all' ||
       item.location.toLowerCase().includes(selectedLocation.toLowerCase());
@@ -89,12 +143,17 @@ export const TabHome: React.FC<TabHomeProps> = ({
     const matchesCategory =
       selectedCategory === 'all' || item.category === selectedCategory;
 
+    const q = searchQuery.toLowerCase().trim();
     const matchesQuery =
-      searchQuery.trim() === '' ||
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.categoryName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase());
+      q === '' ||
+      item.name.toLowerCase().includes(q) ||
+      item.location.toLowerCase().includes(q) ||
+      item.categoryName.toLowerCase().includes(q) ||
+      item.description.toLowerCase().includes(q) ||
+      displayName.toLowerCase().includes(q) ||
+      displayLocation.toLowerCase().includes(q) ||
+      displayCategoryName.toLowerCase().includes(q) ||
+      displayDesc.toLowerCase().includes(q);
 
     return matchesLocation && matchesCategory && matchesQuery;
   });
@@ -104,7 +163,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
     if (loc === 'all') {
       setSearchQuery('');
     } else {
-      setSearchQuery(loc);
+      setSearchQuery(t.data.locations[loc] || loc);
     }
   };
 
@@ -138,7 +197,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-              {isEn ? 'AVAILABLE CARBON POINTS' : 'ĐIỂM CACBON HIỆN CÓ'}
+              {t.home.availablePoints}
             </p>
             <div className="mt-1 flex items-baseline gap-1.5">
               <span className="text-3xl font-black text-[#1E4D3E] tracking-tight">
@@ -147,9 +206,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
               <span className="text-sm font-extrabold text-emerald-600">CB</span>
             </div>
             <p className="mt-0.5 text-[10px] text-slate-400">
-              {isEn
-                ? `20 points will expire on ${user.expiryDate}`
-                : `20 điểm sẽ hết hạn vào ${user.expiryDate}`}
+              {formatText(t.home.expiryNotice, { date: user.expiryDate })}
             </p>
           </div>
 
@@ -160,20 +217,20 @@ export const TabHome: React.FC<TabHomeProps> = ({
 
         {/* Quick link to earn points */}
         <div className="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
-          <span className="text-slate-500 font-medium text-[11px]">
-            {isEn ? 'Want to collect more eco points?' : 'Muốn tích lũy thêm điểm xanh?'}
+          <span className="text-slate-500 font-medium text-[11px] truncate pr-2">
+            {t.earn.headerTitle}
           </span>
           <button
             onClick={onNavigateToEarn}
-            className="flex items-center gap-1 font-bold text-[#1E4D3E] hover:text-emerald-700 transition-colors text-xs"
+            className="flex shrink-0 items-center gap-1 font-bold text-[#1E4D3E] hover:text-emerald-700 transition-colors text-xs"
           >
-            <span>{isEn ? 'Missions' : 'Làm nhiệm vụ'}</span>
+            <span>{t.nav.earn}</span>
             <ChevronRight size={14} />
           </button>
         </div>
       </div>
 
-      {/* 2. Search Input: "Bạn muốn đi đâu?" */}
+      {/* 2. Search Input */}
       <div className="relative">
         <div className="relative flex items-center">
           <Search size={18} className="absolute left-3.5 text-emerald-700 pointer-events-none" />
@@ -181,11 +238,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={
-              isEn
-                ? 'Where do you want to go? (Hoi An, Da Lat...)'
-                : 'Bạn muốn đi đâu? (Hội An, Cúc Phương, Đà Lạt...)'
-            }
+            placeholder={t.home.searchPlaceholder}
             className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-10 text-xs font-semibold text-slate-800 placeholder-slate-400 shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 transition-all"
           />
           {searchQuery && (
@@ -202,7 +255,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
         </div>
       </div>
 
-      {/* 3. Bản đồ Điểm đến Xanh Việt Nam Chuyên nghiệp (Realistic Interactive Street Eco-Map with Leaflet) */}
+      {/* 3. Interactive Street Eco-Map with Leaflet */}
       <EcoMap
         selectedLocation={selectedLocation}
         onSelectLocation={handleSelectMapPoint}
@@ -211,14 +264,14 @@ export const TabHome: React.FC<TabHomeProps> = ({
         onSelectVenue={setViewingDestination}
       />
 
-      {/* 4. Danh Mục Dịch Vụ Xanh (Pills: Tất cả, Ăn uống, Khách sạn, Di chuyển, Vui chơi, Mua sắm) */}
+      {/* 4. Green Service Categories */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-            {isEn ? 'GREEN SERVICE CATEGORIES' : 'DANH MỤC DỊCH VỤ XANH'}
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 truncate">
+            {t.home.categoriesTitle}
           </p>
-          <span className="text-[11px] font-semibold text-emerald-700">
-            {filtered.length} {isEn ? 'certified green venues' : 'cơ sở đạt chuẩn Xanh'}
+          <span className="shrink-0 text-[11px] font-semibold text-emerald-700">
+            {formatText(t.home.certifiedVenues, { count: filtered.length })}
           </span>
         </div>
 
@@ -240,18 +293,13 @@ export const TabHome: React.FC<TabHomeProps> = ({
         </div>
       </div>
 
-      {/* 5. Danh Sách Kết Quả Cơ Sở Đạt Chuẩn Xanh (Clean Card Layout Matching Mockup!) */}
+      {/* 5. Certified Green Venues List */}
       <div className="space-y-3">
         {filtered.length === 0 ? (
           <div className="rounded-3xl bg-white p-6 text-center border border-slate-100">
             <Compass size={28} className="mx-auto text-slate-300 mb-1.5" />
             <p className="text-xs font-semibold text-slate-700">
-              {isEn ? 'No venues found' : 'Không tìm thấy địa điểm phù hợp'}
-            </p>
-            <p className="text-[10px] text-slate-400 mt-0.5">
-              {isEn
-                ? 'Try searching "Hoi An" or tap "All".'
-                : 'Thử tìm kiếm với từ khóa khác như "Hội An", "Đà Lạt" hoặc bấm "Tất cả".'}
+              {t.home.noVenuesFound}
             </p>
             <button
               onClick={() => {
@@ -261,19 +309,18 @@ export const TabHome: React.FC<TabHomeProps> = ({
               }}
               className="mt-3 rounded-xl bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-800"
             >
-              {isEn ? 'View all venues' : 'Xem tất cả điểm đến'}
+              {t.home.resetFilter}
             </button>
           </div>
         ) : (
           filtered.map((item) => {
-            const trans = isEn ? destinationTranslations[item.id] : null;
+            const trans = t.data.destinations[item.id];
             const displayName = trans?.name || item.name;
-            const displayLocation = isEn
-              ? mapLocationTranslations[item.location] || item.location
-              : item.location;
-            const displayCategoryName = isEn
-              ? destinationCategoryTranslations[item.category] || item.categoryName
-              : item.categoryName;
+            const displayLocation = t.data.locations[item.location] || item.location;
+            const displayCategoryName =
+              trans?.categoryName ||
+              t.data.destinationCategories[item.category] ||
+              item.categoryName;
             const displayTitle = trans?.title || item.title;
             const displayDesc = trans?.desc || item.description;
             const displayBadge = trans?.badge || item.greenBadge;
@@ -293,11 +340,10 @@ export const TabHome: React.FC<TabHomeProps> = ({
                 key={item.id}
                 className="rounded-3xl bg-white p-4 shadow-sm border border-emerald-950/5 hover:border-emerald-200 hover:shadow-md transition-all text-left"
               >
-                {/* Top row: 100% Xanh pill on left & +300 CB on right (matching mockup) */}
                 <div className="flex items-center justify-between">
                   <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200/80 flex items-center gap-1">
                     <CheckCircle2 size={11} className="text-emerald-600" />
-                    <span>{isEn ? '100% Green' : '100% Xanh'}</span>
+                    <span>{t.home.greenBadge100}</span>
                   </span>
 
                   <span className="rounded-full bg-[#1E4D3E] px-2.5 py-0.5 text-xs font-black text-white shadow-xs">
@@ -305,7 +351,6 @@ export const TabHome: React.FC<TabHomeProps> = ({
                   </span>
                 </div>
 
-                {/* Title & Category with Icon */}
                 <div className="mt-2.5 flex items-start gap-2.5">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-100 shadow-2xs">
                     {getCategoryIconBox(item.category)}
@@ -321,12 +366,10 @@ export const TabHome: React.FC<TabHomeProps> = ({
                   </div>
                 </div>
 
-                {/* Description */}
                 <p className="mt-2 text-xs text-slate-600 leading-relaxed line-clamp-2">
                   {displayDesc}
                 </p>
 
-                {/* Bottom Row: Green Certificate Badge + Action Button */}
                 <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
                   <span className="text-[10px] font-semibold text-slate-500 line-clamp-1 flex items-center gap-1">
                     <ShieldCheck size={12} className="text-emerald-700 shrink-0" />
@@ -337,7 +380,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
                     onClick={() => setViewingDestination(translatedItem)}
                     className="shrink-0 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#1E4D3E] hover:bg-emerald-100 active:scale-95 transition-all shadow-2xs border border-emerald-200/60"
                   >
-                    {isEn ? 'View & Book' : 'Xem & Đặt dịch vụ'}
+                    {t.home.viewAndBook}
                   </button>
                 </div>
               </div>
@@ -346,17 +389,15 @@ export const TabHome: React.FC<TabHomeProps> = ({
         )}
       </div>
 
-      {/* 6. Prominent Floating AI Chatbot Avatar Button (Matching user's circular robot photo!) */}
+      {/* 6. Prominent Floating AI Chatbot Avatar Button */}
       <div className="fixed bottom-20 right-4 z-40 flex flex-col items-end">
         <button
           onClick={onOpenAIChat}
           className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-[#1E4D3E] via-[#2D6A56] to-emerald-500 shadow-xl ring-4 ring-white/90 hover:scale-105 active:scale-95 transition-all"
-          aria-label="Hỏi EcoBot AI"
+          aria-label={t.home.ecoBotLabel}
         >
-          {/* Subtle pulse glow */}
           <div className="absolute inset-0 rounded-full bg-emerald-400 opacity-30 animate-ping pointer-events-none" />
 
-          {/* Avatar image */}
           <div className="relative h-12 w-12 rounded-full overflow-hidden border-2 border-emerald-200 shadow-inner bg-[#16392E]">
             <img
               src="/chatbot-avatar.png"
@@ -369,7 +410,6 @@ export const TabHome: React.FC<TabHomeProps> = ({
             <Bot size={22} className="text-emerald-300 absolute inset-0 m-auto" />
           </div>
 
-          {/* Mini online green dot */}
           <span className="absolute top-0 right-0 h-3.5 w-3.5 rounded-full bg-emerald-400 border-2 border-white shadow-xs" />
         </button>
 
@@ -378,111 +418,123 @@ export const TabHome: React.FC<TabHomeProps> = ({
         </span>
       </div>
 
-      {/* 7. Modal "Xem & Đặt dịch vụ" */}
-      {viewingDestination && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fadeIn">
-          <div className="relative w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col text-left">
-            <div className="flex items-center justify-between border-b pb-3">
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800">
-                  {getCategoryIconBox(viewingDestination.category)}
+      {/* 7. Modal "View & Book" */}
+      {viewingDestination && (() => {
+        const modalTrans = t.data.destinations[viewingDestination.id];
+        const modalName = modalTrans?.name || viewingDestination.name;
+        const modalTitle = modalTrans?.title || viewingDestination.title;
+        const modalDesc = modalTrans?.desc || viewingDestination.description;
+        const modalBadge = modalTrans?.badge || viewingDestination.greenBadge;
+        const modalCat =
+          modalTrans?.categoryName ||
+          t.data.destinationCategories[viewingDestination.category] ||
+          viewingDestination.categoryName;
+        const modalLoc =
+          t.data.locations[viewingDestination.location] || viewingDestination.location;
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fadeIn">
+            <div className="relative w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col text-left">
+              <div className="flex items-center justify-between border-b pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800">
+                    {getCategoryIconBox(viewingDestination.category)}
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-800">
+                      {modalCat}
+                    </h3>
+                    <p className="text-[10px] text-emerald-700 font-semibold">
+                      {modalLoc}
+                    </p>
+                  </div>
                 </div>
+                <button
+                  onClick={() => setViewingDestination(null)}
+                  className="rounded-full bg-slate-100 p-1.5 text-slate-500 hover:bg-slate-200"
+                  aria-label={t.common.close}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="mt-3 flex-1 overflow-y-auto space-y-3 text-xs text-slate-600 leading-relaxed pr-1">
+                <div className="h-36 w-full rounded-2xl overflow-hidden relative shadow-sm">
+                  <img
+                    src={viewingDestination.image}
+                    alt={modalName}
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute top-2 right-2 rounded-full bg-[#1E4D3E] px-2.5 py-0.5 text-xs font-black text-white shadow">
+                    +{viewingDestination.pointsReward} CB
+                  </div>
+                </div>
+
                 <div>
-                  <h3 className="text-sm font-bold text-slate-800">
-                    {viewingDestination.categoryName}
-                  </h3>
-                  <p className="text-[10px] text-emerald-700 font-semibold">
-                    {viewingDestination.location}
+                  <h4 className="text-base font-extrabold text-slate-900">
+                    {modalName}
+                  </h4>
+                  <p className="text-[11px] font-medium text-emerald-800 mt-0.5">
+                    {modalTitle}
                   </p>
                 </div>
-              </div>
-              <button
-                onClick={() => setViewingDestination(null)}
-                className="rounded-full bg-slate-100 p-1.5 text-slate-500 hover:bg-slate-200"
-              >
-                <X size={16} />
-              </button>
-            </div>
 
-            <div className="mt-3 flex-1 overflow-y-auto space-y-3 text-xs text-slate-600 leading-relaxed pr-1">
-              <div className="h-36 w-full rounded-2xl overflow-hidden relative shadow-sm">
-                <img
-                  src={viewingDestination.image}
-                  alt={viewingDestination.name}
-                  className="h-full w-full object-cover"
-                />
-                <div className="absolute top-2 right-2 rounded-full bg-[#1E4D3E] px-2.5 py-0.5 text-xs font-black text-white shadow">
-                  +{viewingDestination.pointsReward} CB
-                </div>
-              </div>
+                <p className="text-xs text-slate-600">{modalDesc}</p>
 
-              <div>
-                <h4 className="text-base font-extrabold text-slate-900">
-                  {viewingDestination.name}
-                </h4>
-                <p className="text-[11px] font-medium text-emerald-800 mt-0.5">
-                  {viewingDestination.title}
-                </p>
-              </div>
-
-              <p className="text-xs text-slate-600">{viewingDestination.description}</p>
-
-              <div className="rounded-2xl bg-emerald-50/80 p-3 border border-emerald-100 space-y-1.5">
-                <p className="text-[11px] font-bold text-[#1E4D3E]">
-                  🌿 {isEn ? 'Green Certifications & Rewards:' : 'Tiêu chí Xanh & Quyền lợi tích điểm:'}
-                </p>
-                <p className="text-[11px] text-slate-700">
-                  • <strong>{viewingDestination.greenBadge}</strong>
-                </p>
-                <p className="text-[11px] text-slate-700">
-                  • {isEn ? 'Reward:' : 'Thưởng ngay:'}{' '}
-                  <strong className="text-emerald-700">+{viewingDestination.pointsReward} CB</strong>{' '}
-                  {isEn ? 'credited directly to your EcoStay balance.' : 'khi sử dụng dịch vụ tại đây.'}
-                </p>
-                {viewingDestination.priceEstimate && (
+                <div className="rounded-2xl bg-emerald-50/80 p-3 border border-emerald-100 space-y-1.5">
+                  <p className="text-[11px] font-bold text-[#1E4D3E]">
+                    🌿 {modalBadge}
+                  </p>
                   <p className="text-[11px] text-slate-700">
-                    • {isEn ? 'Price reference:' : 'Mức giá tham khảo:'}{' '}
-                    <strong>{viewingDestination.priceEstimate}</strong>
+                    • {formatText(t.home.earnRewardNote, { points: viewingDestination.pointsReward })}
                   </p>
+                  {viewingDestination.priceEstimate && (
+                    <p className="text-[11px] text-slate-700">
+                      • {t.home.priceEstimateLabel}{' '}
+                      <strong>{viewingDestination.priceEstimate}</strong>
+                    </p>
+                  )}
+                </div>
+
+                {viewingDestination.address && (
+                  <div className="flex items-start gap-1.5 text-[11px] text-slate-500">
+                    <MapPin size={13} className="text-emerald-700 shrink-0 mt-0.5" />
+                    <span>
+                      <strong className="text-slate-600">{t.home.addressLabel}</strong>{' '}
+                      {viewingDestination.address}
+                    </span>
+                  </div>
                 )}
               </div>
 
-              {viewingDestination.address && (
-                <div className="flex items-start gap-1.5 text-[11px] text-slate-500">
-                  <MapPin size={13} className="text-emerald-700 shrink-0 mt-0.5" />
-                  <span>{viewingDestination.address}</span>
-                </div>
-              )}
-            </div>
+              {/* Action buttons */}
+              <div className="mt-4 pt-3 border-t border-slate-100 space-y-2">
+                <button
+                  onClick={() => handleConfirmBooking(viewingDestination)}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-[#1E4D3E] py-2.5 text-xs font-bold text-white shadow hover:bg-[#16392E] active:scale-98 transition-all"
+                >
+                  <Sparkles size={14} className="text-amber-400" />
+                  <span>
+                    {formatText(t.home.bookAndEarnBtn, { points: viewingDestination.pointsReward })}
+                  </span>
+                </button>
 
-            {/* Action buttons */}
-            <div className="mt-4 pt-3 border-t border-slate-100 space-y-2">
-              <button
-                onClick={() => handleConfirmBooking(viewingDestination)}
-                className="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-[#1E4D3E] py-2.5 text-xs font-bold text-white shadow hover:bg-[#16392E] active:scale-98 transition-all"
-              >
-                <Sparkles size={14} className="text-amber-400" />
-                <span>
-                  {isEn ? 'Book Service & Earn' : 'Đặt Dịch Vụ & Tích'}{' '}
-                  +{viewingDestination.pointsReward} CB
-                </span>
-              </button>
-
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                  viewingDestination.name + ' ' + (viewingDestination.address || viewingDestination.location)
-                )}`}
-                target="_blank"
-                rel="noreferrer"
-                className="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
-              >
-                <Navigation size={13} className="text-emerald-700" />
-                <span>{isEn ? 'Get Directions on Google Maps' : 'Chỉ đường qua Google Maps'}</span>
-              </a>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                    viewingDestination.name + ' ' + (viewingDestination.address || viewingDestination.location)
+                  )}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  <Navigation size={13} className="text-emerald-700" />
+                  <span>{t.home.openGoogleMaps}</span>
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };

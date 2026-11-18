@@ -1,3 +1,5 @@
+import { Lang } from '@/lib/i18n';
+
 export interface RagChunk {
   id: string;
   source: string;
@@ -7,7 +9,7 @@ export interface RagChunk {
 
 export interface RagRetrievalOptions {
   topK?: number;
-  lang?: 'vi' | 'en';
+  lang?: Lang;
 }
 
 /**

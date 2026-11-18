@@ -1,4 +1,5 @@
-export type Lang = 'vi' | 'en';
+import type { Lang } from '@/lib/i18n';
+export type { Lang };
 
 export interface MissionTranslation {
   title: string;

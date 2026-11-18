@@ -4,12 +4,13 @@ import React, { useRef, useState } from 'react';
 import { X, Download, Share2, Award, TreePine, Droplets, Zap, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { UserProfile } from '@/data/types';
+import { getDictionary, Lang } from '@/lib/i18n';
 
 interface EcoImpactModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: UserProfile;
-  currentLang?: 'vi' | 'en';
+  currentLang?: Lang;
 }
 
 export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({
@@ -22,7 +23,8 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const isEn = currentLang === 'en';
+  const t = getDictionary(currentLang);
+  const displayRank = t.data.ranks[user.rank] || user.rank;
 
   if (!isOpen) return null;
 
@@ -48,22 +50,17 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({
   };
 
   const handleShare = () => {
+    const shareText = `🌿 ${t.modals.ecoImpact.title}: ${user.co2Saved} kg CO₂ • ${user.treesPlanted} ${t.modals.ecoImpact.treeUnit} — EcoStay`;
     if (navigator.share) {
       navigator
         .share({
-          title: isEn ? 'EcoStay Green Passport' : 'Hộ Chiếu Sinh Thái EcoStay',
-          text: isEn
-            ? `I reduced ${user.co2Saved} kg CO₂ and planted ${user.treesPlanted} native trees with EcoStay!`
-            : `Tôi vừa giảm được ${user.co2Saved} kg CO₂ và đóng góp ${user.treesPlanted} cây xanh cùng EcoStay!`,
+          title: t.modals.ecoImpact.title,
+          text: shareText,
           url: window.location.href,
         })
         .catch(() => {});
     } else {
-      navigator.clipboard.writeText(
-        isEn
-          ? `🌿 I just reduced ${user.co2Saved} kg CO₂ and contributed ${user.treesPlanted} trees with EcoStay! Join eco-tourism at: ${window.location.origin}`
-          : `🌿 Tôi vừa đồng hành cùng EcoStay giảm ${user.co2Saved} kg CO₂ và đóng góp ${user.treesPlanted} cây xanh cho Trái Đất! Trải nghiệm du lịch xanh tại: ${window.location.origin}`
-      );
+      navigator.clipboard.writeText(`${shareText} (${window.location.origin})`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     }
@@ -75,7 +72,7 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({
         <button
           onClick={onClose}
           className="absolute right-4 top-4 z-20 rounded-full bg-black/20 p-2 text-white hover:bg-black/30 transition-colors"
-          aria-label={isEn ? 'Close' : 'Đóng'}
+          aria-label={t.common.close}
         >
           <X size={18} />
         </button>
@@ -97,15 +94,15 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({
               </div>
               <div>
                 <p className="text-xs uppercase tracking-wider text-emerald-300 font-semibold">
-                  EcoStay Official
+                  {t.modals.ecoImpact.title}
                 </p>
                 <p className="text-[10px] text-white/60">
-                  {isEn ? 'Certified Green Impact' : 'Chứng Nhận Tác Động Xanh'}
+                  {t.modals.ecoImpact.subtitle}
                 </p>
               </div>
             </div>
-            <div className="rounded-full bg-emerald-500/20 px-3 py-1 text-[11px] font-medium text-emerald-300 border border-emerald-500/30">
-              ISO 14064
+            <div className="rounded-full bg-emerald-500/20 px-2.5 py-1 text-[10px] font-medium text-emerald-300 border border-emerald-500/30 shrink-0">
+              {t.modals.ecoImpact.certifiedBadge}
             </div>
           </div>
 
@@ -121,14 +118,10 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({
             <h3 className="mt-3 text-lg font-bold text-white tracking-wide">{user.name}</h3>
             <div className="inline-flex items-center gap-1.5 mt-1 rounded-full bg-white/10 px-3 py-0.5 text-xs text-emerald-200">
               <Award className="h-3.5 w-3.5 text-amber-400" />
-              <span>
-                {isEn ? 'Tier: Sprout Tier' : `Hạng: ${user.rank}`}
-              </span>
+              <span>{displayRank}</span>
             </div>
             <p className="mt-2 text-xs text-emerald-100/70 italic">
-              {isEn
-                ? `"Proudly practiced sustainable habits during stay at ${user.hotelName}"`
-                : `"Đã đồng hành thực hành lối sống bền vững trong kỳ lưu trú tại ${user.hotelName}"`}
+              &ldquo;{t.modals.ecoImpact.quote}&rdquo;
             </p>
           </div>
 
@@ -138,9 +131,9 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({
               <div className="flex justify-center text-emerald-400 mb-1">
                 <ShieldCheck size={18} />
               </div>
-              <p className="text-base font-extrabold text-white">{user.co2Saved}</p>
+              <p className="text-base font-extrabold text-white">{user.co2Saved} kg</p>
               <p className="text-[10px] text-emerald-200/80">
-                {isEn ? 'kg CO₂ saved' : 'kg CO₂ giảm'}
+                {t.modals.ecoImpact.co2Label}
               </p>
             </div>
             <div className="rounded-xl bg-white/5 border border-white/10 p-2.5 backdrop-blur-md">
@@ -149,16 +142,16 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({
               </div>
               <p className="text-base font-extrabold text-white">{user.waterSaved}L</p>
               <p className="text-[10px] text-cyan-200/80">
-                {isEn ? 'Water saved' : 'Nước tiết kiệm'}
+                {t.modals.ecoImpact.waterLabel}
               </p>
             </div>
             <div className="rounded-xl bg-white/5 border border-white/10 p-2.5 backdrop-blur-md">
               <div className="flex justify-center text-amber-400 mb-1">
                 <Zap size={18} />
               </div>
-              <p className="text-base font-extrabold text-white">{user.energySaved}</p>
+              <p className="text-base font-extrabold text-white">{user.energySaved} kWh</p>
               <p className="text-[10px] text-amber-200/80">
-                {isEn ? 'kWh clean' : 'kWh Điện sạch'}
+                {t.modals.ecoImpact.energyLabel}
               </p>
             </div>
           </div>
@@ -170,21 +163,17 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({
             </div>
             <div className="text-left">
               <p className="text-xs font-semibold text-white">
-                {isEn
-                  ? `Contributed: ${user.treesPlanted} Native Trees`
-                  : `Đóng góp: ${user.treesPlanted} Cây Bách Xanh`}
+                {t.modals.ecoImpact.treesLabel}: {user.treesPlanted} {t.modals.ecoImpact.treeUnit}
               </p>
               <p className="text-[10px] text-emerald-200/70">
-                Cuc Phuong NP (Coord: 20.3188° N, 105.6042° E)
+                {t.data.locations['Cúc Phương'] || 'Cúc Phương'} (20.3188° N, 105.6042° E)
               </p>
             </div>
           </div>
 
           {/* Card Footer */}
           <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-3 text-[10px] text-white/50">
-            <span>
-              {isEn ? 'Auth Code:' : 'Mã xác thực:'} ECO-{Date.now().toString().slice(-6)}
-            </span>
+            <span>{user.memberCode}</span>
             <span>ecostay.vn/verify</span>
           </div>
         </div>
@@ -197,15 +186,7 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({
             className="flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-white py-3 text-xs font-bold text-[#1E4D3E] shadow-sm hover:bg-emerald-50 active:scale-95 transition-all border border-slate-200"
           >
             <Download size={15} />
-            <span>
-              {downloading
-                ? isEn
-                  ? 'Saving...'
-                  : 'Đang tải...'
-                : isEn
-                ? 'Download Image'
-                : 'Tải Ảnh Infographic (PNG)'}
-            </span>
+            <span>{downloading ? '...' : t.modals.ecoImpact.downloadBtn}</span>
           </button>
 
           <button
@@ -214,13 +195,7 @@ export const EcoImpactModal: React.FC<EcoImpactModalProps> = ({
           >
             <Share2 size={15} />
             <span>
-              {copied
-                ? isEn
-                  ? 'Copied Link!'
-                  : 'Đã copy link!'
-                : isEn
-                ? 'Share to Story'
-                : 'Chia Sẻ Lên Story'}
+              {copied ? t.common.copied : t.modals.ecoImpact.shareBtn}
             </span>
           </button>
         </div>

@@ -15,12 +15,12 @@ import {
   Check
 } from 'lucide-react';
 import { DetailedMission, UserProfile } from '@/data/types';
-import { missionTranslations } from '@/data/translations';
+import { getDictionary, Lang } from '@/lib/i18n';
 
 interface TabEarnPointsProps {
   user: UserProfile;
   missions: DetailedMission[];
-  currentLang?: 'vi' | 'en';
+  currentLang?: Lang;
   onOpenMissionQR: (mission: DetailedMission) => void;
   onNavigateToScanner: () => void;
   onOpenEcoImpact: () => void;
@@ -36,15 +36,15 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const isEn = currentLang === 'en';
+  const t = getDictionary(currentLang);
 
   const categories = [
-    { id: 'all', label: isEn ? 'All' : 'Tất cả', icon: <Footprints size={15} /> },
-    { id: 'room', label: isEn ? 'In-Room' : 'Trong phòng', icon: <BedDouble size={15} /> },
-    { id: 'food', label: isEn ? 'Dining' : 'Ăn uống', icon: <UtensilsCrossed size={15} /> },
-    { id: 'transport', label: isEn ? 'Transit' : 'Di chuyển', icon: <Bike size={15} /> },
-    { id: 'experience', label: isEn ? 'Eco-Tours' : 'Trải nghiệm', icon: <Compass size={15} /> },
-    { id: 'app', label: isEn ? 'App Tasks' : 'Tương tác app', icon: <Smartphone size={15} /> },
+    { id: 'all', label: t.earn.categories.all, icon: <Footprints size={15} /> },
+    { id: 'room', label: t.earn.categories.room, icon: <BedDouble size={15} /> },
+    { id: 'food', label: t.earn.categories.food, icon: <UtensilsCrossed size={15} /> },
+    { id: 'transport', label: t.earn.categories.transport, icon: <Bike size={15} /> },
+    { id: 'experience', label: t.earn.categories.experience, icon: <Compass size={15} /> },
+    { id: 'app', label: t.earn.categories.app, icon: <Smartphone size={15} /> },
   ];
 
   const filteredMissions = missions.filter((m) => {
@@ -82,17 +82,15 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-white">
-                {isEn ? 'Eco Missions & QR Earn' : 'Nhiệm Vụ Tích Điểm Xanh'}
+                {t.earn.headerTitle}
               </h3>
               <p className="text-[10px] text-emerald-200">
-                {isEn
-                  ? 'Scan QR to collect EcoStay CARBON POINTS'
-                  : 'Quét mã QR tại điểm đối tác để nhận CACBON POINT'}
+                {t.earn.headerSubtitle}
               </p>
             </div>
           </div>
-          <div className="text-right">
-            <span className="text-[10px] text-emerald-200">{isEn ? 'Completed:' : 'Đã xong:'}</span>
+          <div className="text-right shrink-0">
+            <span className="text-[10px] text-emerald-200">{t.earn.completedLabel}</span>
             <p className="text-xs font-extrabold text-amber-300">
               {completedCount}/{missions.length}
             </p>
@@ -130,7 +128,7 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
       <div className="space-y-2.5">
         {filteredMissions.map((item) => {
           const isDone = item.completed;
-          const trans = isEn ? missionTranslations[item.id] : null;
+          const trans = t.data.missions[item.id];
           const displayTitle = trans?.title || item.title;
           const displaySubtitle = trans?.subtitle || item.subtitle;
           const displayCategoryName = trans?.categoryName || item.categoryName;
@@ -160,14 +158,14 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
                   </div>
 
                   <div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="rounded-md bg-emerald-100 px-1.5 py-0.2 text-[9px] font-bold text-emerald-800">
                         {displayCategoryName}
                       </span>
                       {item.isPenalty && (
                         <span className="rounded-md bg-amber-100 px-1.5 py-0.2 text-[9px] font-bold text-amber-800 flex items-center gap-0.5">
                           <AlertTriangle size={9} />
-                          {isEn ? 'Penalty warning' : 'Lưu ý lãng phí'}
+                          {t.earn.penaltyBadge}
                         </span>
                       )}
                     </div>
@@ -203,7 +201,7 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
                       className="flex items-center gap-1 rounded-xl bg-emerald-600 px-2.5 py-1.5 text-[11px] font-bold text-white shadow-sm hover:bg-emerald-700 active:scale-95 transition-all"
                     >
                       <Check size={12} className="stroke-[3]" />
-                      <span>{isEn ? 'Done ✓' : 'Đã quét ✓'}</span>
+                      <span>{t.earn.doneBadge}</span>
                     </button>
                   ) : (
                     <button
@@ -211,7 +209,7 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
                       className="flex items-center gap-1 rounded-xl bg-gradient-to-r from-[#1E4D3E] to-[#2D6A56] px-2.5 py-1.5 text-[11px] font-bold text-white shadow-sm hover:from-[#16392E] hover:to-[#225242] active:scale-95 transition-all"
                     >
                       <QrCode size={13} className="text-amber-300" />
-                      <span>{isEn ? 'Scan QR' : 'Quét QR'}</span>
+                      <span>{t.earn.scanQrBtn}</span>
                     </button>
                   )}
                 </div>

@@ -6,6 +6,7 @@ import {
   OpenRouterError,
   OpenRouterMessage,
 } from '@/lib/ai/openrouter';
+import { isValidLang, Lang } from '@/lib/i18n';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -18,13 +19,13 @@ interface IncomingChatMessage {
 interface ChatRequestBody {
   messages?: IncomingChatMessage[];
   userContext?: ChatUserContext;
-  lang?: 'vi' | 'en';
+  lang?: string;
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as ChatRequestBody;
-    const lang: 'vi' | 'en' = body.lang === 'en' ? 'en' : 'vi';
+    const lang: Lang = isValidLang(body.lang) ? body.lang : 'vi';
     const rawMessages = Array.isArray(body.messages) ? body.messages : [];
 
     // Sanitize & keep last 12 turns for fast, focused multi-turn memory

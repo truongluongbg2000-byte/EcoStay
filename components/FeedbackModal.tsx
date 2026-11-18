@@ -2,12 +2,13 @@
 
 import React, { useState } from 'react';
 import { X, MessageSquareQuote, Star, CheckCircle2, Sparkles } from 'lucide-react';
+import { getDictionary, Lang } from '@/lib/i18n';
 
 interface FeedbackModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmitFeedback: (comment: string, rating: number) => void;
-  currentLang?: 'vi' | 'en';
+  currentLang?: Lang;
 }
 
 export const FeedbackModal: React.FC<FeedbackModalProps> = ({
@@ -20,7 +21,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const [comment, setComment] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const isEn = currentLang === 'en';
+  const t = getDictionary(currentLang);
 
   if (!isOpen) return null;
 
@@ -30,6 +31,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
+      setComment('');
       onClose();
     }, 1800);
   };
@@ -40,6 +42,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         <button
           onClick={onClose}
           className="absolute right-4 top-4 rounded-full bg-slate-100 p-1.5 text-slate-500 hover:bg-slate-200"
+          aria-label={t.common.close}
         >
           <X size={16} />
         </button>
@@ -50,36 +53,32 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
               <CheckCircle2 size={32} />
             </div>
             <h3 className="mt-3 text-base font-bold text-slate-800">
-              {isEn ? 'Thank you!' : 'Cảm ơn bạn!'}
+              {t.modals.feedback.successTitle}
             </h3>
             <p className="mt-1 text-xs text-slate-600">
-              {isEn
-                ? 'Your feedback has been recorded. You received +15 Carbon Points (CB)!'
-                : 'Ý kiến của bạn đã được ghi nhận. Bạn được cộng +15 Điểm CB!'}
+              {t.modals.feedback.successDesc}
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="text-left">
-            <div className="flex items-center gap-2 border-b pb-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+            <div className="flex items-center gap-2 border-b pb-3 pr-6">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
                 <MessageSquareQuote size={18} />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-800">
-                  {isEn ? 'Guest Survey & Feedback' : 'Gửi Ý Kiến & Khảo Sát'}
+                  {t.modals.feedback.title}
                 </h3>
                 <p className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
-                  <Sparkles size={11} className="text-amber-500" />
-                  {isEn
-                    ? 'Earn +15 CARBON POINTS immediately'
-                    : 'Nhận ngay +15 Điểm CACBON POINT'}
+                  <Sparkles size={11} className="text-amber-500 shrink-0" />
+                  <span>{t.modals.feedback.subtitle}</span>
                 </p>
               </div>
             </div>
 
             <div className="mt-4">
               <label className="text-xs font-bold text-slate-700">
-                {isEn ? 'Overall Satisfaction:' : 'Mức độ hài lòng:'}
+                {t.modals.feedback.ratingLabel}
               </label>
               <div className="mt-1 flex gap-1.5 justify-center py-2 bg-emerald-50/50 rounded-2xl border border-emerald-100">
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -100,28 +99,25 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
             </div>
 
             <div className="mt-3">
-              <label className="text-xs font-bold text-slate-700">
-                {isEn ? 'Your Feedback:' : 'Đóng góp của bạn:'}
-              </label>
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder={
-                  isEn
-                    ? 'Share your experience with eco-services, rooms, or organic dining...'
-                    : 'Chia sẻ trải nghiệm dịch vụ xanh, phòng nghỉ hoặc bữa ăn tại resort...'
-                }
+                placeholder={t.modals.feedback.placeholder}
                 rows={3}
                 required
                 className="mt-1 w-full rounded-2xl border border-slate-200 p-3 text-xs text-slate-800 focus:border-[#1E4D3E] focus:outline-none"
               />
             </div>
 
+            <p className="mt-2 text-[10px] text-slate-400 text-center">
+              {t.modals.feedback.hotlineLabel}
+            </p>
+
             <button
               type="submit"
-              className="mt-4 w-full rounded-2xl bg-[#1E4D3E] py-2.5 text-xs font-bold text-white shadow hover:bg-[#16392E]"
+              className="mt-3 w-full rounded-2xl bg-[#1E4D3E] py-2.5 text-xs font-bold text-white shadow hover:bg-[#16392E]"
             >
-              {isEn ? 'Submit & Earn 15 CB' : 'Gửi đánh giá & Nhận 15 CB'}
+              {t.modals.feedback.submitBtn}
             </button>
           </form>
         )}

@@ -1,4 +1,5 @@
 import { RagChunk } from './ragStub';
+import { getLanguageMeta, Lang } from '@/lib/i18n';
 
 export interface ChatUserContext {
   name?: string;
@@ -12,15 +13,16 @@ export interface ChatUserContext {
 }
 
 export function buildSystemPrompt(params: {
-  lang: 'vi' | 'en';
+  lang: Lang;
   userContext?: ChatUserContext;
   ragChunks?: RagChunk[];
 }): string {
   const { lang, userContext, ragChunks = [] } = params;
-  const isEn = lang === 'en';
+  const isVi = lang === 'vi';
+  const langMeta = getLanguageMeta(lang);
 
   const userSummary = userContext
-    ? isEn
+    ? !isVi
       ? `Current Traveler Profile:
 - Name: ${userContext.name || 'Guest'}
 - Available Carbon Points (CB): ${userContext.carbonPoints ?? 0} CB
@@ -45,7 +47,7 @@ export function buildSystemPrompt(params: {
           .join('\n\n')}\n\nPrioritize facts from [KNOWLEDGE BASE CONTEXT] when answering.`
       : '';
 
-  if (isEn) {
+  if (!isVi) {
     return `You are EcoBot, the official AI Green Travel & Net Zero Assistant of EcoStay Vietnam.
 
 Core Responsibilities:
@@ -60,10 +62,11 @@ Core Responsibilities:
 4. Highlight certified EcoStay partners: Silk Sense Hoi An, An Lac Vegan Restaurant, Bay Mau Coconut Forest, Emeralda Ninh Binh, Cuc Phuong NP, Da Lat Eco Wonderland, Cau Dat Farm, Cat Tien Jungle Lodge, Topas Ecolodge Sa Pa.
 
 Style Guidelines:
-- Respond strictly in English.
+- Respond strictly and naturally in **${langMeta.aiLanguageName}** (${langMeta.nativeName}).
+- Always keep the point unit abbreviated as **CB** and the brand name as **EcoStay**.
 - Be warm, concise, structured with clean bullet points and **bold** highlights.
 - Do not output internal <think> tags or chain-of-thought reasoning.
-- Never invent private bookings; guide users to the relevant tab in EcoStay (Home, Rewards, Scan QR, Earn Points).
+- Never invent private bookings; guide users to the relevant tab in EcoStay.
 
 ${userSummary}${ragSection}`.trim();
   }

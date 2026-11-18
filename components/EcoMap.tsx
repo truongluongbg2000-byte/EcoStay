@@ -19,13 +19,13 @@ import {
   Maximize2
 } from 'lucide-react';
 import { GreenDestination } from '@/data/types';
-import { mapLocationTranslations } from '@/data/translations';
+import { getDictionary, Lang } from '@/lib/i18n';
 import 'leaflet/dist/leaflet.css';
 
 interface EcoMapProps {
   selectedLocation: string;
   onSelectLocation: (location: string) => void;
-  currentLang?: 'vi' | 'en';
+  currentLang?: Lang;
   destinations?: GreenDestination[];
   onSelectVenue?: (destination: GreenDestination) => void;
 }
@@ -113,7 +113,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
   destinations = [],
   onSelectVenue,
 }) => {
-  const isEn = currentLang === 'en';
+  const t = getDictionary(currentLang);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const tileLayerRef = useRef<any>(null);
@@ -319,17 +319,22 @@ export const EcoMap: React.FC<EcoMapProps> = ({
         const marker = L.marker([dest.lat, dest.lng], { icon: markerIcon });
 
         // Popup Content formatted like Google Maps business card
+        const dTrans = t.data.destinations[dest.id];
+        const popupName = dTrans?.name || dest.name;
+        const popupBadge = dTrans?.badge || dest.greenBadge;
+        const popupLoc = t.data.locations[dest.location] || dest.location;
+
         const popupContent = document.createElement('div');
         popupContent.className = 'eco-leaflet-popup p-1 text-left min-w-[210px] max-w-[240px]';
         popupContent.innerHTML = `
           <div class="rounded-xl overflow-hidden mb-1.5 relative border border-slate-100">
-            <img src="${dest.image}" alt="${dest.name}" class="h-20 w-full object-cover" />
+            <img src="${dest.image}" alt="${popupName}" class="h-20 w-full object-cover" />
             <span class="absolute top-1 right-1 rounded-md bg-emerald-600/90 text-white px-1.5 py-0.5 text-[8px] font-black uppercase shadow-xs">
-              ${dest.greenBadge}
+              ${popupBadge}
             </span>
           </div>
-          <h4 class="text-xs font-black text-slate-900 leading-snug line-clamp-2">${dest.name}</h4>
-          <p class="text-[10px] text-slate-500 mt-0.5">${dest.address || dest.location}</p>
+          <h4 class="text-xs font-black text-slate-900 leading-snug line-clamp-2">${popupName}</h4>
+          <p class="text-[10px] text-slate-500 mt-0.5">${dest.address || popupLoc}</p>
           <div class="mt-1.5 pt-1.5 border-t border-slate-100 flex items-center justify-between">
             <span class="rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 text-[10px] font-black">
               +${dest.pointsReward} CB
@@ -418,10 +423,10 @@ export const EcoMap: React.FC<EcoMapProps> = ({
           </div>
           <div>
             <h3 className="text-xs font-bold text-slate-900 leading-tight">
-              {isEn ? 'Interactive Vietnam Eco-Map' : 'Bản đồ Điểm đến Xanh Việt Nam'}
+              {t.map.title}
             </h3>
             <p className="text-[9px] text-slate-400">
-              {isEn ? 'Real street view & green partners' : 'Đường phố thực tế & đối tác chuẩn Xanh'}
+              {t.map.subtitle}
             </p>
           </div>
         </div>
@@ -435,16 +440,10 @@ export const EcoMap: React.FC<EcoMapProps> = ({
                 ? 'bg-slate-900 text-amber-300 border-slate-700'
                 : 'bg-emerald-50 text-emerald-800 border-emerald-200/80 hover:bg-emerald-100'
             }`}
-            title={isEn ? 'Toggle Satellite view' : 'Bật/Tắt chế độ Vệ tinh'}
+            title={mapMode === 'satellite' ? t.map.streetMode : t.map.satelliteMode}
           >
             <span>
-              {mapMode === 'satellite'
-                ? isEn
-                  ? '🛰️ Satellite'
-                  : '🛰️ Vệ tinh'
-                : isEn
-                ? '🗺️ Street'
-                : '🗺️ Đường phố'}
+              {mapMode === 'satellite' ? t.map.satelliteMode : t.map.streetMode}
             </span>
           </button>
         </div>
@@ -460,7 +459,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
           <button
             onClick={handleRecenter}
             className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/95 text-slate-700 shadow-md border border-slate-200 hover:bg-emerald-50 active:scale-95 transition-all"
-            title={isEn ? 'Recenter to Vietnam' : 'Về toàn cảnh Việt Nam'}
+            title={t.map.recenterTitle}
           >
             <Navigation size={14} className="text-[#1E4D3E]" />
           </button>
@@ -468,7 +467,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
           <button
             onClick={handleZoomIn}
             className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/95 text-slate-700 shadow-md border border-slate-200 hover:bg-emerald-50 active:scale-95 transition-all"
-            title={isEn ? 'Zoom in' : 'Phóng to'}
+            title={t.map.zoomInTitle}
           >
             <Plus size={15} />
           </button>
@@ -476,7 +475,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
           <button
             onClick={handleZoomOut}
             className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/95 text-slate-700 shadow-md border border-slate-200 hover:bg-emerald-50 active:scale-95 transition-all"
-            title={isEn ? 'Zoom out' : 'Thu nhỏ'}
+            title={t.map.zoomOutTitle}
           >
             <Minus size={15} />
           </button>
@@ -487,15 +486,11 @@ export const EcoMap: React.FC<EcoMapProps> = ({
           <div className="rounded-xl bg-white/95 px-2.5 py-1 text-[10px] font-bold text-slate-800 shadow-md border border-slate-200 flex items-center gap-1.5 backdrop-blur-xs">
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>
-              {isEn ? 'Region: ' : 'Khu vực: '}
+              {t.map.regionPrefix}
               <strong className="text-[#1E4D3E]">
                 {selectedLocation === 'all'
-                  ? isEn
-                    ? 'All Vietnam'
-                    : 'Toàn quốc'
-                  : isEn
-                  ? mapLocationTranslations[selectedLocation] || selectedLocation
-                  : selectedLocation}
+                  ? t.map.allVietnam
+                  : t.data.locations[selectedLocation] || selectedLocation}
               </strong>
             </span>
           </div>
@@ -521,47 +516,60 @@ export const EcoMap: React.FC<EcoMapProps> = ({
               }`}
             >
               <span>{reg.icon}</span>
-              <span>{isEn ? reg.nameEn : reg.name}</span>
+              <span>
+                {reg.id === 'all'
+                  ? t.map.allVietnam
+                  : t.data.locations[reg.name] || reg.name}
+              </span>
             </button>
           );
         })}
       </div>
 
       {/* 4. Active Selected Venue Spotlight Drawer */}
-      {activeVenue && (
-        <div className="mt-2.5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50/50 p-2.5 border border-emerald-200/80 flex items-center justify-between gap-2.5 animate-fadeIn">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <img
-              src={activeVenue.image}
-              alt={activeVenue.name}
-              className="h-11 w-11 shrink-0 rounded-xl object-cover border border-emerald-200 shadow-xs"
-            />
-            <div className="min-w-0">
-              <div className="flex items-center gap-1">
-                <span className="rounded bg-emerald-600 px-1 py-0.2 text-[8px] font-bold uppercase text-white">
-                  +{activeVenue.pointsReward} CB
-                </span>
-                <span className="text-[9px] font-semibold text-slate-500 truncate">
-                  {activeVenue.categoryName} • {activeVenue.location}
-                </span>
+      {activeVenue && (() => {
+        const avTrans = t.data.destinations[activeVenue.id];
+        const avName = avTrans?.name || activeVenue.name;
+        const avCat =
+          avTrans?.categoryName ||
+          t.data.destinationCategories[activeVenue.category] ||
+          activeVenue.categoryName;
+        const avLoc = t.data.locations[activeVenue.location] || activeVenue.location;
+        return (
+          <div className="mt-2.5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50/50 p-2.5 border border-emerald-200/80 flex items-center justify-between gap-2.5 animate-fadeIn">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <img
+                src={activeVenue.image}
+                alt={avName}
+                className="h-11 w-11 shrink-0 rounded-xl object-cover border border-emerald-200 shadow-xs"
+              />
+              <div className="min-w-0">
+                <div className="flex items-center gap-1">
+                  <span className="rounded bg-emerald-600 px-1 py-0.2 text-[8px] font-bold uppercase text-white">
+                    +{activeVenue.pointsReward} CB
+                  </span>
+                  <span className="text-[9px] font-semibold text-slate-500 truncate">
+                    {avCat} • {avLoc}
+                  </span>
+                </div>
+                <h4 className="text-xs font-bold text-slate-900 truncate mt-0.5">
+                  {avName}
+                </h4>
               </div>
-              <h4 className="text-xs font-bold text-slate-900 truncate mt-0.5">
-                {activeVenue.name}
-              </h4>
             </div>
-          </div>
 
-          {onSelectVenue && (
-            <button
-              onClick={() => onSelectVenue(activeVenue)}
-              className="shrink-0 rounded-xl bg-[#1E4D3E] px-2.5 py-1.5 text-[10px] font-bold text-white shadow-xs hover:bg-[#16392E] active:scale-95 transition-all flex items-center gap-1"
-            >
-              <span>{isEn ? 'View & Book' : 'Đặt Dịch Vụ'}</span>
-              <ChevronRight size={12} />
-            </button>
-          )}
-        </div>
-      )}
+            {onSelectVenue && (
+              <button
+                onClick={() => onSelectVenue(activeVenue)}
+                className="shrink-0 rounded-xl bg-[#1E4D3E] px-2.5 py-1.5 text-[10px] font-bold text-white shadow-xs hover:bg-[#16392E] active:scale-95 transition-all flex items-center gap-1"
+              >
+                <span>{t.map.viewAndBook}</span>
+                <ChevronRight size={12} />
+              </button>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 };

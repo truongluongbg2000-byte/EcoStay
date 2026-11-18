@@ -15,17 +15,16 @@ import {
   ArrowRight,
   Info,
   Globe,
-  Compass,
   Sparkles,
 } from 'lucide-react';
 import { MockAccount } from '@/data/types';
 import { mockAccounts } from '@/data/mockData';
-import { rankTranslations } from '@/data/translations';
 import { playSuccessTickSound } from '@/lib/audio/successSound';
+import { formatText, getDictionary, Lang, SUPPORTED_LANGUAGES } from '@/lib/i18n';
 
 interface LoginScreenProps {
-  currentLang: 'vi' | 'en';
-  onChangeLang: (lang: 'vi' | 'en') => void;
+  currentLang: Lang;
+  onChangeLang: (lang: Lang) => void;
   onLoginSuccess: (account: MockAccount) => void;
   onRegisterSuccess: (data: {
     name: string;
@@ -41,10 +40,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   currentLang,
   onChangeLang,
   onLoginSuccess,
-  onRegisterSuccess,
-  onContinueAsGuest,
 }) => {
-  const isEn = currentLang === 'en';
+  const t = getDictionary(currentLang);
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -68,7 +65,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [regPassword, setRegPassword] = useState('');
   const [showRegPassword, setShowRegPassword] = useState(false);
 
-  // Close settings dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) {
@@ -94,15 +90,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current);
     noticeTimerRef.current = setTimeout(() => {
       setNoticeText(null);
-    }, 2200);
+    }, 2600);
   };
 
   const handleSocialInDev = (provider: 'Google' | 'Facebook') => {
-    showTempNotice(
-      isEn
-        ? `${provider} sign-in is currently under development. Please use "Sign in with Demo Accounts" below.`
-        : `Tính năng đăng nhập bằng ${provider} đang phát triển. Vui lòng chọn "Đăng nhập bằng tài khoản mẫu" bên dưới.`
-    );
+    showTempNotice(formatText(t.login.devNoticeSocial, { provider }));
   };
 
   const handleSelectAccount = (acc: MockAccount) => {
@@ -113,20 +105,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
   const handleManualLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    showTempNotice(
-      isEn
-        ? 'Direct email/password login is currently under development. Please use "Sign in with Demo Accounts" below.'
-        : 'Tính năng đăng nhập trực tiếp đang phát triển. Vui lòng sử dụng "Đăng nhập bằng tài khoản mẫu" bên dưới.'
-    );
+    showTempNotice(t.login.devNoticeEmail);
   };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    showTempNotice(
-      isEn
-        ? 'Account registration is currently under development. Please use "Sign in with Demo Accounts" below.'
-        : 'Tính năng đăng ký tài khoản đang phát triển. Vui lòng sử dụng "Đăng nhập bằng tài khoản mẫu" bên dưới.'
-    );
+    showTempNotice(t.login.devNoticeRegister);
   };
 
   return (
@@ -135,7 +119,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       <div className="pointer-events-none absolute -top-16 -right-16 h-52 w-52 rounded-full bg-emerald-300/25 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-green-300/25 blur-3xl" />
 
-      {/* Top Bar: Settings Gear for Language */}
+      {/* Top Bar: Settings Gear for 5 Languages */}
       <div className="relative z-30 flex items-center justify-end pb-2">
         <div ref={settingsRef} className="relative">
           <button
@@ -146,57 +130,54 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 ? 'bg-[#4CAF50] text-white border-[#4CAF50]'
                 : 'bg-white/95 text-[#2E7D32] border-emerald-200 hover:bg-emerald-50'
             }`}
-            aria-label={isEn ? 'Settings' : 'Cài đặt'}
-            title={isEn ? 'Language Settings' : 'Cài đặt ngôn ngữ'}
+            aria-label={t.login.settingsLabel}
+            title={t.login.settingsLabel}
           >
             <Settings
               size={19}
-              className={isSettingsOpen ? 'rotate-90 transition-transform duration-300' : 'transition-transform duration-300'}
+              className={
+                isSettingsOpen
+                  ? 'rotate-90 transition-transform duration-300'
+                  : 'transition-transform duration-300'
+              }
             />
           </button>
 
-          {/* Language Settings Popover */}
+          {/* 5-Language Settings Popover */}
           {isSettingsOpen && (
-            <div className="absolute right-0 mt-2 w-52 rounded-2xl bg-white p-2.5 shadow-xl border border-emerald-100 animate-fadeIn z-40">
+            <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white p-2.5 shadow-xl border border-emerald-100 animate-fadeIn z-40">
               <div className="flex items-center gap-1.5 px-2 pb-2 mb-1.5 border-b border-slate-100">
                 <Globe size={14} className="text-[#2E7D32]" />
                 <span className="text-[11px] font-bold text-slate-700">
-                  {isEn ? 'Display Language' : 'Ngôn ngữ hiển thị'}
+                  {t.login.settingsLabel}
                 </span>
               </div>
 
               <div className="space-y-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    onChangeLang('vi');
-                    setIsSettingsOpen(false);
-                  }}
-                  className={`flex w-full items-center justify-between rounded-xl px-2.5 py-2 text-xs font-semibold transition-colors ${
-                    currentLang === 'vi'
-                      ? 'bg-[#E8F5E9] text-[#1B5E20]'
-                      : 'text-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  <span>🇻🇳 Tiếng Việt</span>
-                  {currentLang === 'vi' && <Check size={14} className="text-[#2E7D32]" />}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    onChangeLang('en');
-                    setIsSettingsOpen(false);
-                  }}
-                  className={`flex w-full items-center justify-between rounded-xl px-2.5 py-2 text-xs font-semibold transition-colors ${
-                    currentLang === 'en'
-                      ? 'bg-[#E8F5E9] text-[#1B5E20]'
-                      : 'text-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  <span>🇬🇧 English</span>
-                  {currentLang === 'en' && <Check size={14} className="text-[#2E7D32]" />}
-                </button>
+                {SUPPORTED_LANGUAGES.map((langItem) => (
+                  <button
+                    key={langItem.code}
+                    type="button"
+                    onClick={() => {
+                      onChangeLang(langItem.code);
+                      setNoticeText(null);
+                      setIsSettingsOpen(false);
+                    }}
+                    className={`flex w-full items-center justify-between rounded-xl px-2.5 py-2 text-xs font-semibold transition-colors ${
+                      currentLang === langItem.code
+                        ? 'bg-[#E8F5E9] text-[#1B5E20]'
+                        : 'text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>{langItem.flag}</span>
+                      <span>{langItem.nativeName}</span>
+                    </span>
+                    {currentLang === langItem.code && (
+                      <Check size={14} className="text-[#2E7D32]" />
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
           )}
@@ -221,23 +202,17 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   EcoStay
                 </span>
                 <span className="block text-[10px] font-semibold text-emerald-600 mt-0.5">
-                  {isEn ? 'Green Travel & Net Zero' : 'Du lịch Xanh & Net Zero'}
+                  {t.login.tagline}
                 </span>
               </div>
             </div>
 
             <h1 className="mt-4 text-xl font-extrabold text-slate-900">
-              {mode === 'login'
-                ? isEn
-                  ? 'Sign In'
-                  : 'Đăng nhập'
-                : isEn
-                ? 'Create Account'
-                : 'Đăng ký'}
+              {mode === 'login' ? t.login.signIn : t.login.signUp}
             </h1>
           </div>
 
-          {/* Inline Notice Banner (e.g., Google/Facebook in development) */}
+          {/* Inline Notice Banner */}
           {noticeText && (
             <div className="mb-3.5 flex items-center gap-2 rounded-2xl bg-[#E8F5E9] border border-[#A5D6A7] px-3 py-2 text-[11px] font-semibold text-[#1B5E20] animate-fadeIn">
               <Info size={15} className="shrink-0 text-[#2E7D32]" />
@@ -293,7 +268,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               {/* Divider */}
               <div className="my-4 flex items-center gap-3 text-[11px] text-slate-400">
                 <div className="h-px flex-1 bg-slate-200" />
-                <span>{isEn ? 'or' : 'hoặc'}</span>
+                <span>{t.login.or}</span>
                 <div className="h-px flex-1 bg-slate-200" />
               </div>
 
@@ -305,7 +280,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                     type="text"
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
-                    placeholder={isEn ? 'Email or phone number' : 'Email hoặc số điện thoại'}
+                    placeholder={t.login.emailOrPhone}
                     className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-3.5 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none focus:ring-2 focus:ring-[#C8E6C9] transition-all"
                   />
                 </div>
@@ -316,14 +291,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                     type={showPassword ? 'text' : 'password'}
                     value={passwordInput}
                     onChange={(e) => setPasswordInput(e.target.value)}
-                    placeholder={isEn ? 'Password' : 'Mật khẩu'}
+                    placeholder={t.login.password}
                     className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-10 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none focus:ring-2 focus:ring-[#C8E6C9] transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
                     className="absolute right-3.5 text-slate-400 hover:text-slate-600"
-                    aria-label={isEn ? 'Toggle password visibility' : 'Ẩn/Hiện mật khẩu'}
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -335,15 +309,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                     onClick={() => setShowForgotHint((prev) => !prev)}
                     className="text-[11px] font-semibold text-[#2E7D32] hover:underline"
                   >
-                    {isEn ? 'Forgot password?' : 'Quên mật khẩu?'}
+                    {t.login.forgotPassword}
                   </button>
                 </div>
 
                 {showForgotHint && (
                   <div className="rounded-xl bg-[#F1F8E9] border border-[#C5E1A5] px-3 py-2 text-[11px] text-[#33691E]">
-                    {isEn
-                      ? 'Demo default password is "123456", or use "Sign in with demo account" below.'
-                      : 'Mật khẩu mẫu là "123456", hoặc bạn có thể chọn "Đăng nhập bằng tài khoản mẫu" ở bên dưới.'}
+                    {t.login.forgotHint}
                   </div>
                 )}
 
@@ -351,13 +323,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   type="submit"
                   className="mt-1 w-full rounded-full bg-gradient-to-r from-[#66BB6A] to-[#4CAF50] py-3.5 text-sm font-bold text-white shadow-md shadow-green-500/20 hover:from-[#57AE5B] hover:to-[#43A047] active:scale-98 transition-all"
                 >
-                  {isEn ? 'Sign In' : 'Đăng nhập'}
+                  {t.login.signIn}
                 </button>
               </form>
 
               {/* Register Link */}
               <p className="mt-4 text-center text-xs text-slate-600">
-                {isEn ? "Don't have an account? " : 'Bạn chưa có tài khoản? '}
+                {t.login.noAccount}
                 <button
                   type="button"
                   onClick={() => {
@@ -366,28 +338,24 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   }}
                   className="font-bold text-[#2E7D32] hover:underline"
                 >
-                  {isEn ? 'Sign Up' : 'Đăng ký'}
+                  {t.login.signUp}
                 </button>
               </p>
             </>
           ) : (
-            /* REGISTER FORM INSIDE SAME CLEAN WHITE CARD */
             <form onSubmit={handleRegisterSubmit} className="space-y-2.5">
               <div className="rounded-2xl bg-[#E8F5E9] border border-[#C8E6C9] p-2.5 flex items-center gap-2">
                 <Sparkles size={16} className="text-[#2E7D32] shrink-0" />
                 <p className="text-[11px] font-semibold text-[#1B5E20]">
-                  {isEn
-                    ? 'New members receive +50 Carbon Points (CB) immediately!'
-                    : 'Thành viên mới nhận ngay +50 Điểm Cacbon (CB) chào mừng!'}
+                  {t.login.welcomeBonus}
                 </p>
               </div>
 
               <input
                 type="text"
-                required
                 value={regName}
                 onChange={(e) => setRegName(e.target.value)}
-                placeholder={isEn ? 'Full name *' : 'Họ và tên du khách *'}
+                placeholder={t.login.fullName}
                 className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 px-3.5 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none focus:ring-2 focus:ring-[#C8E6C9]"
               />
 
@@ -396,7 +364,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   type="tel"
                   value={regPhone}
                   onChange={(e) => setRegPhone(e.target.value)}
-                  placeholder={isEn ? 'Phone number' : 'Số điện thoại'}
+                  placeholder={t.login.phone}
                   className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 px-3 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none"
                 />
                 <input
@@ -425,7 +393,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   type="text"
                   value={regRoom}
                   onChange={(e) => setRegRoom(e.target.value)}
-                  placeholder={isEn ? 'Room number' : 'Số phòng'}
+                  placeholder={t.login.roomNumber}
                   className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 px-3 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none"
                 />
               </div>
@@ -435,7 +403,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   type={showRegPassword ? 'text' : 'password'}
                   value={regPassword}
                   onChange={(e) => setRegPassword(e.target.value)}
-                  placeholder={isEn ? 'Password' : 'Mật khẩu'}
+                  placeholder={t.login.password}
                   className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none"
                 />
                 <button
@@ -451,11 +419,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 type="submit"
                 className="mt-1 w-full rounded-full bg-gradient-to-r from-[#66BB6A] to-[#4CAF50] py-3 text-sm font-bold text-white shadow-md shadow-green-500/20 hover:from-[#57AE5B] hover:to-[#43A047] active:scale-98 transition-all"
               >
-                {isEn ? 'Create Account (+50 CB)' : 'Đăng ký & Nhận +50 CB'}
+                {t.login.createAccountBtn}
               </button>
 
               <p className="pt-1 text-center text-xs text-slate-600">
-                {isEn ? 'Already have an account? ' : 'Đã có tài khoản? '}
+                {t.login.hasAccount}
                 <button
                   type="button"
                   onClick={() => {
@@ -464,7 +432,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   }}
                   className="font-bold text-[#2E7D32] hover:underline"
                 >
-                  {isEn ? 'Sign In' : 'Đăng nhập'}
+                  {t.login.signIn}
                 </button>
               </p>
             </form>
@@ -472,9 +440,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
           {/* Legal Terms Micro-Text */}
           <p className="mt-5 text-center text-[10px] text-slate-400 leading-relaxed">
-            {isEn
-              ? 'By signing in, you agree to the EcoStay Terms of Service and Green Tourism Commitment.'
-              : 'Bằng việc đăng nhập tài khoản, quý khách xác nhận đồng ý với Điều khoản sử dụng của EcoStay.'}
+            {t.login.terms}
           </p>
         </div>
       </div>
@@ -487,13 +453,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white/95 border border-[#A5D6A7] py-3 px-4 text-xs font-bold text-[#1B5E20] shadow-xs hover:bg-[#E8F5E9] active:scale-98 transition-all"
         >
           <Users size={15} className="text-[#2E7D32]" />
-          <span>
-            {isEn ? 'Sign in with Demo Accounts' : 'Đăng nhập bằng tài khoản mẫu'}
-          </span>
+          <span>{t.login.signInDemoBtn}</span>
         </button>
       </div>
 
-      {/* Demo Accounts Picker Modal (Only visible after tapping bottom button) */}
+      {/* Demo Accounts Picker Modal */}
       {isDemoSheetOpen && (
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/45 p-3 sm:p-4 backdrop-blur-xs animate-fadeIn"
@@ -510,12 +474,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 </div>
                 <div>
                   <h3 className="text-sm font-extrabold text-slate-900">
-                    {isEn ? 'Choose a Demo Account' : 'Chọn tài khoản mẫu'}
+                    {t.login.chooseDemoTitle}
                   </h3>
                   <p className="text-[11px] text-slate-500">
-                    {isEn
-                      ? 'Tap any profile below to sign in instantly'
-                      : 'Chạm vào 1 trong 4 tài khoản để đăng nhập ngay'}
+                    {t.login.chooseDemoSubtitle}
                   </p>
                 </div>
               </div>
@@ -524,7 +486,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 type="button"
                 onClick={() => setIsDemoSheetOpen(false)}
                 className="rounded-full bg-slate-100 p-1.5 text-slate-500 hover:bg-slate-200"
-                aria-label={isEn ? 'Close' : 'Đóng'}
+                aria-label={t.common.close}
               >
                 <X size={16} />
               </button>
@@ -532,10 +494,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
             <div className="mt-3 space-y-2.5 overflow-y-auto pr-0.5">
               {mockAccounts.map((acc) => {
-                const displayRank = isEn
-                  ? rankTranslations[acc.profile.rank] || acc.profile.rank
-                  : acc.profile.rank;
-                const displayRole = isEn ? acc.roleBadgeEn : acc.roleBadge;
+                const displayRank = t.data.ranks[acc.profile.rank] || acc.profile.rank;
+                const displayRole = t.data.accountRoles[acc.id] || acc.roleBadge;
 
                 return (
                   <button
@@ -578,7 +538,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                     <div className="mt-2 pt-1.5 border-t border-emerald-100/80 flex items-center justify-between text-[10px] text-slate-500">
                       <span>{displayRole}</span>
                       <span className="font-bold text-[#2E7D32] flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
-                        <span>{isEn ? 'Sign in' : 'Chọn'}</span>
+                        <span>{t.common.select}</span>
                         <ArrowRight size={11} />
                       </span>
                     </div>

@@ -24,11 +24,12 @@ import {
   FastQRScannerController,
   tryEnableContinuousFocus,
 } from '@/lib/qr/fastScanner';
+import { getDictionary, formatText, Lang } from '@/lib/i18n';
 
 interface MissionQRModalProps {
   mission: DetailedMission | null;
   userPoints?: number;
-  currentLang?: 'vi' | 'en';
+  currentLang?: Lang;
   onClose: () => void;
   onSuccess: (missionId: string) => void;
   onScanNext?: () => void;
@@ -44,7 +45,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
   onScanNext,
   onNavigateHome,
 }) => {
-  const isEn = currentLang === 'en';
+  const t = getDictionary(currentLang);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -104,9 +105,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
         // 2. Show completion screen with 2 choices
         setScanStatus('success');
         setStatusMessage(
-          isEn
-            ? `+${activeMission.points} CB has been added to your account!`
-            : `Đã cộng thật +${activeMission.points} CB vào tài khoản của bạn!`
+          formatText(t.missionModal.addedNotice, { points: activeMission.points })
         );
 
         if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
@@ -135,17 +134,9 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
 
       setScanStatus('mismatch');
       if (scanned.toUpperCase().startsWith('ECOSTAY:')) {
-        setStatusMessage(
-          isEn
-            ? 'Wrong mission QR! Please scan the exact QR code for this mission.'
-            : 'Sai mã nhiệm vụ đang chọn! Vui lòng quét đúng mã QR của nhiệm vụ này.'
-        );
+        setStatusMessage(t.missionModal.wrongMissionError);
       } else {
-        setStatusMessage(
-          isEn
-            ? 'Invalid QR code — not an EcoStay mission code.'
-            : 'Mã QR không hợp lệ — không thuộc hệ thống nhiệm vụ EcoStay.'
-        );
+        setStatusMessage(t.missionModal.invalidQrError);
       }
 
       if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
@@ -156,7 +147,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
         }
       }, 2600);
     },
-    [isEn, stopCamera]
+    [stopCamera, t.missionModal.addedNotice, t.missionModal.invalidQrError, t.missionModal.wrongMissionError]
   );
 
   const startCamera = useCallback(async () => {
@@ -170,11 +161,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
       !navigator.mediaDevices ||
       !navigator.mediaDevices.getUserMedia
     ) {
-      setCameraError(
-        isEn
-          ? 'Camera is unavailable (HTTPS required). You can upload a QR image below to scan.'
-          : 'Trình duyệt không hỗ trợ mở Camera (cần kết nối HTTPS). Bạn có thể chọn ảnh QR từ thiết bị bên dưới.'
-      );
+      setCameraError(t.scanner.errHttps);
       setIsStartingCamera(false);
       return;
     }
@@ -215,29 +202,17 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
     } catch (err: unknown) {
       const error = err as Error;
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-        setCameraError(
-          isEn
-            ? 'Camera access denied. Please allow camera permission in your browser settings.'
-            : 'Bạn đã từ chối quyền Camera. Vui lòng cấp quyền máy ảnh trong trình duyệt để quét mã.'
-        );
+        setCameraError(t.scanner.errDenied);
       } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-        setCameraError(
-          isEn
-            ? 'No camera found on this device. You can upload a QR image below.'
-            : 'Không tìm thấy camera trên thiết bị này. Bạn có thể chọn ảnh QR từ máy bên dưới.'
-        );
+        setCameraError(t.scanner.errNotFound);
       } else {
-        setCameraError(
-          isEn
-            ? `Cannot open camera: ${error.message || 'Unknown error'}`
-            : `Không thể mở camera: ${error.message || 'Lỗi không xác định'}`
-        );
+        setCameraError(`${t.scanner.errGeneric}${error.message || ''}`);
       }
       setCameraActive(false);
     } finally {
       setIsStartingCamera(false);
     }
-  }, [facingMode, handleDecodedQR, isEn, stopCamera]);
+  }, [facingMode, handleDecodedQR, stopCamera, t.scanner.errDenied, t.scanner.errGeneric, t.scanner.errHttps, t.scanner.errNotFound]);
 
   const missionId = mission?.id ?? null;
 
@@ -289,11 +264,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
       handleDecodedQR(decoded);
     } else {
       setScanStatus('mismatch');
-      setStatusMessage(
-        isEn
-          ? 'No readable QR code found in the selected image.'
-          : 'Không tìm thấy mã QR hợp lệ trong ảnh vừa chọn.'
-      );
+      setStatusMessage(t.missionModal.noQrInImage);
       if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
       errorTimerRef.current = setTimeout(() => {
         if (!hasSucceededRef.current) {
@@ -305,6 +276,12 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
   };
 
   if (!mission) return null;
+
+  const mTrans = t.data.missions[mission.id];
+  const displayTitle = mTrans?.title || mission.title;
+  const displaySubtitle = mTrans?.subtitle || mission.subtitle;
+  const displayCategoryName = mTrans?.categoryName || mission.categoryName;
+  const displayQrInstruction = mTrans?.qrInstruction || mission.qrInstruction;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-fadeIn">
@@ -331,15 +308,11 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
             <div>
               <h3 className="text-sm font-bold text-slate-900">
                 {scanStatus === 'success'
-                  ? isEn
-                    ? 'Mission Completed!'
-                    : 'Hoàn Thành Nhiệm Vụ!'
-                  : isEn
-                    ? 'Live Mission QR Scanner'
-                    : 'Quét Camera Nhiệm Vụ Xanh'}
+                  ? t.missionModal.completedTitle
+                  : t.missionModal.scanningTitle}
               </h3>
               <p className="text-[10px] text-emerald-700 font-semibold">
-                {mission.categoryName}
+                {displayCategoryName}
               </p>
             </div>
           </div>
@@ -349,7 +322,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
               onClose();
             }}
             className="rounded-full bg-slate-100 p-1.5 text-slate-500 hover:bg-slate-200 transition-colors"
-            aria-label={isEn ? 'Close' : 'Đóng'}
+            aria-label={t.common.close}
           >
             <X size={16} />
           </button>
@@ -368,7 +341,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
             </div>
 
             <h4 className="mt-2.5 text-sm font-extrabold text-slate-900 px-2 leading-snug">
-              {mission.title}
+              {displayTitle}
             </h4>
 
             <p className="mt-1 text-xs text-slate-500 leading-relaxed px-2">
@@ -378,7 +351,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
             {typeof userPoints === 'number' && (
               <div className="mt-3 rounded-2xl bg-emerald-50/80 border border-emerald-100 px-3.5 py-2.5 flex items-center justify-between text-xs">
                 <span className="font-semibold text-slate-600">
-                  {isEn ? 'Updated CB Balance:' : 'Số dư điểm CB hiện tại:'}
+                  {t.missionModal.updatedBalanceLabel}
                 </span>
                 <span className="text-sm font-black text-[#1E4D3E]">
                   {userPoints.toLocaleString()} CB
@@ -401,9 +374,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#1E4D3E] to-[#2D6A56] py-3 text-xs font-bold text-white shadow-md hover:from-[#16392E] hover:to-[#225242] active:scale-98 transition-all"
               >
                 <ScanLine size={15} className="text-emerald-300" />
-                <span>
-                  {isEn ? 'Scan Next Mission QR' : 'Quét mã làm nhiệm vụ tiếp'}
-                </span>
+                <span>{t.missionModal.scanNextBtn}</span>
               </button>
 
               <button
@@ -419,7 +390,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
                 className="flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50/70 py-3 text-xs font-bold text-[#1E4D3E] hover:bg-emerald-100 active:scale-98 transition-all"
               >
                 <Home size={15} />
-                <span>{isEn ? 'Done (Back to Home)' : 'Hoàn thành'}</span>
+                <span>{t.missionModal.doneBtn}</span>
               </button>
             </div>
           </div>
@@ -430,25 +401,21 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
             <div className="rounded-2xl bg-emerald-50/80 p-3 border border-emerald-100 mb-3">
               <div className="flex items-start justify-between gap-2">
                 <h4 className="text-xs font-bold text-slate-900 leading-snug">
-                  {mission.title}
+                  {displayTitle}
                 </h4>
                 <span className="shrink-0 rounded-full bg-[#1E4D3E] px-2.5 py-0.5 text-xs font-extrabold text-white">
                   +{mission.points} CB
                 </span>
               </div>
-              {mission.subtitle && (
+              {displaySubtitle && (
                 <p className="mt-1 text-[11px] text-slate-600 leading-tight">
-                  {mission.subtitle}
+                  {displaySubtitle}
                 </p>
               )}
               {mission.isPenalty && (
                 <div className="mt-1.5 flex items-center gap-1 text-[10px] text-amber-700 font-medium">
                   <AlertTriangle size={12} className="shrink-0" />
-                  <span>
-                    {isEn
-                      ? 'Partner food-waste report applies a -5 CB penalty.'
-                      : 'Nếu quán đối tác phản ánh lãng phí thức ăn sẽ bị trừ 5 CB.'}
-                  </span>
+                  <span>{t.missionModal.penaltyNote}</span>
                 </div>
               )}
             </div>
@@ -503,7 +470,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
                         ? 'bg-amber-400 text-slate-900'
                         : 'bg-black/50 text-white hover:bg-black/70'
                       }`}
-                    title={isEn ? 'Toggle Flashlight' : 'Bật/Tắt đèn Flash'}
+                    title={t.scanner.toggleFlash}
                   >
                     <Flashlight size={14} />
                   </button>
@@ -513,7 +480,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
                       setFacingMode((prev) => (prev === 'environment' ? 'user' : 'environment'))
                     }
                     className="flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md hover:bg-black/70 transition-colors"
-                    title={isEn ? 'Flip Camera' : 'Đổi camera trước/sau'}
+                    title={t.scanner.flipCamera}
                   >
                     <RefreshCw size={14} />
                   </button>
@@ -525,7 +492,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 text-white gap-2">
                   <QrCode size={32} className="text-emerald-400 animate-pulse" />
                   <p className="text-xs font-semibold text-emerald-200">
-                    {isEn ? 'Opening live camera...' : 'Đang mở Camera quét mã...'}
+                    {t.missionModal.openingCamera}
                   </p>
                 </div>
               )}
@@ -540,7 +507,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
                     onClick={startCamera}
                     className="mt-3 rounded-xl bg-emerald-600 px-3.5 py-2 text-[11px] font-bold text-white hover:bg-emerald-500 transition-colors"
                   >
-                    {isEn ? 'Retry Camera' : 'Thử mở lại Camera'}
+                    {t.missionModal.retryCamera}
                   </button>
                 </div>
               )}
@@ -556,11 +523,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
 
             {/* Location Guidance */}
             <p className="mt-2.5 text-center text-[11px] text-slate-600 leading-relaxed px-1">
-              📍{' '}
-              {mission.qrInstruction ||
-                (isEn
-                  ? 'Point your camera directly at the partner QR code to verify and earn points.'
-                  : 'Đưa camera vào mã QR thật tại điểm đối tác để xác thực và cộng điểm.')}
+              📍 {displayQrInstruction || t.missionModal.defaultInstruction}
             </p>
 
             {/* Real QR Image Upload Fallback */}
@@ -571,9 +534,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
                 className="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-emerald-200 bg-emerald-50/60 py-2.5 text-xs font-bold text-[#1E4D3E] hover:bg-emerald-100/80 transition-colors"
               >
                 <ImageUp size={15} />
-                <span>
-                  {isEn ? 'Scan from QR Image File' : 'Quét từ ảnh mã QR có sẵn'}
-                </span>
+                <span>{t.missionModal.scanFromImageBtn}</span>
               </button>
             </div>
           </>

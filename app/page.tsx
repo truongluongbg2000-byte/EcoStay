@@ -41,6 +41,7 @@ import { triggerEcoConfetti } from '@/components/Confetti';
 import { Sparkles, CheckCircle2, UserCheck } from 'lucide-react';
 import { mockAccounts } from '@/data/mockData';
 import { MockAccount } from '@/data/types';
+import { getDictionary, getLanguageMeta, isValidLang, formatText, Lang } from '@/lib/i18n';
 
 const STORAGE_KEY_USER = 'ecostay_user_profile_v5';
 const STORAGE_KEY_VOUCHERS = 'ecostay_vouchers_v5';
@@ -63,8 +64,11 @@ export default function EcoStayApp() {
   const [logs, setLogs] = useState<ImpactLog[]>(initialImpactLogs);
   const [missions, setMissions] = useState<DetailedMission[]>(initialMissions);
   const [notifications, setNotifications] = useState<AppNotification[]>(initialNotifications);
-  const [currentLang, setCurrentLang] = useState<'vi' | 'en'>('vi');
+  const [currentLang, setCurrentLang] = useState<Lang>('vi');
   const [isLoaded, setIsLoaded] = useState(false);
+
+  const t = getDictionary(currentLang);
+  const langMeta = getLanguageMeta(currentLang);
 
   // Modals
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -111,7 +115,7 @@ export default function EcoStayApp() {
       if (savedMissions) setMissions(JSON.parse(savedMissions));
 
       const savedLang = localStorage.getItem(STORAGE_KEY_LANG);
-      if (savedLang === 'vi' || savedLang === 'en') setCurrentLang(savedLang);
+      if (isValidLang(savedLang)) setCurrentLang(savedLang);
 
       const savedNotifs = localStorage.getItem(STORAGE_KEY_NOTIFICATIONS);
       if (savedNotifs) setNotifications(JSON.parse(savedNotifs));
@@ -121,6 +125,13 @@ export default function EcoStayApp() {
       setIsLoaded(true);
     }
   }, []);
+
+  // Sync HTML lang attribute for typography & screen readers
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = currentLang;
+    }
+  }, [currentLang]);
 
   // Save to LocalStorage
   useEffect(() => {
@@ -147,9 +158,7 @@ export default function EcoStayApp() {
   const handleMarkAllNotificationsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     showToast(
-      currentLang === 'en'
-        ? 'All notifications marked as read.'
-        : 'Đã đánh dấu đọc tất cả thông báo.',
+      t.toasts.readAllSuccess,
       <CheckCircle2 size={16} className="text-emerald-400" />,
       2000
     );
@@ -160,12 +169,13 @@ export default function EcoStayApp() {
     const mission = missions.find((m) => m.id === missionId);
     if (!mission) return;
 
+    const mTrans = t.data.missions[mission.id];
+    const mTitle = mTrans?.title || mission.title;
+    const mSubtitle = mTrans?.subtitle || mission.subtitle;
+    const mCategory = mTrans?.categoryName || mission.categoryName;
+
     if (mission.completed) {
-      showToast(
-        currentLang === 'en'
-          ? `Mission "${mission.title}" already verified!`
-          : `Nhiệm vụ "${mission.title}" đã được xác nhận hoàn thành trước đó!`
-      );
+      showToast(formatText(t.toasts.missionAlreadyDone, { title: mTitle }));
       return;
     }
 
@@ -191,42 +201,47 @@ export default function EcoStayApp() {
 
     const newLog: ImpactLog = {
       id: `log-${Date.now()}`,
-      date: currentLang === 'en' ? 'Just now' : 'Vừa xong',
-      title: mission.title,
+      date: t.common.justNow,
+      title: mTitle,
       points: pointsAdded,
       type: 'earn',
-      detail:
-        mission.subtitle ||
-        `Quét mã QR hoàn thành nhiệm vụ ${mission.categoryName} (+${pointsAdded} CB)`,
+      detail: mSubtitle || `${mCategory} (+${pointsAdded} CB)`,
     };
 
     setLogs((prev) => [newLog, ...prev]);
 
+    const earnedMsg = formatText(t.toasts.missionEarned, {
+      points: pointsAdded,
+      title: mTitle,
+    });
+
     const newNotif: AppNotification = {
       id: `notif-${Date.now()}`,
-      title: `Cộng +${pointsAdded} CB từ nhiệm vụ xanh`,
-      titleEn: `+${pointsAdded} CB Earned from Eco Mission`,
-      desc: mission.title,
-      descEn: mission.title,
-      detail: `Chúc mừng! Bạn vừa quét mã QR xác nhận hoàn thành nhiệm vụ "${mission.title}" và nhận ngay +${pointsAdded} CB vào tài khoản.`,
-      detailEn: `Congratulations! You verified "${mission.title}" via QR scan and received +${pointsAdded} CB in your balance.`,
-      time: 'Vừa xong',
-      timeEn: 'Just now',
+      title: `+${pointsAdded} CB • ${mCategory}`,
+      titleEn: `+${pointsAdded} CB • ${mCategory}`,
+      desc: mTitle,
+      descEn: mTitle,
+      detail: earnedMsg,
+      detailEn: earnedMsg,
+      time: t.common.justNow,
+      timeEn: t.common.justNow,
       category: 'points',
       isRead: false,
     };
     setNotifications((prev) => [newNotif, ...prev]);
 
     showToast(
-      currentLang === 'en'
-        ? `+${pointsAdded} CB earned from "${mission.title}"!`
-        : `+${pointsAdded} CB! Đã quét mã xác nhận "${mission.title}"`,
+      earnedMsg,
       <CheckCircle2 size={16} className="text-emerald-400" />
     );
   };
 
   // Handler: Book Service from Home Green Destination
   const handleBookService = (dest: GreenDestination) => {
+    const dTrans = t.data.destinations[dest.id];
+    const dName = dTrans?.name || dest.name;
+    const dLoc = t.data.locations[dest.location] || dest.location;
+
     setUser((prev) => ({
       ...prev,
       carbonPoints: prev.carbonPoints + dest.pointsReward,
@@ -235,19 +250,17 @@ export default function EcoStayApp() {
 
     const newLog: ImpactLog = {
       id: `log-${Date.now()}`,
-      date: currentLang === 'en' ? 'Just now' : 'Vừa xong',
-      title: `Đặt dịch vụ xanh: ${dest.name}`,
+      date: t.common.justNow,
+      title: dName,
       points: dest.pointsReward,
       type: 'earn',
-      detail: `Check-in cơ sở xanh ${dest.location} (+${dest.pointsReward} CB)`,
+      detail: `${dLoc} (+${dest.pointsReward} CB)`,
     };
 
     setLogs((prev) => [newLog, ...prev]);
 
     showToast(
-      currentLang === 'en'
-        ? `Booked at ${dest.name}! +${dest.pointsReward} CB added.`
-        : `Đã kết nối dịch vụ ${dest.name}! +${dest.pointsReward} CB`,
+      formatText(t.toasts.bookSuccess, { name: dName, points: dest.pointsReward }),
       <Sparkles size={16} className="text-amber-400" />
     );
   };
@@ -255,13 +268,12 @@ export default function EcoStayApp() {
   // Handler: Redeem Reward into Green Cart
   const handleRedeemReward = (reward: RewardItem) => {
     if (user.carbonPoints < reward.points) {
-      showToast(
-        currentLang === 'en'
-          ? 'Not enough Carbon Points to redeem this reward!'
-          : 'Bạn chưa đủ điểm Cacbon để đổi quà tặng này!'
-      );
+      showToast(t.toasts.redeemNotEnough);
       return;
     }
+
+    const rTrans = t.data.rewards[reward.id];
+    const rTitle = rTrans?.title || reward.title;
 
     // Deduct points
     setUser((prev) => ({
@@ -277,16 +289,16 @@ export default function EcoStayApp() {
     const newVoucher: Voucher = {
       id: `voucher-${Date.now()}`,
       rewardId: reward.id,
-      title: reward.title,
+      title: rTitle,
       code: voucherCode,
-      category: reward.categoryName,
+      category: rTrans?.categoryName || reward.categoryName,
       image: reward.image,
       pointsUsed: reward.points,
-      issueDate: new Date().toLocaleDateString('vi-VN'),
+      issueDate: new Date().toLocaleDateString(langMeta.locale),
       expiryDate: '31/12/2026',
       isUsed: false,
-      partner: reward.partner,
-      description: reward.description,
+      partner: rTrans?.partner || reward.partner,
+      description: rTrans?.desc || reward.description,
       qrValue: `ECOSTAY:VOUCHER:${voucherCode}:${reward.points}`,
     };
 
@@ -295,19 +307,17 @@ export default function EcoStayApp() {
     // Add log
     const newLog: ImpactLog = {
       id: `log-${Date.now()}`,
-      date: currentLang === 'en' ? 'Just now' : 'Vừa xong',
-      title: `Đổi quà: ${reward.title}`,
+      date: t.common.justNow,
+      title: rTitle,
       points: -reward.points,
       type: 'redeem',
-      detail: `Đã đổi quà thành công và lưu vào Giỏ hàng xanh (-${reward.points} CB)`,
+      detail: `-${reward.points} CB • ${t.rewards.cartTab}`,
     };
 
     setLogs((prev) => [newLog, ...prev]);
 
     showToast(
-      currentLang === 'en'
-        ? `Redeemed ${reward.title}! Saved to Green Cart.`
-        : `Đã đổi thành công! Quà đã được chuyển vào "Giỏ hàng xanh".`,
+      formatText(t.toasts.redeemSuccess, { title: rTitle }),
       <Sparkles size={16} className="text-amber-400" />
     );
   };
@@ -317,29 +327,17 @@ export default function EcoStayApp() {
     setVouchers((prev) =>
       prev.map((v) => (v.id === voucherId ? { ...v, isUsed: true } : v))
     );
-    showToast(
-      currentLang === 'en'
-        ? 'Voucher marked as redeemed at counter!'
-        : 'Đã xác nhận sử dụng voucher tại quầy!'
-    );
+    showToast(t.toasts.voucherUsed);
   };
 
   // Handler: Simulated QR Scan
   const handleSimulateQRScan = (type: 'room' | 'food' | 'transport') => {
-    let earnedPoints = 10;
-    let title = 'Tiết kiệm giặt là trong phòng';
     let targetMissionId = 'mis-r1';
-
     if (type === 'food') {
-      earnedPoints = 15;
-      title = 'Đặt bàn xanh & Zero Food Waste';
       targetMissionId = 'mis-f1';
     } else if (type === 'transport') {
-      earnedPoints = 20;
-      title = 'Di chuyển bằng Xe đạp điện / Xe công cộng';
       targetMissionId = 'mis-t1';
     }
-
     handleCompleteMission(targetMissionId);
   };
 
@@ -360,39 +358,37 @@ export default function EcoStayApp() {
     );
 
     if (!matchingMission) {
-      const invalidMsg =
-        currentLang === 'en'
-          ? 'Invalid QR code — not a certified EcoStay mission QR.'
-          : 'Mã QR không hợp lệ — không thuộc hệ thống nhiệm vụ EcoStay.';
+      const invalidMsg = t.toasts.invalidQr;
       showToast(invalidMsg);
       return { status: 'invalid', message: invalidMsg };
     }
 
+    const mTrans = t.data.missions[matchingMission.id];
+    const mTitle = mTrans?.title || matchingMission.title;
+    const mCategory = mTrans?.categoryName || matchingMission.categoryName;
+
     if (matchingMission.completed) {
-      const alreadyMsg =
-        currentLang === 'en'
-          ? `Mission "${matchingMission.title}" was already completed!`
-          : `Nhiệm vụ "${matchingMission.title}" đã được quét trước đó rồi!`;
+      const alreadyMsg = formatText(t.toasts.alreadyCompletedQr, { title: mTitle });
       showToast(alreadyMsg);
       return {
         status: 'already_completed',
         message: alreadyMsg,
-        missionTitle: matchingMission.title,
-        categoryName: matchingMission.categoryName,
+        missionTitle: mTitle,
+        categoryName: mCategory,
       };
     }
 
     handleCompleteMission(matchingMission.id);
-    const successMsg =
-      currentLang === 'en'
-        ? `+${matchingMission.points} CB! Completed "${matchingMission.title}"`
-        : `+${matchingMission.points} CB! Đã xác thực "${matchingMission.title}"`;
+    const successMsg = formatText(t.toasts.missionEarned, {
+      points: matchingMission.points,
+      title: mTitle,
+    });
     return {
       status: 'success',
       message: successMsg,
       points: matchingMission.points,
-      missionTitle: matchingMission.title,
-      categoryName: matchingMission.categoryName,
+      missionTitle: mTitle,
+      categoryName: mCategory,
     };
   };
 
@@ -406,19 +402,17 @@ export default function EcoStayApp() {
 
     const newLog: ImpactLog = {
       id: `log-${Date.now()}`,
-      date: currentLang === 'en' ? 'Just now' : 'Vừa xong',
-      title: 'Khảo sát ý kiến du khách sống xanh',
+      date: t.common.justNow,
+      title: t.modals.feedback.title,
       points: pointsAwarded,
       type: 'earn',
-      detail: `Đóng góp ${rating} sao giúp nâng cao chất lượng dịch vụ (+${pointsAwarded} CB)`,
+      detail: `${rating}★ • +${pointsAwarded} CB`,
     };
 
     setLogs((prev) => [newLog, ...prev]);
 
     showToast(
-      currentLang === 'en'
-        ? `Thank you for your review! +${pointsAwarded} CB.`
-        : `Cảm ơn bạn đã đóng góp ý kiến! +${pointsAwarded} CB`,
+      formatText(t.toasts.feedbackThanks, { points: pointsAwarded }),
       <Sparkles size={16} className="text-amber-400" />
     );
   };
@@ -442,9 +436,7 @@ export default function EcoStayApp() {
     }
 
     showToast(
-      currentLang === 'en'
-        ? `Signed in successfully! (${account.profile.name})`
-        : `Đăng nhập thành công! (${account.profile.name})`,
+      formatText(t.toasts.loginSuccess, { name: account.profile.name }),
       <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />,
       2000
     );
@@ -478,17 +470,11 @@ export default function EcoStayApp() {
     const newLogs: ImpactLog[] = [
       {
         id: `log-${Date.now()}`,
-        date: currentLang === 'en' ? 'Just now' : 'Vừa xong',
-        title:
-          currentLang === 'en'
-            ? 'New Member Welcome Bonus (+50 CB)'
-            : 'Thưởng chào mừng thành viên mới (+50 CB)',
+        date: t.common.justNow,
+        title: t.login.welcomeBonus,
         points: 50,
         type: 'earn',
-        detail:
-          currentLang === 'en'
-            ? 'Welcome to EcoStay Net Zero travel community!'
-            : 'Chào mừng bạn đến với cộng đồng du lịch Net Zero EcoStay!',
+        detail: 'EcoStay (+50 CB)',
       },
     ];
 
@@ -507,9 +493,7 @@ export default function EcoStayApp() {
     }
 
     showToast(
-      currentLang === 'en'
-        ? `Account created & signed in! (+50 CB)`
-        : `Đăng ký & đăng nhập thành công! (+50 CB)`,
+      t.toasts.registerSuccess,
       <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />,
       2000
     );
@@ -518,16 +502,12 @@ export default function EcoStayApp() {
   // Handler: Logout
   const handleLogout = () => {
     setIsLoggedIn(false);
-    showToast(
-      currentLang === 'en'
-        ? 'Signed out successfully.'
-        : 'Đã đăng xuất thành công.'
-    );
+    showToast(t.toasts.logoutSuccess);
   };
 
   // Handler: Reset Data to Default
   const handleResetData = () => {
-    if (confirm('Bạn có chắc muốn đặt lại toàn bộ dữ liệu Demo ban đầu không?')) {
+    if (confirm(t.toasts.resetConfirm)) {
       localStorage.removeItem(STORAGE_KEY_ACTIVE_ACCOUNT);
       localStorage.removeItem(STORAGE_KEY_USER);
       localStorage.removeItem(STORAGE_KEY_VOUCHERS);
@@ -542,7 +522,7 @@ export default function EcoStayApp() {
       setMissions(initialMissions);
       setNotifications(initialNotifications);
       setCurrentLang('vi');
-      showToast('Đã khôi phục dữ liệu Demo thành công.');
+      showToast(t.toasts.resetSuccess);
     }
   };
 
@@ -564,9 +544,7 @@ export default function EcoStayApp() {
           onContinueAsGuest={() => {
             setIsLoggedIn(true);
             showToast(
-              currentLang === 'en'
-                ? 'Signed in as Guest!'
-                : 'Đăng nhập thành công (Chế độ Khách)!',
+              formatText(t.toasts.loginSuccess, { name: user.name }),
               <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />,
               2000
             );

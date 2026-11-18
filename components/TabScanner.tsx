@@ -28,6 +28,7 @@ import {
   FastQRScannerController,
   tryEnableContinuousFocus,
 } from '@/lib/qr/fastScanner';
+import { getDictionary, Lang } from '@/lib/i18n';
 
 export interface LiveQRScanResult {
   status: 'success' | 'already_completed' | 'invalid';
@@ -39,7 +40,7 @@ export interface LiveQRScanResult {
 
 interface TabScannerProps {
   user: UserProfile;
-  currentLang?: 'vi' | 'en';
+  currentLang?: Lang;
   onSimulateQRScan: (type: 'room' | 'food' | 'transport') => void;
   onLiveQRScan: (decodedData: string) => LiveQRScanResult | void;
   onNavigateHome?: () => void;
@@ -51,7 +52,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
   onLiveQRScan,
   onNavigateHome,
 }) => {
-  const isEn = currentLang === 'en';
+  const t = getDictionary(currentLang);
   const [activeScannerTab, setActiveScannerTab] = useState<'camera' | 'my_qr'>('camera');
   const [copiedCode, setCopiedCode] = useState(false);
 
@@ -101,9 +102,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
       const result = onLiveQRScanRef.current(decodedText);
       const feedback: LiveQRScanResult = result || {
         status: 'success',
-        message: isEn
-          ? `Recognized: ${decodedText.slice(0, 36)}`
-          : `Đã nhận diện: ${decodedText.slice(0, 36)}`,
+        message: decodedText.slice(0, 36),
       };
 
       if (feedback.status === 'success') {
@@ -131,7 +130,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
         setScanFeedback(null);
       }, 3600);
     },
-    [isEn, stopCamera]
+    [stopCamera]
   );
 
   const handleVideoCodeDetected = useCallback(
@@ -154,7 +153,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
     setIsProcessing(true);
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      setCameraPermissionError('Trình duyệt không hỗ trợ truy cập máy ảnh (cần kết nối HTTPS).');
+      setCameraPermissionError(t.scanner.errHttps);
       setIsProcessing(false);
       return;
     }
@@ -195,17 +194,17 @@ export const TabScanner: React.FC<TabScannerProps> = ({
     } catch (err: unknown) {
       const error = err as Error;
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-        setCameraPermissionError('Bạn đã từ chối quyền truy cập máy ảnh. Vui lòng cho phép quyền trong cài đặt trình duyệt để quét trực tiếp.');
+        setCameraPermissionError(t.scanner.errDenied);
       } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-        setCameraPermissionError('Không tìm thấy thiết bị máy ảnh/webcam trên thiết bị này.');
+        setCameraPermissionError(t.scanner.errNotFound);
       } else {
-        setCameraPermissionError('Không thể mở camera: ' + (error.message || 'Lỗi không xác định'));
+        setCameraPermissionError(t.scanner.errGeneric + (error.message || ''));
       }
       setCameraActive(false);
     } finally {
       setIsProcessing(false);
     }
-  }, [facingMode, handleVideoCodeDetected, stopCamera]);
+  }, [facingMode, handleVideoCodeDetected, stopCamera, t.scanner.errDenied, t.scanner.errGeneric, t.scanner.errHttps, t.scanner.errNotFound]);
 
   useEffect(() => {
     if (activeScannerTab === 'camera' && !completedScan) {
@@ -263,9 +262,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
     } else {
       setScanFeedback({
         status: 'invalid',
-        message: isEn
-          ? 'No readable QR code found in the selected image.'
-          : 'Không tìm thấy mã QR hợp lệ trong ảnh vừa chọn.',
+        message: t.scanner.noQrInImage,
       });
       if (resultTimerRef.current) clearTimeout(resultTimerRef.current);
       resultTimerRef.current = setTimeout(() => setScanFeedback(null), 3500);
@@ -288,7 +285,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
         className="hidden"
       />
 
-      {/* 1. Mode Switcher: [ Quét mã QR ] vs [ MÃ QR CỦA TÔI ] */}
+      {/* 1. Mode Switcher */}
       <div className="flex rounded-2xl bg-emerald-100/60 p-1">
         <button
           onClick={() => setActiveScannerTab('camera')}
@@ -299,7 +296,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
           }`}
         >
           <ScanLine size={15} />
-          <span>{isEn ? 'Camera Scanner' : 'Quét mã camera'}</span>
+          <span>{t.scanner.cameraTab}</span>
         </button>
         <button
           onClick={() => setActiveScannerTab('my_qr')}
@@ -310,7 +307,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
           }`}
         >
           <UserCheck size={15} />
-          <span>{isEn ? 'MY MEMBER QR' : 'MÃ QR CỦA TÔI'}</span>
+          <span>{t.scanner.myQrTab}</span>
         </button>
       </div>
 
@@ -325,11 +322,11 @@ export const TabScanner: React.FC<TabScannerProps> = ({
               </div>
 
               <span className="mt-3 inline-block rounded-full bg-emerald-50 border border-emerald-200 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800">
-                {completedScan.categoryName || (isEn ? 'Eco Mission' : 'Nhiệm vụ Xanh')}
+                {completedScan.categoryName || t.earn.headerTitle}
               </span>
 
               <h3 className="mt-2 text-base font-black text-slate-900">
-                {isEn ? 'Mission Completed!' : 'Hoàn thành nhiệm vụ!'}
+                {t.scanner.completedTitle}
               </h3>
 
               {typeof completedScan.points === 'number' && (
@@ -346,15 +343,13 @@ export const TabScanner: React.FC<TabScannerProps> = ({
               )}
 
               <p className="mt-1 text-[11px] text-slate-500">
-                {isEn
-                  ? 'Camera closed automatically. Points have been added to your account.'
-                  : 'Camera đã tự động đóng. Điểm thưởng đã được cộng thật vào tài khoản.'}
+                {t.scanner.cameraClosedNotice}
               </p>
 
               {/* Live Updated Balance Box */}
               <div className="mt-4 rounded-2xl bg-emerald-50/80 border border-emerald-100 px-4 py-3 flex items-center justify-between text-xs">
                 <span className="font-semibold text-slate-600">
-                  {isEn ? 'Current Carbon Points:' : 'Số dư điểm CB hiện tại:'}
+                  {t.scanner.currentBalanceLabel}
                 </span>
                 <span className="text-base font-black text-[#1E4D3E]">
                   {user.carbonPoints.toLocaleString()} CB
@@ -369,9 +364,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
                   className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#1E4D3E] to-[#2D6A56] py-3.5 text-xs font-bold text-white shadow-md hover:from-[#16392E] hover:to-[#225242] active:scale-98 transition-all"
                 >
                   <ScanLine size={16} className="text-emerald-300" />
-                  <span>
-                    {isEn ? 'Scan Next Mission QR' : 'Quét mã làm nhiệm vụ tiếp'}
-                  </span>
+                  <span>{t.scanner.scanNextBtn}</span>
                 </button>
 
                 <button
@@ -383,7 +376,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
                   className="flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50/70 py-3.5 text-xs font-bold text-[#1E4D3E] hover:bg-emerald-100 active:scale-98 transition-all"
                 >
                   <Home size={16} />
-                  <span>{isEn ? 'Done (Back to Home)' : 'Hoàn thành'}</span>
+                  <span>{t.scanner.doneToHomeBtn}</span>
                 </button>
               </div>
             </div>
@@ -391,12 +384,10 @@ export const TabScanner: React.FC<TabScannerProps> = ({
             <>
               <div className="border-b border-emerald-900/10 pb-2">
                 <h3 className="text-base font-bold text-slate-800">
-                  {isEn ? 'Scan QR with Live Camera' : 'Quét mã QR bằng Camera thật'}
+                  {t.scanner.title}
                 </h3>
                 <p className="text-xs text-slate-500">
-                  {isEn
-                    ? 'Point camera at any EcoStay QR code to verify and earn real CARBON POINTS'
-                    : 'Đưa camera vào mã QR EcoStay bất kỳ để xác thực và cộng điểm CACBON POINT thật'}
+                  {t.scanner.subtitle}
                 </p>
               </div>
 
@@ -410,13 +401,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
                       }`}
                     />
                     <span className="font-semibold text-white">
-                      {cameraActive
-                        ? isEn
-                          ? 'LIVE CAMERA (jsQR)'
-                          : 'CAMERA ĐANG CHẠY'
-                        : isEn
-                        ? 'CAMERA READY'
-                        : 'CAMERA SẴN SÀNG'}
+                      {cameraActive ? t.scanner.liveCamera : t.scanner.cameraReady}
                     </span>
                   </div>
 
@@ -428,14 +413,14 @@ export const TabScanner: React.FC<TabScannerProps> = ({
                           ? 'bg-amber-400 text-slate-900'
                           : 'bg-white/10 text-white hover:bg-white/20'
                       }`}
-                      title={isEn ? 'Toggle Flash' : 'Bật/Tắt Flash'}
+                      title={t.scanner.toggleFlash}
                     >
                       <Flashlight size={14} />
                     </button>
                     <button
                       onClick={flipCamera}
                       className="rounded-full bg-white/10 p-1.5 text-white hover:bg-white/20 transition-colors"
-                      title={isEn ? 'Flip Camera' : 'Đổi camera'}
+                      title={t.scanner.flipCamera}
                     >
                       <RefreshCw size={14} />
                     </button>
@@ -466,26 +451,20 @@ export const TabScanner: React.FC<TabScannerProps> = ({
                             onClick={startCamera}
                             className="mt-3 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-500"
                           >
-                            {isEn ? 'Retry Camera' : 'Thử lại Camera'}
+                            {t.scanner.retryCamera}
                           </button>
                         </>
                       ) : (
                         <>
                           <Camera size={36} className="text-emerald-400/60 animate-bounce mb-2" />
                           <p className="text-xs font-medium text-slate-300">
-                            {isProcessing
-                              ? isEn
-                                ? 'Starting camera...'
-                                : 'Đang mở máy ảnh...'
-                              : isEn
-                              ? 'Tap to activate live camera'
-                              : 'Nhấn nút để kích hoạt Camera'}
+                            {isProcessing ? t.scanner.startingCamera : t.scanner.tapToActivate}
                           </p>
                           <button
                             onClick={startCamera}
                             className="mt-3 rounded-xl bg-[#1E4D3E] px-3.5 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-700"
                           >
-                            {isEn ? 'Turn On Live Camera' : 'Bật Camera Quét Thật'}
+                            {t.scanner.turnOnCamera}
                           </button>
                         </>
                       )}
@@ -520,12 +499,10 @@ export const TabScanner: React.FC<TabScannerProps> = ({
                   </div>
                 )}
 
-                {/* Scan from Real QR Image File (decodes via jsQR) */}
+                {/* Scan from Real QR Image File */}
                 <div className="mt-3 text-center border-t border-white/10 pt-2.5">
                   <p className="text-[10px] text-slate-400 mb-2">
-                    {isEn
-                      ? 'Scan any of the 15 official EcoStay mission QR codes to earn real CB'
-                      : 'Quét bất kỳ mã nào trong 15 mã nhiệm vụ EcoStay để cộng điểm CB thật'}
+                    {t.scanner.scanAny15Hint}
                   </p>
                   <button
                     type="button"
@@ -533,7 +510,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 px-3 py-2.5 text-xs font-bold text-emerald-200 hover:bg-emerald-600/30 active:scale-98 transition-all border border-white/15"
                   >
                     <ImageUp size={15} />
-                    <span>{isEn ? 'Scan from QR Image File' : 'Quét từ ảnh mã QR có sẵn'}</span>
+                    <span>{t.scanner.scanFromImageBtn}</span>
                   </button>
                 </div>
               </div>
@@ -541,11 +518,11 @@ export const TabScanner: React.FC<TabScannerProps> = ({
           )}
         </div>
       ) : (
-        /* MODE 2: MÃ QR CỦA TÔI (CHO NHÂN VIÊN/ĐỐI TÁC QUÉT) */
+        /* MODE 2: MY MEMBER QR */
         <div className="rounded-3xl bg-white p-5 shadow-sm border border-emerald-950/5 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-[#1E4D3E]">
-              {isEn ? 'EcoStay Member Card' : 'Thẻ Thành Viên EcoStay'}
+              {t.scanner.memberCardBadge}
             </span>
           </div>
 
@@ -556,15 +533,15 @@ export const TabScanner: React.FC<TabScannerProps> = ({
             <div className="text-left">
               <h3 className="text-base font-bold text-slate-900">{user.name}</h3>
               <p className="text-xs text-emerald-700 font-semibold">
-                {isEn ? 'Green Member • Sprout Tier' : user.rank}
+                {t.data.ranks[user.rank] || user.rank}
               </p>
             </div>
           </div>
 
           {/* Points display */}
           <div className="mt-3 rounded-2xl bg-gradient-to-r from-[#1E4D3E] to-[#2D6A56] p-3 text-white">
-            <p className="text-[10px] text-emerald-200">
-              {isEn ? 'CURRENT BALANCE' : 'SỐ DƯ HIỆN CÓ'}
+            <p className="text-[10px] text-emerald-200 uppercase">
+              {t.scanner.currentPointsLabel}
             </p>
             <p className="text-2xl font-black">{user.carbonPoints} CB</p>
           </div>
@@ -609,15 +586,19 @@ export const TabScanner: React.FC<TabScannerProps> = ({
               </svg>
             </div>
 
+            <p className="mt-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              {t.scanner.memberCodeLabel}
+            </p>
+
             {/* Member Code with Copy */}
-            <div className="mt-3 flex items-center justify-center gap-2">
+            <div className="mt-1 flex items-center justify-center gap-2">
               <span className="font-mono text-sm font-extrabold tracking-wider text-[#1E4D3E] bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">
                 {user.memberCode || 'ECO-TL-883921'}
               </span>
               <button
                 onClick={handleCopyMemberCode}
                 className="rounded-xl bg-emerald-100 p-1.5 text-emerald-800 hover:bg-emerald-200 transition-colors"
-                title={isEn ? 'Copy member code' : 'Sao chép mã thành viên'}
+                title={copiedCode ? t.scanner.copiedBtn : t.scanner.copyCodeBtn}
               >
                 {copiedCode ? (
                   <Check size={16} className="text-emerald-700" />
@@ -628,9 +609,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
             </div>
 
             <p className="mt-2 text-[11px] text-slate-500 max-w-xs">
-              {isEn
-                ? 'Present this QR code to hotel receptionist, housekeeping or cashier to earn points or apply discounts upon checkout.'
-                : 'Xuất trình mã này cho nhân viên lễ tân, buồng phòng hoặc quầy thu ngân đối tác để tích điểm hoặc áp dụng cấn trừ trực tiếp khi thanh toán.'}
+              {t.scanner.showStaffHint}
             </p>
           </div>
         </div>

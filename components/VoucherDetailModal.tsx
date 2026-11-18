@@ -3,13 +3,13 @@
 import React, { useState } from 'react';
 import { X, Copy, Check, QrCode, Sparkles, Building2, Calendar, ShieldCheck } from 'lucide-react';
 import { Voucher } from '@/data/types';
-import { voucherTranslations } from '@/data/translations';
+import { getDictionary, Lang } from '@/lib/i18n';
 
 interface VoucherDetailModalProps {
   voucher: Voucher | null;
   onClose: () => void;
   onMarkUsed?: (voucherId: string) => void;
-  currentLang?: 'vi' | 'en';
+  currentLang?: Lang;
 }
 
 export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({
@@ -19,7 +19,7 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({
   currentLang = 'vi',
 }) => {
   const [copied, setCopied] = useState(false);
-  const isEn = currentLang === 'en';
+  const t = getDictionary(currentLang);
 
   if (!voucher) return null;
 
@@ -29,11 +29,9 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const vTrans = isEn
-    ? voucherTranslations[voucher.id] || voucherTranslations[voucher.rewardId]
-    : null;
+  const vTrans = t.data.rewards[voucher.rewardId];
   const displayTitle = vTrans?.title || voucher.title;
-  const displayCategory = vTrans?.category || voucher.category;
+  const displayCategory = vTrans?.categoryName || voucher.category;
   const displayPartner = vTrans?.partner || voucher.partner;
 
   return (
@@ -42,7 +40,7 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({
         <button
           onClick={onClose}
           className="absolute right-4 top-4 z-20 rounded-full bg-slate-100 p-2 text-slate-600 hover:bg-slate-200 transition-colors"
-          aria-label={isEn ? 'Close' : 'Đóng'}
+          aria-label={t.common.close}
         >
           <X size={18} />
         </button>
@@ -57,7 +55,7 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({
           <div className="mt-1 flex items-center justify-center gap-1.5 text-xs text-slate-500">
             <Building2 size={13} />
             <span>
-              {isEn ? 'Partner:' : 'Đối tác:'} {displayPartner}
+              {t.modals.voucherDetail.partnerLabel} {displayPartner}
             </span>
           </div>
         </div>
@@ -65,7 +63,7 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({
         {/* Voucher Digital Ticket */}
         <div className="mt-4 rounded-2xl border-2 border-dashed border-emerald-300 bg-gradient-to-b from-emerald-50/70 to-white p-4 text-center">
           <p className="text-xs font-medium text-slate-500">
-            {isEn ? 'Your Eco Voucher Code' : 'Mã ưu đãi của bạn'}
+            {t.modals.voucherDetail.codeLabel}
           </p>
           <div className="mt-1 flex items-center justify-center gap-2">
             <span className="font-mono text-xl font-extrabold tracking-widest text-[#1E4D3E]">
@@ -74,7 +72,7 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({
             <button
               onClick={handleCopyCode}
               className="rounded-lg bg-emerald-100 p-1.5 text-emerald-800 hover:bg-emerald-200 transition-colors"
-              title={isEn ? 'Copy Code' : 'Sao chép mã'}
+              title={copied ? t.common.copied : t.common.copy}
             >
               {copied ? <Check size={14} className="text-emerald-700" /> : <Copy size={14} />}
             </button>
@@ -133,7 +131,7 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({
               </svg>
             </div>
             <p className="mt-1 text-[11px] font-medium text-emerald-800">
-              {isEn ? 'Scan at counter to redeem' : 'Quét mã tại quầy để áp dụng'}
+              {t.modals.voucherDetail.headerTitle}
             </p>
           </div>
 
@@ -141,7 +139,7 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({
           <div className="mt-3 flex items-center justify-between border-t border-emerald-200/60 pt-2.5 text-xs text-slate-500">
             <span className="flex items-center gap-1">
               <Calendar size={12} />
-              {isEn ? 'Expires:' : 'Hạn dùng:'}
+              {t.modals.voucherDetail.expiryDateLabel}
             </span>
             <span className="font-semibold text-slate-800">{voucher.expiryDate}</span>
           </div>
@@ -151,12 +149,10 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({
         <div className="mt-3 rounded-xl bg-slate-50 p-2.5 text-left text-xs text-slate-600">
           <div className="flex items-center gap-1.5 font-semibold text-slate-700 mb-1">
             <ShieldCheck size={14} className="text-emerald-600" />
-            <span>{isEn ? 'Usage Instructions:' : 'Hướng dẫn sử dụng:'}</span>
+            <span>{t.modals.voucherDetail.issueDateLabel} {voucher.issueDate}</span>
           </div>
           <p className="text-[11px] leading-relaxed">
-            {isEn
-              ? 'Present this code to hotel front desk, housekeeping or dining cashier before payment. Each voucher is single-use only.'
-              : 'Xuất trình mã này cho nhân viên lễ tân, buồng phòng hoặc quầy thu ngân nhà hàng trước khi thanh toán. Mỗi mã chỉ có giá trị sử dụng một lần.'}
+            {t.modals.voucherDetail.guideText}
           </p>
         </div>
 
@@ -166,7 +162,7 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({
             onClick={onClose}
             className="w-full rounded-2xl bg-[#1E4D3E] py-3 text-sm font-semibold text-white shadow-md hover:bg-[#16392E] transition-colors"
           >
-            {isEn ? 'Close' : 'Đóng'}
+            {t.common.close}
           </button>
           {onMarkUsed && !voucher.isUsed && (
             <button
@@ -176,7 +172,7 @@ export const VoucherDetailModal: React.FC<VoucherDetailModalProps> = ({
               }}
               className="shrink-0 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors"
             >
-              {isEn ? 'Mark as Used' : 'Đã dùng'}
+              {t.modals.voucherDetail.markUsedBtn}
             </button>
           )}
         </div>

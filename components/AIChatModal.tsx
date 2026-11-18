@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { UserProfile } from '@/data/types';
+import { formatText, getDictionary, getLanguageMeta, Lang } from '@/lib/i18n';
 
 interface Message {
   id: string;
@@ -27,17 +28,9 @@ interface AIChatModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: UserProfile;
-  currentLang?: 'vi' | 'en';
+  currentLang?: Lang;
 }
 
-function formatCurrentTime(): string {
-  const now = new Date();
-  return now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-}
-
-/**
- * Lightweight safe Markdown renderer for **bold**, *italic*, and `code` spans.
- */
 function renderFormattedLine(line: string, lineIdx: number): React.ReactNode {
   const tokens = line.split(/(\*\*[^*]+\*\*|`[^`]+`|\*[^*]+\*)/g);
   return (
@@ -79,9 +72,7 @@ function renderMessageText(text: string, isUser: boolean): React.ReactNode {
   const lines = text.split('\n');
   return lines.map((line, idx) => {
     const trimmed = line.trim();
-    if (!trimmed) {
-      return <div key={idx} className="h-1.5" />;
-    }
+    if (!trimmed) return <div key={idx} className="h-1.5" />;
     if (trimmed.startsWith('### ')) {
       return (
         <div key={idx} className="font-extrabold text-[#1E4D3E] text-[12px] mt-1.5 mb-0.5">
@@ -110,33 +101,19 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
   user,
   currentLang = 'vi',
 }) => {
-  const isEn = currentLang === 'en';
-  const pointsTerm = isEn ? 'Carbon Points (CB)' : 'Điểm Cacbon (CB)';
+  const t = getDictionary(currentLang);
+  const langMeta = getLanguageMeta(currentLang);
 
   const buildWelcomeMessage = useCallback((): Message => {
-    const cp = user.carbonPoints;
+    const points = user.carbonPoints;
     return {
       id: 'msg-init',
       sender: 'bot',
-      text: isEn
-        ? `Hello **${user.name}**! I am **EcoBot**, your AI Green Travel Assistant powered by OpenRouter. I can help you plan low-carbon trips in Vietnam and maximize your **${cp} ${pointsTerm}**. How can I help you today?`
-        : `Xin chào **${user.name}**! Mình là **EcoBot** – Trợ lý Du Lịch Xanh AI kết nối trực tiếp OpenRouter. Mình có thể giúp bạn lên lịch trình du lịch xanh và tư vấn tối ưu **${cp} ${pointsTerm}** hiện có. Bạn cần hỗ trợ gì nào?`,
-      time: isEn ? 'Just now' : 'Vừa xong',
-      suggestions: isEn
-        ? [
-            'Plan a 2D1N green trip in Hoi An',
-            'How do I earn CB at hotels?',
-            `What can I redeem with ${cp} CB?`,
-            'Best vegan & organic restaurants',
-          ]
-        : [
-            'Lên lịch trình 2N1Đ tại Hội An xanh',
-            'Làm sao để tích điểm CB khi lưu trú?',
-            `${cp} CB của tôi đổi được quà gì?`,
-            'Gợi ý quán ăn thuần chay hữu cơ',
-          ],
+      text: formatText(t.chat.welcomeText, { name: user.name, points }),
+      time: t.common.justNow,
+      suggestions: t.chat.suggestions.map((s) => formatText(s, { points })),
     };
-  }, [isEn, pointsTerm, user.carbonPoints, user.name]);
+  }, [t, user.carbonPoints, user.name]);
 
   const [messages, setMessages] = useState<Message[]>(() => [buildWelcomeMessage()]);
   const [inputText, setInputText] = useState('');
@@ -164,7 +141,6 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
     }
   }, [messages, isOpen]);
 
-  // Abort active stream if modal closes
   useEffect(() => {
     if (!isOpen && abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -175,30 +151,15 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
   if (!isOpen) return null;
 
+  const formatCurrentTime = () =>
+    new Date().toLocaleTimeString(langMeta.locale, { hour: '2-digit', minute: '2-digit' });
+
   const formatFriendlyError = (code?: string, rawMessage?: string): string => {
-    if (code === 'MISSING_API_KEY') {
-      return isEn
-        ? 'OpenRouter API key is not configured yet. Please paste your key into `OPENROUTER_API_KEY` inside `.env.local` and restart `npm run dev`.'
-        : 'Chưa cấu hình khóa OpenRouter API. Bạn hãy dán API Key vào biến `OPENROUTER_API_KEY` trong file `.env.local` rồi khởi động lại `npm run dev` nhé!';
-    }
-    if (code === 'INVALID_API_KEY') {
-      return isEn
-        ? 'Your OpenRouter API key is invalid or expired. Please check `OPENROUTER_API_KEY` in `.env.local`.'
-        : 'Khóa `OPENROUTER_API_KEY` không hợp lệ hoặc đã hết hạn. Vui lòng kiểm tra lại tại openrouter.ai/keys.';
-    }
-    if (code === 'RATE_LIMITED') {
-      return isEn
-        ? 'The free model (`inclusionai/ling-3.2-flash:free`) is currently rate-limited. Please wait a few seconds and tap Retry.'
-        : 'Model miễn phí (`inclusionai/ling-3.2-flash:free`) đang tạm quá tải (HTTP 429). Vui lòng đợi vài giây rồi bấm Thử lại nhé!';
-    }
-    if (code === 'MODEL_NOT_FOUND') {
-      return isEn
-        ? 'The configured OpenRouter model ID was not found. Please verify `OPENROUTER_MODEL` in `.env.local`.'
-        : 'Không tìm thấy mã model trong `OPENROUTER_MODEL`. Vui lòng kiểm tra lại tên model trên OpenRouter.';
-    }
-    return isEn
-      ? `Unable to reach EcoBot AI (${rawMessage || 'Network error'}). Please try again.`
-      : `Không thể kết nối EcoBot AI (${rawMessage || 'Lỗi mạng'}). Vui lòng bấm Thử lại.`;
+    if (code === 'MISSING_API_KEY') return t.chat.errMissingKey;
+    if (code === 'INVALID_API_KEY') return t.chat.errInvalidKey;
+    if (code === 'RATE_LIMITED') return t.chat.errRateLimit;
+    if (code === 'MODEL_NOT_FOUND') return t.chat.errModelNotFound;
+    return `${t.chat.errNetwork}${rawMessage ? ` (${rawMessage})` : ''}`;
   };
 
   const handleStopStreaming = () => {
@@ -236,7 +197,6 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
       time: formatCurrentTime(),
     };
 
-    // Build history payload (exclude welcome message & previous error bubbles)
     const historyPayload = [
       ...messages
         .filter((m) => m.id !== 'msg-init' && !m.isError && m.text.trim().length > 0)
@@ -327,13 +287,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
         setMessages((prev) =>
           prev.map((m) =>
             m.id === botMsgId
-              ? {
-                  ...m,
-                  text: isEn
-                    ? 'The model returned an empty response. Please try again.'
-                    : 'Model không trả về nội dung. Bạn vui lòng bấm Thử lại nhé!',
-                  isError: true,
-                }
+              ? { ...m, text: t.chat.errEmpty, isError: true }
               : m
           )
         );
@@ -346,14 +300,13 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
       }
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
-        // User stopped stream manually; keep partial text or clean up empty bubble
         setMessages((prev) =>
           prev.filter((m) => !(m.id === botMsgId && !m.text.trim()))
         );
         return;
       }
 
-      const msg = error instanceof Error ? error.message : 'Network error';
+      const msg = error instanceof Error ? error.message : '';
       setLastFailedPrompt(text);
       setMessages((prev) =>
         prev.map((m) =>
@@ -375,7 +328,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fadeIn">
       <div className="relative w-full max-w-sm rounded-3xl bg-white shadow-2xl overflow-hidden max-h-[90vh] flex flex-col text-left">
-        {/* Header with Circular Robot Avatar */}
+        {/* Header */}
         <div className="bg-gradient-to-r from-[#1E4D3E] via-[#245D4B] to-[#16392E] p-4 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative h-11 w-11 rounded-full border-2 border-emerald-300 overflow-hidden shadow bg-emerald-950 flex items-center justify-center">
@@ -398,11 +351,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                   Ling 3.2
                 </span>
               </div>
-              <p className="text-[10px] text-emerald-200">
-                {isEn
-                  ? 'OpenRouter Live AI • Green Travel Assistant'
-                  : 'OpenRouter AI • Trợ Lý Du Lịch Xanh'}
-              </p>
+              <p className="text-[10px] text-emerald-200">{t.chat.subtitle}</p>
             </div>
           </div>
 
@@ -410,14 +359,14 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
             <button
               onClick={handleResetChat}
               className="rounded-full bg-white/10 p-1.5 text-white hover:bg-white/20 transition-colors"
-              title={isEn ? 'New conversation' : 'Làm mới cuộc trò chuyện'}
+              title={t.chat.newChatTitle}
             >
               <RefreshCw size={14} />
             </button>
             <button
               onClick={onClose}
               className="rounded-full bg-white/10 p-1.5 text-white hover:bg-white/20 transition-colors"
-              title={isEn ? 'Close' : 'Đóng'}
+              title={t.common.close}
             >
               <X size={16} />
             </button>
@@ -462,16 +411,14 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                     {isEmptyPending ? (
                       <div className="flex items-center gap-2 text-slate-400">
                         <span className="flex h-2 w-2 rounded-full bg-emerald-600 animate-ping" />
-                        <span>
-                          {isEn ? 'EcoBot is thinking...' : 'EcoBot đang trả lời...'}
-                        </span>
+                        <span>{t.chat.thinking}</span>
                       </div>
                     ) : (
                       <>
                         {msg.isError && (
                           <div className="flex items-center gap-1.5 font-bold text-amber-800 mb-1">
                             <AlertCircle size={13} />
-                            <span>{isEn ? 'Connection Notice' : 'Thông báo kết nối'}</span>
+                            <span>{t.chat.connectionNotice}</span>
                           </div>
                         )}
                         <div>{renderMessageText(msg.text, isUser)}</div>
@@ -481,7 +428,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                             className="mt-2 inline-flex items-center gap-1 rounded-xl bg-[#1E4D3E] px-2.5 py-1 text-[10px] font-bold text-white hover:bg-[#16392E] transition-colors"
                           >
                             <RotateCcw size={11} />
-                            <span>{isEn ? 'Retry' : 'Thử lại'}</span>
+                            <span>{t.chat.retryBtn}</span>
                           </button>
                         )}
                       </>
@@ -489,7 +436,6 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                   </div>
                 </div>
 
-                {/* Quick suggestions if provided */}
                 {msg.suggestions && msg.suggestions.length > 0 && (
                   <div className="mt-2.5 flex flex-wrap gap-1.5 pl-9">
                     {msg.suggestions.map((sug, idx) => (
@@ -524,11 +470,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
               value={inputText}
               disabled={isStreaming}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder={
-                isEn
-                  ? 'Ask EcoBot anything...'
-                  : 'Hỏi EcoBot về lịch trình, cách tích điểm...'
-              }
+              placeholder={t.chat.inputPlaceholder}
               className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:border-emerald-600 focus:bg-white focus:outline-none disabled:opacity-60 transition-all"
             />
             {isStreaming ? (
@@ -536,7 +478,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                 type="button"
                 onClick={handleStopStreaming}
                 className="flex h-9 w-9 items-center justify-center rounded-2xl bg-rose-600 text-white shadow-sm hover:bg-rose-700 transition-all shrink-0"
-                title={isEn ? 'Stop generating' : 'Dừng trả lời'}
+                title={t.chat.stopTitle}
               >
                 <Square size={13} className="fill-current" />
               </button>
@@ -545,7 +487,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                 type="submit"
                 disabled={!inputText.trim()}
                 className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#1E4D3E] text-white shadow-sm hover:bg-[#16392E] disabled:opacity-40 transition-all shrink-0"
-                title={isEn ? 'Send' : 'Gửi'}
+                title={t.chat.sendTitle}
               >
                 <Send size={15} />
               </button>

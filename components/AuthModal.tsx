@@ -20,14 +20,14 @@ import {
 } from 'lucide-react';
 import { MockAccount } from '@/data/types';
 import { mockAccounts } from '@/data/mockData';
-import { rankTranslations } from '@/data/translations';
 import { playSuccessTickSound } from '@/lib/audio/successSound';
+import { formatText, getDictionary, Lang } from '@/lib/i18n';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentUserId: string;
-  currentLang?: 'vi' | 'en';
+  currentLang?: Lang;
   onSelectAccount: (account: MockAccount) => void;
   onRegisterNewAccount: (data: {
     name: string;
@@ -44,19 +44,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   currentUserId,
   currentLang = 'vi',
   onSelectAccount,
-  onRegisterNewAccount,
 }) => {
-  const isEn = currentLang === 'en';
+  const t = getDictionary(currentLang);
   const [activeTab, setActiveTab] = useState<'quick' | 'login' | 'register'>('quick');
   const [noticeText, setNoticeText] = useState<string | null>(null);
   const noticeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Login form state
   const [loginIdentifier, setLoginIdentifier] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Register form state
   const [regName, setRegName] = useState('');
   const [regPhone, setRegPhone] = useState('');
   const [regEmail, setRegEmail] = useState('');
@@ -76,15 +73,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const showTempNotice = (message: string) => {
     setNoticeText(message);
     if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current);
-    noticeTimerRef.current = setTimeout(() => setNoticeText(null), 2200);
+    noticeTimerRef.current = setTimeout(() => setNoticeText(null), 2400);
   };
 
   const handleSocialInDev = (provider: 'Google' | 'Facebook') => {
-    showTempNotice(
-      isEn
-        ? `${provider} sign-in is currently under development.`
-        : `Chức năng đăng nhập bằng ${provider} đang phát triển.`
-    );
+    showTempNotice(formatText(t.login.devNoticeSocial, { provider }));
   };
 
   const handleQuickSelect = (acc: MockAccount) => {
@@ -95,20 +88,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleManualLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    showTempNotice(
-      isEn
-        ? 'Direct login is under development. Please select one of the 4 demo accounts.'
-        : 'Tính năng đăng nhập trực tiếp đang phát triển. Vui lòng chọn 1 trong 4 tài khoản mẫu.'
-    );
+    showTempNotice(t.login.devNoticeAuthLogin);
   };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    showTempNotice(
-      isEn
-        ? 'Account registration is under development. Please select one of the 4 demo accounts.'
-        : 'Tính năng đăng ký đang phát triển. Vui lòng chọn 1 trong 4 tài khoản mẫu.'
-    );
+    showTempNotice(t.login.devNoticeAuthRegister);
   };
 
   return (
@@ -128,10 +113,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-extrabold text-slate-900">
-                {isEn ? 'EcoStay Account' : 'Tài khoản EcoStay'}
+                {t.login.authTitle}
               </h3>
               <p className="text-[10px] text-[#2E7D32] font-semibold">
-                {isEn ? 'Switch demo accounts or sign in' : 'Đổi tài khoản mẫu hoặc đăng nhập mới'}
+                {t.login.authSubtitle}
               </p>
             </div>
           </div>
@@ -139,7 +124,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             type="button"
             onClick={onClose}
             className="rounded-full bg-slate-100 p-1.5 text-slate-500 hover:bg-slate-200 transition-colors"
-            aria-label={isEn ? 'Close' : 'Đóng'}
+            aria-label={t.common.close}
           >
             <X size={16} />
           </button>
@@ -157,7 +142,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             }`}
           >
             <Users size={13} />
-            <span>{isEn ? 'Demo Accounts' : 'Tài khoản mẫu'}</span>
+            <span className="truncate">{t.login.demoAccountsTab}</span>
           </button>
 
           <button
@@ -170,7 +155,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             }`}
           >
             <LogIn size={13} />
-            <span>{isEn ? 'Sign In' : 'Đăng nhập'}</span>
+            <span className="truncate">{t.login.signIn}</span>
           </button>
 
           <button
@@ -183,7 +168,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             }`}
           >
             <UserPlus size={13} />
-            <span>{isEn ? 'Sign Up' : 'Đăng ký'}</span>
+            <span className="truncate">{t.login.signUp}</span>
           </button>
         </div>
 
@@ -200,10 +185,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="mt-3 flex-1 overflow-y-auto space-y-2.5 pr-0.5">
             {mockAccounts.map((acc) => {
               const isActive = acc.id === currentUserId;
-              const displayRank = isEn
-                ? rankTranslations[acc.profile.rank] || acc.profile.rank
-                : acc.profile.rank;
-              const displayRole = isEn ? acc.roleBadgeEn : acc.roleBadge;
+              const displayRank = t.data.ranks[acc.profile.rank] || acc.profile.rank;
+              const displayRole = t.data.accountRoles[acc.id] || acc.roleBadge;
 
               return (
                 <button
@@ -238,7 +221,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                           </h4>
                           {isActive && (
                             <span className="rounded bg-[#4CAF50] px-1.5 py-0.2 text-[8px] font-bold text-white shrink-0">
-                              {isEn ? 'ACTIVE' : 'ĐANG DÙNG'}
+                              {t.common.active}
                             </span>
                           )}
                         </div>
@@ -263,7 +246,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <div className="mt-2 pt-1.5 border-t border-emerald-100/80 flex items-center justify-between text-[10px] text-slate-500">
                     <span>{displayRole}</span>
                     <span className="font-bold text-[#2E7D32] flex items-center gap-0.5">
-                      <span>{isEn ? 'Switch' : 'Chọn'}</span>
+                      <span>{t.login.switchAction}</span>
                       <ArrowRight size={11} />
                     </span>
                   </div>
@@ -273,7 +256,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
-        {/* TAB 2: LOGIN FORM (Google & Facebook only -> In Development) */}
+        {/* TAB 2: LOGIN FORM */}
         {activeTab === 'login' && (
           <form onSubmit={handleManualLogin} className="mt-3 flex-1 overflow-y-auto space-y-3 pr-0.5">
             <div className="grid grid-cols-2 gap-2.5">
@@ -305,7 +288,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             <div className="flex items-center gap-3 text-[11px] text-slate-400">
               <div className="h-px flex-1 bg-slate-200" />
-              <span>{isEn ? 'or' : 'hoặc'}</span>
+              <span>{t.login.or}</span>
               <div className="h-px flex-1 bg-slate-200" />
             </div>
 
@@ -315,7 +298,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 type="text"
                 value={loginIdentifier}
                 onChange={(e) => setLoginIdentifier(e.target.value)}
-                placeholder={isEn ? 'Email or phone number' : 'Email hoặc số điện thoại'}
+                placeholder={t.login.emailOrPhone}
                 className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none focus:ring-2 focus:ring-[#C8E6C9]"
               />
             </div>
@@ -326,7 +309,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 type={showPassword ? 'text' : 'password'}
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
-                placeholder={isEn ? 'Password' : 'Mật khẩu'}
+                placeholder={t.login.password}
                 className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-10 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none focus:ring-2 focus:ring-[#C8E6C9]"
               />
               <button
@@ -342,7 +325,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               type="submit"
               className="w-full rounded-full bg-gradient-to-r from-[#66BB6A] to-[#4CAF50] py-3 text-xs font-bold text-white shadow-md hover:from-[#57AE5B] hover:to-[#43A047] active:scale-98 transition-all"
             >
-              {isEn ? 'Sign In' : 'Đăng nhập'}
+              {t.login.signIn}
             </button>
           </form>
         )}
@@ -353,16 +336,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="rounded-2xl bg-[#E8F5E9] border border-[#C8E6C9] p-2.5 flex items-center gap-2">
               <Sparkles size={15} className="text-[#2E7D32] shrink-0" />
               <p className="text-[11px] font-semibold text-[#1B5E20]">
-                {isEn ? 'Welcome bonus: +50 Carbon Points!' : 'Tặng ngay +50 Điểm Cacbon khi đăng ký!'}
+                {t.login.welcomeBonus}
               </p>
             </div>
 
             <input
               type="text"
-              required
               value={regName}
               onChange={(e) => setRegName(e.target.value)}
-              placeholder={isEn ? 'Full name *' : 'Họ và tên *'}
+              placeholder={t.login.fullName}
               className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 px-3 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none"
             />
 
@@ -371,7 +353,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 type="tel"
                 value={regPhone}
                 onChange={(e) => setRegPhone(e.target.value)}
-                placeholder={isEn ? 'Phone' : 'Số điện thoại'}
+                placeholder={t.login.phone}
                 className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 px-3 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none"
               />
               <input
@@ -398,7 +380,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 type="text"
                 value={regRoom}
                 onChange={(e) => setRegRoom(e.target.value)}
-                placeholder={isEn ? 'Room' : 'Số phòng'}
+                placeholder={t.login.roomNumber}
                 className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 px-3 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none"
               />
             </div>
@@ -408,7 +390,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 type={showRegPassword ? 'text' : 'password'}
                 value={regPassword}
                 onChange={(e) => setRegPassword(e.target.value)}
-                placeholder={isEn ? 'Password' : 'Mật khẩu'}
+                placeholder={t.login.password}
                 className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#66BB6A] focus:outline-none"
               />
               <button
@@ -424,7 +406,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               type="submit"
               className="w-full rounded-full bg-gradient-to-r from-[#66BB6A] to-[#4CAF50] py-3 text-xs font-bold text-white shadow-md hover:from-[#57AE5B] hover:to-[#43A047] active:scale-98 transition-all"
             >
-              {isEn ? 'Create Account (+50 CB)' : 'Đăng ký & Nhận +50 CB'}
+              {t.login.createAccountBtn}
             </button>
           </form>
         )}
