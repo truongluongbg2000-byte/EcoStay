@@ -42,10 +42,10 @@ export const OpenOnPhoneQR: React.FC<{ currentLang: Lang; tone?: 'light' | 'dark
         <img
           src={src}
           alt={t.desktop.phoneTitle}
-          className="h-28 w-28 shrink-0 rounded-xl bg-white object-contain p-1"
+          className="h-36 w-36 shrink-0 rounded-xl bg-white object-contain p-1"
         />
       ) : (
-        <div className="h-28 w-28 shrink-0 animate-pulse rounded-xl bg-white/60" />
+        <div className="h-36 w-36 shrink-0 animate-pulse rounded-xl bg-white/60" />
       )}
       <div className="min-w-0">
         <p className={`text-sm font-bold ${dark ? 'text-white' : 'text-slate-800'}`}>{t.desktop.phoneTitle}</p>
