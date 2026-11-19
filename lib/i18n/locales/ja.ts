@@ -54,6 +54,9 @@ export const ja: AppDictionary = {
       '{provider}ログイン機能は現在開発中です。下の「デモアカウントでログイン」をご利用ください。',
     devNoticeEmail:
       '直接ログイン機能は現在開発中です。下の「デモアカウントでログイン」をご利用ください。',
+    errRegisterInvalid: 'お名前、有効なメールまたは電話番号、6文字以上のパスワードを入力してください。',
+    errAccountExists: 'このアカウントは既に存在します。ログインしてください。',
+    errLoginInvalid: 'メール/電話番号またはパスワードが正しくありません。',
     devNoticeRegister:
       '新規登録機能は現在開発中です。下の「デモアカウントでログイン」をご利用ください。',
     authTitle: 'EcoStayアカウント',
@@ -280,12 +283,12 @@ export const ja: AppDictionary = {
     stopTitle: '生成を停止',
     sendTitle: '送信',
     errMissingKey:
-      'AI APIキーが未設定です。`.env.local` の `GEMINI_API_KEY`（または `OPENROUTER_API_KEY`）を設定して再起動してください。',
+      'AIアシスタントは現在ご利用いただけません。しばらくしてからお試しいただくか、管理者にお問い合わせください。',
     errInvalidKey:
-      'APIキーが無効または期限切れです。設定をご確認ください。',
+      'AIアシスタントの設定に問題があります。しばらくしてからお試しいただくか、管理者にお問い合わせください。',
     errRateLimit:
       'AIサービスが混み合っています。数秒後に再試行してください。',
-    errModelNotFound: '指定されたAIモデルが見つかりません。',
+    errModelNotFound: 'AIアシスタントはメンテナンス中です。しばらくしてからお試しください。',
     errEmpty: '回答が空でした。もう一度お試しください。',
     errNetwork: 'EcoBot AIに接続できませんでした。再試行してください。',
   },

@@ -660,7 +660,7 @@ Source of Growth & Room-to-Win:
   3. Cửa hàng Quà tặng: Danh mục thời trang tái chế, ẩm thực organic, dịch vụ Spa và trồng cây.
   4. Hồ sơ & Lan tỏa: Lịch sử giao dịch và tự động xuất "Báo cáo Dấu chân sinh thái" dạng đồ họa khi check-out để chia sẻ MXH.
 - Quy chế định giá & thời hạn điểm CB:
-  - 1 Điểm Cacbon (CB) tương đương 1.000 VNĐ khi thanh toán/đổi dịch vụ nội khu (không có giá trị quy đổi thành tiền mặt).
+  - Điểm Cacbon (CB) chỉ dùng để đổi dịch vụ, quà tặng, ưu đãi nội khu và trồng cây; không có giá trị quy đổi thành tiền mặt.
   - Thời hạn hiệu lực điểm: 12 tháng.
 - 4 mốc đổi thưởng theo đề án:
   - 100 – 200 CB (Quà tặng nhỏ): 1 ly cocktail/nước ép organic hoặc quà lưu niệm xanh (túi vải tái chế, bộ hạt giống).

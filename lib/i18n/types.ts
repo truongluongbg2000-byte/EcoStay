@@ -111,6 +111,9 @@ export interface AppDictionary {
     devNoticeSocial: string; // uses {provider}
     devNoticeEmail: string;
     devNoticeRegister: string;
+    errRegisterInvalid: string;
+    errAccountExists: string;
+    errLoginInvalid: string;
     authTitle: string;
     authSubtitle: string;
     demoAccountsTab: string;

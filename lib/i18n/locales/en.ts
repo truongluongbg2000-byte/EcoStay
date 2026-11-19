@@ -56,6 +56,9 @@ export const en: AppDictionary = {
       '{provider} sign-in is currently under development. Please use "Sign in with Demo Accounts" below.',
     devNoticeEmail:
       'Direct email/password login is currently under development. Please use "Sign in with Demo Accounts" below.',
+    errRegisterInvalid: 'Please enter your name, a valid email or phone, and a password of at least 6 characters.',
+    errAccountExists: 'This account already exists. Please sign in.',
+    errLoginInvalid: 'Incorrect email/phone or password.',
     devNoticeRegister:
       'Account registration is currently under development. Please use "Sign in with Demo Accounts" below.',
     authTitle: 'EcoStay Account',
@@ -288,13 +291,13 @@ export const en: AppDictionary = {
     stopTitle: 'Stop generating',
     sendTitle: 'Send',
     errMissingKey:
-      'AI API key is not configured yet. Please paste your Google Gemini key into `GEMINI_API_KEY` (or `OPENROUTER_API_KEY`) in `.env.local` and restart the application.',
+      'The AI assistant is not available right now. Please try again later or contact the administrator.',
     errInvalidKey:
-      'Your AI API key is invalid or expired. Please check your key in `.env.local`.',
+      'The AI assistant has a configuration issue. Please try again later or contact the administrator.',
     errRateLimit:
       'The AI service is currently busy or rate-limited. Please wait a few moments and tap Retry.',
     errModelNotFound:
-      'The configured AI model was not found. Please verify your `.env.local` configuration.',
+      'The AI assistant is under maintenance. Please try again later.',
     errEmpty: 'The model returned an empty response. Please try again.',
     errNetwork: 'Unable to reach EcoBot AI. Please try again.',
   },

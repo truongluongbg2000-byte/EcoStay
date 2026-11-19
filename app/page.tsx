@@ -41,6 +41,7 @@ import { triggerEcoConfetti } from '@/components/Confetti';
 import { Sparkles, CheckCircle2, UserCheck } from 'lucide-react';
 import { mockAccounts } from '@/data/mockData';
 import { MockAccount } from '@/data/types';
+import { LocalAccount } from '@/lib/auth/localAccounts';
 import { getDictionary, getLanguageMeta, isValidLang, formatText, Lang } from '@/lib/i18n';
 
 const STORAGE_KEY_USER = 'ecostay_user_profile_v5';
@@ -50,6 +51,20 @@ const STORAGE_KEY_MISSIONS = 'ecostay_missions_v5';
 const STORAGE_KEY_LANG = 'ecostay_lang_v5';
 const STORAGE_KEY_ACTIVE_ACCOUNT = 'ecostay_active_account_v5';
 const STORAGE_KEY_NOTIFICATIONS = 'ecostay_notifications_v5';
+const STORAGE_KEY_LOGGED_IN = 'ecostay_logged_in_v5';
+
+const todayKey = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+// A mission completed on a previous day becomes available again.
+const resetStaleMissions = (list: DetailedMission[]): DetailedMission[] => {
+  const today = todayKey();
+  return list.map((m) =>
+    m.completed && m.completedDate !== today ? { ...m, completed: false, completedDate: undefined } : m
+  );
+};
 
 export default function EcoStayApp() {
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -112,7 +127,9 @@ export default function EcoStayApp() {
       if (savedLogs) setLogs(JSON.parse(savedLogs));
 
       const savedMissions = localStorage.getItem(STORAGE_KEY_MISSIONS);
-      if (savedMissions) setMissions(JSON.parse(savedMissions));
+      if (savedMissions) setMissions(resetStaleMissions(JSON.parse(savedMissions)));
+
+      if (localStorage.getItem(STORAGE_KEY_LOGGED_IN) === '1') setIsLoggedIn(true);
 
       const savedLang = localStorage.getItem(STORAGE_KEY_LANG);
       if (isValidLang(savedLang)) setCurrentLang(savedLang);
@@ -143,11 +160,12 @@ export default function EcoStayApp() {
       localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));
       localStorage.setItem(STORAGE_KEY_MISSIONS, JSON.stringify(missions));
       localStorage.setItem(STORAGE_KEY_LANG, currentLang);
+      localStorage.setItem(STORAGE_KEY_LOGGED_IN, isLoggedIn ? '1' : '0');
       localStorage.setItem(STORAGE_KEY_NOTIFICATIONS, JSON.stringify(notifications));
     } catch (e) {
       console.warn('LocalStorage save failed', e);
     }
-  }, [user, vouchers, logs, missions, notifications, currentLang, currentAccountId, isLoaded]);
+  }, [user, vouchers, logs, missions, notifications, currentLang, currentAccountId, isLoggedIn, isLoaded]);
 
   const handleMarkNotificationRead = (notifId: string) => {
     setNotifications((prev) =>
@@ -180,7 +198,7 @@ export default function EcoStayApp() {
     }
 
     setMissions((prev) =>
-      prev.map((m) => (m.id === missionId ? { ...m, completed: true } : m))
+      prev.map((m) => (m.id === missionId ? { ...m, completed: true, completedDate: todayKey() } : m))
     );
 
     triggerEcoConfetti();
@@ -444,18 +462,20 @@ export default function EcoStayApp() {
 
   // Handler: Register New Account (+50 CB Bonus)
   const handleRegisterNewAccount = (data: {
+    id?: string;
+    welcomeBonus?: boolean;
     name: string;
     phone: string;
     email: string;
     hotel: string;
     room: string;
   }) => {
-    const newId = `user-${Date.now()}`;
+    const grantBonus = data.welcomeBonus !== false;
+    const newId = data.id || `user-${Date.now()}`;
     const newProfile: UserProfile = {
       name: data.name,
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-      carbonPoints: 50,
-      avnPoints: 0,
+      avatar: '/logo.jpg',
+      carbonPoints: grantBonus ? 50 : 0,
       expiryDate: '31/12/2027',
       co2Saved: 0.0,
       waterSaved: 0,
@@ -467,7 +487,7 @@ export default function EcoStayApp() {
       memberCode: `ECO-NW-${Math.floor(100000 + Math.random() * 900000)}`,
     };
 
-    const newLogs: ImpactLog[] = [
+    const newLogs: ImpactLog[] = !grantBonus ? [] : [
       {
         id: `log-${Date.now()}`,
         date: t.common.justNow,
@@ -497,6 +517,31 @@ export default function EcoStayApp() {
       <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />,
       2000
     );
+  };
+
+  // Handler: Login with a locally registered account
+  const handleLocalLogin = (account: LocalAccount) => {
+    if (account.id === currentAccountId) {
+      // Same browser profile as the saved state: keep points/missions.
+      setIsLoggedIn(true);
+      showToast(
+        formatText(t.toasts.loginSuccess, { name: account.name }),
+        <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />,
+        2000
+      );
+      return;
+    }
+    // Different profile was active: demo storage keeps a single profile slot.
+    handleRegisterNewAccount({
+      id: account.id,
+      welcomeBonus: false,
+      name: account.name,
+      phone: account.phone,
+      email: account.email,
+      hotel: account.hotel,
+      room: account.room,
+    });
+    setIsLoggedIn(true);
   };
 
   // Handler: Logout
@@ -537,6 +582,7 @@ export default function EcoStayApp() {
             handleSelectAccount(acc);
             setIsLoggedIn(true);
           }}
+          onLocalLogin={handleLocalLogin}
           onRegisterSuccess={(data) => {
             handleRegisterNewAccount(data);
             setIsLoggedIn(true);

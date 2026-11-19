@@ -56,6 +56,9 @@ export const vi: AppDictionary = {
       'Tính năng đăng nhập bằng {provider} đang phát triển. Vui lòng chọn "Đăng nhập bằng tài khoản mẫu" bên dưới.',
     devNoticeEmail:
       'Tính năng đăng nhập trực tiếp đang phát triển. Vui lòng sử dụng "Đăng nhập bằng tài khoản mẫu" bên dưới.',
+    errRegisterInvalid: 'Vui lòng nhập họ tên, email hoặc SĐT hợp lệ và mật khẩu từ 6 ký tự.',
+    errAccountExists: 'Tài khoản này đã tồn tại. Vui lòng đăng nhập.',
+    errLoginInvalid: 'Email/SĐT hoặc mật khẩu không đúng.',
     devNoticeRegister:
       'Tính năng đăng ký tài khoản đang phát triển. Vui lòng sử dụng "Đăng nhập bằng tài khoản mẫu" bên dưới.',
     authTitle: 'Tài khoản EcoStay',
@@ -286,13 +289,13 @@ export const vi: AppDictionary = {
     stopTitle: 'Dừng trả lời',
     sendTitle: 'Gửi',
     errMissingKey:
-      'Chưa cấu hình API Key. Bạn hãy dán khóa Google Gemini vào biến `GEMINI_API_KEY` (hoặc `OPENROUTER_API_KEY`) trong file `.env.local` rồi khởi động lại ứng dụng nhé!',
+      'Trợ lý AI chưa sẵn sàng. Vui lòng thử lại sau hoặc liên hệ quản trị viên.',
     errInvalidKey:
-      'Khóa API không hợp lệ hoặc đã hết hạn. Vui lòng kiểm tra lại tại aistudio.google.com/app/apikey hoặc openrouter.ai/keys.',
+      'Trợ lý AI đang gặp sự cố cấu hình. Vui lòng thử lại sau hoặc liên hệ quản trị viên.',
     errRateLimit:
       'Hệ thống AI đang tạm quá tải hoặc chạm giới hạn lượt hỏi (HTTP 429). Vui lòng đợi vài giây rồi bấm Thử lại nhé!',
     errModelNotFound:
-      'Không tìm thấy mã model AI. Vui lòng kiểm tra cấu hình trong file `.env.local`.',
+      'Trợ lý AI đang được bảo trì. Vui lòng thử lại sau.',
     errEmpty: 'Model không trả về nội dung. Bạn vui lòng bấm Thử lại nhé!',
     errNetwork: 'Không thể kết nối EcoBot AI. Vui lòng bấm Thử lại.',
   },

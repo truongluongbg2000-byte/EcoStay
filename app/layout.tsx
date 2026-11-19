@@ -2,20 +2,30 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+        : 'http://localhost:3000')
+  ),
   title: 'EcoStay - Du Lịch Xanh & Tích Lũy CACBON POINT',
   description: 'Ứng dụng du lịch bền vững, theo dõi giảm thiểu phát thải CO2 và đổi quà xanh.',
   icons: {
-    icon: '/logo.jpg',
-    apple: '/logo.jpg',
+    icon: '/icon-192.png',
+    apple: '/icon-192.png',
   },
   manifest: '/manifest.json',
+  openGraph: {
+    title: 'EcoStay - Du Lịch Xanh & Tích Lũy CACBON POINT',
+    description: 'Ứng dụng du lịch bền vững, theo dõi giảm thiểu phát thải CO2 và đổi quà xanh.',
+    images: ['/icon-512.png'],
+    type: 'website',
+  },
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   themeColor: '#1E4D3E',
 };
 

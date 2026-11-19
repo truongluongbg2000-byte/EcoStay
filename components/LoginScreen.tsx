@@ -19,6 +19,11 @@ import {
 } from 'lucide-react';
 import { MockAccount } from '@/data/types';
 import { mockAccounts } from '@/data/mockData';
+import {
+  registerLocalAccount,
+  verifyLocalAccount,
+  LocalAccount,
+} from '@/lib/auth/localAccounts';
 import { playSuccessTickSound } from '@/lib/audio/successSound';
 import { formatText, getDictionary, Lang, SUPPORTED_LANGUAGES } from '@/lib/i18n';
 
@@ -26,7 +31,9 @@ interface LoginScreenProps {
   currentLang: Lang;
   onChangeLang: (lang: Lang) => void;
   onLoginSuccess: (account: MockAccount) => void;
+  onLocalLogin: (account: LocalAccount) => void;
   onRegisterSuccess: (data: {
+    id?: string;
     name: string;
     phone: string;
     email: string;
@@ -40,6 +47,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   currentLang,
   onChangeLang,
   onLoginSuccess,
+  onLocalLogin,
+  onRegisterSuccess,
 }) => {
   const t = getDictionary(currentLang);
 
@@ -103,14 +112,34 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     onLoginSuccess(acc);
   };
 
-  const handleManualLogin = (e: React.FormEvent) => {
+  const handleManualLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    showTempNotice(t.login.devNoticeEmail);
+    const account = await verifyLocalAccount(emailInput, passwordInput);
+    if (!account) {
+      showTempNotice(t.login.errLoginInvalid);
+      return;
+    }
+    playSuccessTickSound();
+    onLocalLogin(account);
   };
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    showTempNotice(t.login.devNoticeRegister);
+    const result = await registerLocalAccount({
+      name: regName,
+      phone: regPhone,
+      email: regEmail,
+      hotel: regHotel,
+      room: regRoom,
+      password: regPassword,
+    });
+    if (!result.ok) {
+      showTempNotice(result.reason === 'exists' ? t.login.errAccountExists : t.login.errRegisterInvalid);
+      return;
+    }
+    playSuccessTickSound();
+    const a = result.account;
+    onRegisterSuccess({ id: a.id, name: a.name, phone: a.phone, email: a.email, hotel: a.hotel, room: a.room });
   };
 
   return (

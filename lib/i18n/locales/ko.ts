@@ -54,6 +54,9 @@ export const ko: AppDictionary = {
       '{provider} 로그인 기능은 현재 개발 중입니다. 아래 "샘플 계정으로 로그인"을 이용해 주세요.',
     devNoticeEmail:
       '직접 로그인 기능은 현재 개발 중입니다. 아래 "샘플 계정으로 로그인"을 이용해 주세요.',
+    errRegisterInvalid: '이름, 올바른 이메일 또는 전화번호, 6자 이상의 비밀번호를 입력해 주세요.',
+    errAccountExists: '이미 존재하는 계정입니다. 로그인해 주세요.',
+    errLoginInvalid: '이메일/전화번호 또는 비밀번호가 올바르지 않습니다.',
     devNoticeRegister:
       '회원가입 기능은 현재 개발 중입니다. 아래 "샘플 계정으로 로그인"을 이용해 주세요.',
     authTitle: 'EcoStay 계정',
@@ -280,12 +283,12 @@ export const ko: AppDictionary = {
     stopTitle: '응답 중지',
     sendTitle: '보내기',
     errMissingKey:
-      'API 키가 설정되지 않았습니다. `.env.local`의 `GEMINI_API_KEY` (또는 `OPENROUTER_API_KEY`)에 키를 입력해 주세요.',
+      'AI 도우미를 사용할 수 없습니다. 나중에 다시 시도하거나 관리자에게 문의해 주세요.',
     errInvalidKey:
-      'API 키가 올바르지 않거나 만료되었습니다. 키 설정을 확인해 주세요.',
+      'AI 도우미 설정에 문제가 있습니다. 나중에 다시 시도하거나 관리자에게 문의해 주세요.',
     errRateLimit:
       'AI 서비스가 일시적으로 혼잡합니다. 잠시 후 다시 시도해 주세요.',
-    errModelNotFound: '설정된 AI 모델을 찾을 수 없습니다.',
+    errModelNotFound: 'AI 도우미가 점검 중입니다. 나중에 다시 시도해 주세요.',
     errEmpty: '응답이 비어 있습니다. 다시 시도해 주세요.',
     errNetwork: 'EcoBot AI에 연결할 수 없습니다. 다시 시도해 주세요.',
   },

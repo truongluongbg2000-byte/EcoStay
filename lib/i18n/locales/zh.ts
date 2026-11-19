@@ -54,6 +54,9 @@ export const zh: AppDictionary = {
       '{provider} 登录功能正在开发中，请点击下方“使用示例账号登录”。',
     devNoticeEmail:
       '直接账号登录功能正在开发中，请点击下方“使用示例账号登录”。',
+    errRegisterInvalid: '请输入姓名、有效的邮箱或手机号，以及至少 6 位的密码。',
+    errAccountExists: '该账号已存在，请直接登录。',
+    errLoginInvalid: '邮箱/手机号或密码不正确。',
     devNoticeRegister:
       '账号注册功能正在开发中，请点击下方“使用示例账号登录”。',
     authTitle: 'EcoStay 账号',
@@ -277,12 +280,12 @@ export const zh: AppDictionary = {
     stopTitle: '停止生成',
     sendTitle: '发送',
     errMissingKey:
-      '尚未配置 AI API 密钥，请在 `.env.local` 的 `GEMINI_API_KEY`（或 `OPENROUTER_API_KEY`）中填入密钥并重启服务。',
+      'AI 助手暂时不可用，请稍后再试或联系管理员。',
     errInvalidKey:
-      'API 密钥无效或已过期，请检查 `.env.local` 配置。',
+      'AI 助手配置出现问题，请稍后再试或联系管理员。',
     errRateLimit:
       'AI 服务当前请求繁忙，请稍等几秒后重试。',
-    errModelNotFound: '未找到配置的 AI 模型，请检查配置。',
+    errModelNotFound: 'AI 助手正在维护中，请稍后再试。',
     errEmpty: '模型返回内容为空，请点击重试。',
     errNetwork: '无法连接到 EcoBot AI，请点击重试。',
   },

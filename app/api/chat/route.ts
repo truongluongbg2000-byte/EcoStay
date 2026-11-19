@@ -2,16 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { retrieveRagContext } from '@/lib/ai/ragStub';
 import { buildSystemPrompt, ChatUserContext } from '@/lib/ai/contextBuilder';
 import {
-  createOpenRouterStream,
-  getOpenRouterConfig,
-  OpenRouterError,
-  OpenRouterMessage,
-} from '@/lib/ai/openrouter';
-import {
-  createGeminiStream,
-  getGeminiConfig,
-  GeminiError,
-} from '@/lib/ai/gemini';
+  createOpenAIStream,
+  isOpenAIConfigured,
+  OpenAIError,
+  OpenAIMessage,
+} from '@/lib/ai/openai';
 import { isValidLang, Lang } from '@/lib/i18n';
 
 export const runtime = 'nodejs';
@@ -29,25 +24,10 @@ interface ChatRequestBody {
 }
 
 export async function GET() {
-  const geminiConfig = getGeminiConfig();
-  let openRouterConfig = null;
-  try {
-    openRouterConfig = getOpenRouterConfig();
-  } catch {
-    // ignore
-  }
-
+  // Minimal diagnostic: never expose provider, model or key details.
   return NextResponse.json({
     status: 'online',
-    activeProvider: geminiConfig ? `Google Gemini (${geminiConfig.model})` : 'OpenRouter',
-    gemini: {
-      configured: Boolean(geminiConfig),
-      model: geminiConfig?.model || null,
-    },
-    openRouter: {
-      configured: Boolean(openRouterConfig),
-      model: openRouterConfig?.model || null,
-    },
+    configured: isOpenAIConfigured(),
     timestamp: new Date().toISOString(),
   });
 }
@@ -103,39 +83,12 @@ export async function POST(req: NextRequest) {
       ragChunks,
     });
 
-    // 3. Choose provider: Prefer direct Google Gemini if GEMINI_API_KEY is configured
-    const geminiConfig = getGeminiConfig();
-    let upstreamResponse: Response | null = null;
-    let activeProviderUsed = 'OpenRouter';
-
-    if (geminiConfig) {
-      try {
-        console.log(
-          `[EcoBot] API Request -> Trying Google Gemini (${geminiConfig.model})...`
-        );
-        upstreamResponse = await createGeminiStream(
-          conversationMessages,
-          systemPrompt,
-          req.signal
-        );
-        activeProviderUsed = `Google-Gemini (${geminiConfig.model})`;
-      } catch (geminiError) {
-        console.warn(
-          '[EcoBot] Google Gemini failed, falling back to OpenRouter:',
-          geminiError instanceof Error ? geminiError.message : geminiError
-        );
-      }
-    }
-
-    if (!upstreamResponse) {
-      console.log('[EcoBot] API Request -> Using OpenRouter fallback...');
-      const fullMessages: OpenRouterMessage[] = [
-        { role: 'system', content: systemPrompt },
-        ...conversationMessages,
-      ];
-      upstreamResponse = await createOpenRouterStream(fullMessages, req.signal);
-      activeProviderUsed = 'OpenRouter';
-    }
+    // 3. Stream from OpenAI (key is read server-side only)
+    const fullMessages: OpenAIMessage[] = [
+      { role: 'system', content: systemPrompt },
+      ...conversationMessages,
+    ];
+    const upstreamResponse = await createOpenAIStream(fullMessages, req.signal);
 
     if (!upstreamResponse.body) {
       throw new Error('Empty stream body from AI upstream provider');
@@ -212,10 +165,7 @@ export async function POST(req: NextRequest) {
 
               try {
                 const parsed = JSON.parse(dataStr);
-                // Supports both OpenRouter and Google Gemini SSE chunks
-                const delta =
-                  parsed?.choices?.[0]?.delta?.content ??
-                  parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
+                const delta = parsed?.choices?.[0]?.delta?.content;
 
                 if (typeof delta === 'string' && delta.length > 0) {
                   emitFilteredText(delta);
@@ -247,38 +197,20 @@ export async function POST(req: NextRequest) {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'Cache-Control': 'no-cache, no-transform',
-        'X-EcoBot-Provider': activeProviderUsed,
-        'X-EcoBot-Model': geminiConfig ? geminiConfig.model : 'OpenRouter',
       },
     });
   } catch (error) {
-    if (error instanceof GeminiError) {
+    if (error instanceof OpenAIError) {
       return NextResponse.json(
-        {
-          error: error.message,
-          code: error.code,
-        },
+        { error: error.message, code: error.code },
         { status: error.status }
       );
     }
 
-    if (error instanceof OpenRouterError) {
-      return NextResponse.json(
-        {
-          error: error.message,
-          code: error.code,
-        },
-        { status: error.status }
-      );
-    }
-
-    const message =
-      error instanceof Error ? error.message : 'Unexpected server error';
+    // Never leak internal error details to the client.
+    console.error('[EcoBot] Unexpected error:', error instanceof Error ? error.message : 'unknown');
     return NextResponse.json(
-      {
-        error: message,
-        code: 'INTERNAL_ERROR',
-      },
+      { error: 'Unexpected server error.', code: 'INTERNAL_ERROR' },
       { status: 500 }
     );
   }

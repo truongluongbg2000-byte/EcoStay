@@ -28,6 +28,7 @@ export interface DetailedMission {
   points: number; // e.g. +10, +20, -5
   isPenalty?: boolean;
   completed: boolean;
+  completedDate?: string; // local YYYY-MM-DD; missions reset daily
   actionType: 'qr';
   qrInstruction?: string;
   qrSampleCode?: string;
@@ -38,7 +39,6 @@ export interface UserProfile {
   name: string;
   avatar: string;
   carbonPoints: number;
-  avnPoints: number;
   expiryDate: string;
   co2Saved: number; // in kg
   waterSaved: number; // in Liters

@@ -567,7 +567,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
             <div className="p-2.5 border-t border-slate-200/80 bg-slate-100/70 text-[10px] text-slate-600 flex items-center justify-between">
               <span className="flex items-center gap-1 font-semibold text-emerald-800">
                 <Sparkles size={11} className="text-amber-500" />
-                Gemini 2.0 Flash
+                EcoBot AI
               </span>
               <span className="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">
                 1500 req/ngày
