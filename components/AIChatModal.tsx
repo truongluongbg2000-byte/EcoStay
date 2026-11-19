@@ -334,7 +334,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
             <div className="relative h-11 w-11 rounded-full border-2 border-emerald-300 overflow-hidden shadow bg-emerald-950 flex items-center justify-center shrink-0">
               <Bot size={22} className="text-emerald-300 absolute z-0" />
               <img
-                src="/ecobot-avatar.jpg"
+                src="/chatbot-avatar.png"
                 alt="EcoBot Avatar"
                 className="relative z-10 h-full w-full object-cover"
                 onError={(e) => {
@@ -389,7 +389,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                     <div className="h-7 w-7 rounded-full overflow-hidden shrink-0 border border-emerald-300 bg-[#1E4D3E] flex items-center justify-center relative">
                       <Bot size={14} className="text-emerald-200 absolute z-0" />
                       <img
-                        src="/ecobot-avatar.jpg"
+                        src="/chatbot-avatar.png"
                         alt="EcoBot"
                         className="relative z-10 h-full w-full object-cover"
                         onError={(e) => {

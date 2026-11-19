@@ -453,7 +453,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
           <div className="relative h-12 w-12 rounded-full overflow-hidden border-2 border-emerald-200 shadow-inner bg-[#16392E] flex items-center justify-center">
             <Bot size={22} className="text-emerald-300 absolute inset-0 m-auto z-0" />
             <img
-              src="/ecobot-avatar.jpg"
+              src="/chatbot-avatar.png"
               alt="EcoBot AI"
               className="relative z-10 h-full w-full object-cover"
               onError={(e) => {
