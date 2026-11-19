@@ -316,20 +316,18 @@ export const TabHome: React.FC<TabHomeProps> = ({
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`flex shrink-0 items-center gap-1.5 rounded-2xl px-3.5 py-2 text-xs font-semibold transition-all shadow-sm ${
-                selectedCategory === cat.id
-                  ? 'bg-[#1E4D3E] text-white shadow-emerald-950/20'
-                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-              }`}
+              className={`flex shrink-0 items-center gap-1.5 rounded-2xl px-3.5 py-2 text-xs font-semibold transition-all shadow-sm ${selectedCategory === cat.id
+                ? 'bg-[#1E4D3E] text-white shadow-emerald-950/20'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+                }`}
             >
               {cat.icon}
               <span>{cat.label}</span>
               <span
-                className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
-                  selectedCategory === cat.id
-                    ? 'bg-emerald-400/25 text-emerald-100'
-                    : 'bg-slate-100 text-slate-500'
-                }`}
+                className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${selectedCategory === cat.id
+                  ? 'bg-emerald-400/25 text-emerald-100'
+                  : 'bg-slate-100 text-slate-500'
+                  }`}
               >
                 {cat.count}
               </span>

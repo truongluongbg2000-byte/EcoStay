@@ -362,11 +362,11 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
           prev.map((m) =>
             m.id === botMsgId
               ? {
-                  ...m,
-                  text: formatFriendlyError(errCode, errMessage),
-                  isError: true,
-                  errorCode: errCode,
-                }
+                ...m,
+                text: formatFriendlyError(errCode, errMessage),
+                isError: true,
+                errorCode: errCode,
+              }
               : m
           )
         );
@@ -423,10 +423,10 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
         prev.map((m) =>
           m.id === botMsgId
             ? {
-                ...m,
-                text: formatFriendlyError('NETWORK_ERROR', msg),
-                isError: true,
-              }
+              ...m,
+              text: formatFriendlyError('NETWORK_ERROR', msg),
+              isError: true,
+            }
             : m
         )
       );
@@ -533,21 +533,19 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                       onClick={() => handleSelectSession(sess.id)}
                       className={`
                         group relative flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl cursor-pointer text-xs transition-all
-                        ${
-                          isActive
-                            ? 'bg-emerald-100/90 text-emerald-950 font-semibold shadow-xs border border-emerald-300/80'
-                            : 'text-slate-700 hover:bg-slate-200/70 hover:text-slate-900'
+                        ${isActive
+                          ? 'bg-emerald-100/90 text-emerald-950 font-semibold shadow-xs border border-emerald-300/80'
+                          : 'text-slate-700 hover:bg-slate-200/70 hover:text-slate-900'
                         }
                       `}
                     >
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <MessageSquare
                           size={14}
-                          className={`shrink-0 ${
-                            isActive
-                              ? 'text-emerald-700'
-                              : 'text-slate-400 group-hover:text-slate-600'
-                          }`}
+                          className={`shrink-0 ${isActive
+                            ? 'text-emerald-700'
+                            : 'text-slate-400 group-hover:text-slate-600'
+                            }`}
                         />
                         <span className="truncate">{sess.title}</span>
                       </div>
@@ -606,13 +604,12 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                       )}
 
                       <div
-                        className={`rounded-2xl p-3 shadow-xs leading-relaxed ${
-                          isUser
-                            ? 'bg-[#1E4D3E] text-white rounded-tr-none whitespace-pre-line'
-                            : msg.isError
+                        className={`rounded-2xl p-3 shadow-xs leading-relaxed ${isUser
+                          ? 'bg-[#1E4D3E] text-white rounded-tr-none whitespace-pre-line'
+                          : msg.isError
                             ? 'bg-amber-50 text-amber-950 border border-amber-200 rounded-tl-none'
                             : 'bg-white text-slate-800 border border-slate-200/80 rounded-tl-none'
-                        }`}
+                          }`}
                       >
                         {isEmptyPending ? (
                           <div className="flex items-center gap-1.5 py-1 text-emerald-800">
