@@ -131,7 +131,7 @@ export const zh: AppDictionary = {
   scanner: {
     cameraTab: '相机扫码',
     myQrTab: '我的会员码',
-    title: '实景相机扫码赚积分',
+    title: '扫描二维码',
     subtitle: '将相机对准任意 EcoStay 环保任务二维码，自动核验并累计真实 CB 积分',
     liveCamera: '相机运行中',
     cameraReady: '相机就绪',

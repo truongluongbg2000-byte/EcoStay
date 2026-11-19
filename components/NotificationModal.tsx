@@ -259,13 +259,11 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
                     </p>
                     <div className="mt-1.5 flex items-center justify-between text-[10px]">
                       <span className="text-slate-400">{resolved.time}</span>
-                      <span
-                        className={`font-semibold ${
-                          !item.isRead ? 'text-rose-500' : 'text-emerald-700'
-                        }`}
-                      >
-                        {!item.isRead ? t.notifications.tapToRead : t.notifications.readCheck}
-                      </span>
+                      {item.isRead && (
+                        <span className="font-semibold text-emerald-700">
+                          {t.notifications.readCheck}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </button>

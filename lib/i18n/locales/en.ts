@@ -137,7 +137,7 @@ export const en: AppDictionary = {
   scanner: {
     cameraTab: 'Camera Scanner',
     myQrTab: 'MY MEMBER QR',
-    title: 'Scan QR with Live Camera',
+    title: 'Scan QR code',
     subtitle: 'Point camera at any EcoStay QR code to verify and earn real CARBON POINTS',
     liveCamera: 'LIVE CAMERA',
     cameraReady: 'CAMERA READY',

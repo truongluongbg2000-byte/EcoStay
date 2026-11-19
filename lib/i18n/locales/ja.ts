@@ -133,7 +133,7 @@ export const ja: AppDictionary = {
   scanner: {
     cameraTab: 'カメラでスキャン',
     myQrTab: 'マイ会員QR',
-    title: 'ライブカメラQRスキャン',
+    title: 'QRコードをスキャン',
     subtitle: 'EcoStay公式QRコードにカメラを向けると自動で実際のCBポイントが加算されます',
     liveCamera: 'カメラ起動中',
     cameraReady: 'カメラ待機中',

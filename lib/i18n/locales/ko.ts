@@ -133,7 +133,7 @@ export const ko: AppDictionary = {
   scanner: {
     cameraTab: '카메라 스캔',
     myQrTab: '내 회원 QR',
-    title: '실시간 카메라 QR 스캔',
+    title: 'QR 코드 스캔',
     subtitle: 'EcoStay 제휴 QR 코드에 카메라를 대면 자동으로 실제 CB 포인트가 적립됩니다',
     liveCamera: '카메라 작동 중',
     cameraReady: '카메라 준비됨',

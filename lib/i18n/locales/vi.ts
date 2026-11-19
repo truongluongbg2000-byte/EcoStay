@@ -136,7 +136,7 @@ export const vi: AppDictionary = {
   scanner: {
     cameraTab: 'Quét mã camera',
     myQrTab: 'MÃ QR CỦA TÔI',
-    title: 'Quét mã QR bằng Camera thật',
+    title: 'Quét mã QR',
     subtitle: 'Đưa camera vào mã QR EcoStay bất kỳ để xác thực và cộng điểm CACBON POINT thật',
     liveCamera: 'CAMERA ĐANG CHẠY',
     cameraReady: 'CAMERA SẴN SÀNG',

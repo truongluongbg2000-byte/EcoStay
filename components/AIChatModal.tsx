@@ -569,9 +569,6 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                 <Sparkles size={11} className="text-amber-500" />
                 EcoBot AI
               </span>
-              <span className="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">
-                1500 req/ngày
-              </span>
             </div>
           </aside>
 
@@ -678,15 +675,30 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                   e.preventDefault();
                   handleSendMessage();
                 }}
-                className="flex items-center gap-2"
+                className="flex items-end gap-2"
               >
-                <input
-                  type="text"
+                <textarea
+                  rows={1}
                   value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
+                  onChange={(e) => {
+                    setInputText(e.target.value);
+                    // Auto-grow up to ~5 lines
+                    e.target.style.height = 'auto';
+                    e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+                  }}
+                  onKeyDown={(e) => {
+                    // Enter sends, Shift+Enter inserts a newline; ignore Enter while an IME is composing
+                    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+                      e.preventDefault();
+                      if (!isStreaming && inputText.trim()) {
+                        handleSendMessage();
+                        e.currentTarget.style.height = 'auto';
+                      }
+                    }
+                  }}
                   placeholder={t.chat.inputPlaceholder}
                   disabled={isStreaming}
-                  className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-800 focus:border-emerald-500 focus:bg-white focus:outline-hidden disabled:opacity-60 shadow-inner"
+                  className="flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs leading-snug text-slate-800 focus:border-emerald-500 focus:bg-white focus:outline-hidden disabled:opacity-60 shadow-inner max-h-[120px]"
                 />
 
                 {isStreaming ? (

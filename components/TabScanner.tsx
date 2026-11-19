@@ -386,9 +386,6 @@ export const TabScanner: React.FC<TabScannerProps> = ({
                 <h3 className="text-base font-bold text-slate-800">
                   {t.scanner.title}
                 </h3>
-                <p className="text-xs text-slate-500">
-                  {t.scanner.subtitle}
-                </p>
               </div>
 
               <div className="relative overflow-hidden rounded-3xl bg-slate-950 p-3 text-white shadow-xl">
@@ -501,9 +498,6 @@ export const TabScanner: React.FC<TabScannerProps> = ({
 
                 {/* Scan from Real QR Image File */}
                 <div className="mt-3 text-center border-t border-white/10 pt-2.5">
-                  <p className="text-[10px] text-slate-400 mb-2">
-                    {t.scanner.scanAny15Hint}
-                  </p>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}

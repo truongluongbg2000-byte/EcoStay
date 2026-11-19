@@ -100,6 +100,25 @@ const REGION_TARGETS: RegionTarget[] = [
   },
 ];
 
+const MAP_TILE_URL =
+  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+const MAP_TILE_OPTIONS = {
+  maxZoom: 19,
+  subdomains: 'abcd',
+  detectRetina: true,
+  attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+};
+
+// Monochrome line icons (24x24, stroke) used inside map pins
+const CATEGORY_ICON_SVG: Record<string, string> = {
+  food: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+  hotel: '<path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M12 4v6"/><path d="M2 18h20"/>',
+  transport: '<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>',
+  activity: '<circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/>',
+  shopping: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+  all: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+};
+
 const CATEGORY_STYLE: Record<
   Exclude<DestinationCategory, 'all'>,
   { color: string; emoji: string }
@@ -185,10 +204,8 @@ export const EcoMap: React.FC<EcoMapProps> = ({
           attributionControl: false,
         });
 
-        const streetTiles = L.tileLayer(
-          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          { maxZoom: 19 }
-        );
+        const streetTiles = L.tileLayer(MAP_TILE_URL, MAP_TILE_OPTIONS);
+        L.control.attribution({ prefix: false, position: 'bottomright' }).addTo(map);
         streetTiles.addTo(map);
         tileLayerRef.current = streetTiles;
 
@@ -267,10 +284,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
         tileLayerRef.current = satLayer;
         labelLayerRef.current = labelsOverlay;
       } else {
-        const osmLayer = L.tileLayer(
-          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          { maxZoom: 19 }
-        );
+        const osmLayer = L.tileLayer(MAP_TILE_URL, MAP_TILE_OPTIONS);
         osmLayer.addTo(map);
         tileLayerRef.current = osmLayer;
       }
@@ -305,7 +319,6 @@ export const EcoMap: React.FC<EcoMapProps> = ({
           const hubHtml = `
             <div class="relative flex flex-col items-center cursor-pointer group">
               <div class="flex items-center gap-1 rounded-full bg-[#1E4D3E] px-2.5 py-1 text-[10px] font-black text-white shadow-lg border-2 border-white transition-transform group-hover:scale-110 whitespace-nowrap">
-                <span>${reg.icon}</span>
                 <span>${displayRegionName}</span>
                 <span class="rounded-full bg-emerald-400 text-[#0F2820] px-1.5 py-0.2 text-[9px] font-black">${regionCount}</span>
               </div>
@@ -340,30 +353,23 @@ export const EcoMap: React.FC<EcoMapProps> = ({
 
         const isSelectedPin = activeVenue?.id === dest.id;
 
+        const iconSvg = CATEGORY_ICON_SVG[dest.category] || CATEGORY_ICON_SVG.all;
         const customHtml = `
-          <div class="relative flex flex-col items-center cursor-pointer group" style="transform: translate3d(0,0,0);">
-            <div class="mb-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-black text-white shadow-md flex items-center gap-0.5 border border-white/70 transition-transform group-hover:scale-110" style="background-color: ${style.color};">
-              <span>+${dest.pointsReward}</span>
-              <span class="text-[7px] opacity-90">CB</span>
+          <div class="eco-pin ${isSelectedPin ? 'eco-pin--active' : ''}" style="--pin:${style.color};">
+            ${isSelectedPin ? `<div class="eco-pin__badge">+${dest.pointsReward} CB</div>` : ''}
+            <div class="eco-pin__dot">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${iconSvg}</svg>
             </div>
-            <div class="relative flex h-7 w-7 items-center justify-center rounded-full text-white shadow-lg border-2 border-white transition-transform group-hover:scale-110" style="background-color: ${style.color};">
-              <span class="text-[11px] leading-none select-none">${style.emoji}</span>
-              ${
-                isSelectedPin
-                  ? `<span class="absolute -inset-1.5 rounded-full border-2 border-amber-300 animate-ping opacity-80"></span>`
-                  : ''
-              }
-            </div>
-            <div class="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px]" style="border-top-color: ${style.color};"></div>
+            <div class="eco-pin__tip"></div>
           </div>
         `;
 
         const markerIcon = L.divIcon({
           className: 'custom-eco-pin',
           html: customHtml,
-          iconSize: [58, 50],
-          iconAnchor: [29, 48],
-          popupAnchor: [0, -48],
+          iconSize: [60, 56],
+          iconAnchor: [30, 54],
+          popupAnchor: [0, -50],
         });
 
         const marker = L.marker([dest.lat, dest.lng], { icon: markerIcon });
@@ -648,7 +654,6 @@ export const EcoMap: React.FC<EcoMapProps> = ({
                 className="h-2 w-2 rounded-full shrink-0"
                 style={{ backgroundColor: style.color }}
               />
-              <span>{style.emoji}</span>
               <span>{item.label}</span>
             </button>
           );
