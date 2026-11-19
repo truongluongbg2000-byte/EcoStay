@@ -3,6 +3,7 @@ import { retrieveRagContext } from '@/lib/ai/ragStub';
 import { buildSystemPrompt, ChatUserContext } from '@/lib/ai/contextBuilder';
 import {
   createOpenRouterStream,
+  getOpenRouterConfig,
   OpenRouterError,
   OpenRouterMessage,
 } from '@/lib/ai/openrouter';
@@ -25,6 +26,30 @@ interface ChatRequestBody {
   messages?: IncomingChatMessage[];
   userContext?: ChatUserContext;
   lang?: string;
+}
+
+export async function GET() {
+  const geminiConfig = getGeminiConfig();
+  let openRouterConfig = null;
+  try {
+    openRouterConfig = getOpenRouterConfig();
+  } catch {
+    // ignore
+  }
+
+  return NextResponse.json({
+    status: 'online',
+    activeProvider: geminiConfig ? 'Google Gemini 2.0 Flash' : 'OpenRouter',
+    gemini: {
+      configured: Boolean(geminiConfig),
+      model: geminiConfig?.model || null,
+    },
+    openRouter: {
+      configured: Boolean(openRouterConfig),
+      model: openRouterConfig?.model || null,
+    },
+    timestamp: new Date().toISOString(),
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -80,6 +105,11 @@ export async function POST(req: NextRequest) {
 
     // 3. Choose provider: Prefer direct Google Gemini 2.0 Flash if GEMINI_API_KEY is configured
     const geminiConfig = getGeminiConfig();
+    console.log(
+      `[EcoBot] API Request -> Active Provider: ${
+        geminiConfig ? `Google Gemini (${geminiConfig.model})` : 'OpenRouter'
+      }`
+    );
     let upstreamResponse: Response;
 
     if (geminiConfig) {
@@ -206,6 +236,8 @@ export async function POST(req: NextRequest) {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'Cache-Control': 'no-cache, no-transform',
+        'X-EcoBot-Provider': geminiConfig ? 'Google-Gemini-2.0-Flash' : 'OpenRouter',
+        'X-EcoBot-Model': geminiConfig ? geminiConfig.model : 'OpenRouter',
       },
     });
   } catch (error) {
