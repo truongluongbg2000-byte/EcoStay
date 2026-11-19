@@ -39,7 +39,7 @@ export async function GET() {
 
   return NextResponse.json({
     status: 'online',
-    activeProvider: geminiConfig ? 'Google Gemini 2.0 Flash' : 'OpenRouter',
+    activeProvider: geminiConfig ? `Google Gemini (${geminiConfig.model})` : 'OpenRouter',
     gemini: {
       configured: Boolean(geminiConfig),
       model: geminiConfig?.model || null,
@@ -103,27 +103,38 @@ export async function POST(req: NextRequest) {
       ragChunks,
     });
 
-    // 3. Choose provider: Prefer direct Google Gemini 2.0 Flash if GEMINI_API_KEY is configured
+    // 3. Choose provider: Prefer direct Google Gemini if GEMINI_API_KEY is configured
     const geminiConfig = getGeminiConfig();
-    console.log(
-      `[EcoBot] API Request -> Active Provider: ${
-        geminiConfig ? `Google Gemini (${geminiConfig.model})` : 'OpenRouter'
-      }`
-    );
-    let upstreamResponse: Response;
+    let upstreamResponse: Response | null = null;
+    let activeProviderUsed = 'OpenRouter';
 
     if (geminiConfig) {
-      upstreamResponse = await createGeminiStream(
-        conversationMessages,
-        systemPrompt,
-        req.signal
-      );
-    } else {
+      try {
+        console.log(
+          `[EcoBot] API Request -> Trying Google Gemini (${geminiConfig.model})...`
+        );
+        upstreamResponse = await createGeminiStream(
+          conversationMessages,
+          systemPrompt,
+          req.signal
+        );
+        activeProviderUsed = `Google-Gemini (${geminiConfig.model})`;
+      } catch (geminiError) {
+        console.warn(
+          '[EcoBot] Google Gemini failed, falling back to OpenRouter:',
+          geminiError instanceof Error ? geminiError.message : geminiError
+        );
+      }
+    }
+
+    if (!upstreamResponse) {
+      console.log('[EcoBot] API Request -> Using OpenRouter fallback...');
       const fullMessages: OpenRouterMessage[] = [
         { role: 'system', content: systemPrompt },
         ...conversationMessages,
       ];
       upstreamResponse = await createOpenRouterStream(fullMessages, req.signal);
+      activeProviderUsed = 'OpenRouter';
     }
 
     if (!upstreamResponse.body) {
@@ -236,7 +247,7 @@ export async function POST(req: NextRequest) {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'Cache-Control': 'no-cache, no-transform',
-        'X-EcoBot-Provider': geminiConfig ? 'Google-Gemini-2.0-Flash' : 'OpenRouter',
+        'X-EcoBot-Provider': activeProviderUsed,
         'X-EcoBot-Model': geminiConfig ? geminiConfig.model : 'OpenRouter',
       },
     });

@@ -57,47 +57,88 @@ export async function createOpenRouterStream(
 ): Promise<Response> {
   const config = getOpenRouterConfig();
 
-  const response = await fetch(`${config.baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-      'HTTP-Referer': config.appUrl,
-      'X-Title': config.appName,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: config.model,
-      messages,
-      stream: true,
-      temperature: 0.45,
-      max_tokens: 1024,
-      reasoning: {
-        exclude: true,
-      },
-    }),
-    signal,
-  });
+  const candidateModels = Array.from(
+    new Set([
+      config.model,
+      'inclusionai/ling-3.2-flash:free',
+      'google/gemma-4-31b-it:free',
+      'nvidia/nemotron-3.5-lightning:free',
+    ])
+  );
 
-  if (!response.ok) {
-    let errorDetail = `OpenRouter error (${response.status})`;
+  let lastError: Error | null = null;
+
+  for (const modelId of candidateModels) {
     try {
-      const errorJson = await response.json();
-      errorDetail =
-        errorJson?.error?.message ||
-        errorJson?.message ||
-        errorDetail;
-    } catch {
-      // ignore json parse error
+      const response = await fetch(`${config.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${config.apiKey}`,
+          'HTTP-Referer': config.appUrl,
+          'X-Title': config.appName,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: modelId,
+          messages,
+          stream: true,
+          temperature: 0.45,
+          max_tokens: 1024,
+          reasoning: {
+            exclude: true,
+          },
+        }),
+        signal,
+      });
+
+      if (response.ok) {
+        return response;
+      }
+
+      let errorDetail = `OpenRouter error (${response.status})`;
+      try {
+        const errorJson = await response.json();
+        errorDetail =
+          errorJson?.error?.message ||
+          errorJson?.message ||
+          errorDetail;
+      } catch {
+        // ignore json parse error
+      }
+
+      if (response.status === 404 || response.status === 429) {
+        console.warn(`[OpenRouter] Model ${modelId} returned ${response.status}. Trying fallback...`);
+        lastError = new OpenRouterError(
+          errorDetail,
+          response.status,
+          response.status === 404 ? 'MODEL_NOT_FOUND' : 'RATE_LIMITED'
+        );
+        continue;
+      }
+
+      let code = 'UPSTREAM_ERROR';
+      if (response.status === 401) code = 'INVALID_API_KEY';
+      else if (response.status === 402) code = 'INSUFFICIENT_CREDITS';
+
+      throw new OpenRouterError(errorDetail, response.status, code);
+    } catch (err) {
+      if (
+        err instanceof OpenRouterError &&
+        err.code !== 'MODEL_NOT_FOUND' &&
+        err.code !== 'RATE_LIMITED'
+      ) {
+        throw err;
+      }
+      lastError = err instanceof Error ? err : new Error(String(err));
     }
-
-    let code = 'UPSTREAM_ERROR';
-    if (response.status === 401) code = 'INVALID_API_KEY';
-    else if (response.status === 402) code = 'INSUFFICIENT_CREDITS';
-    else if (response.status === 404) code = 'MODEL_NOT_FOUND';
-    else if (response.status === 429) code = 'RATE_LIMITED';
-
-    throw new OpenRouterError(errorDetail, response.status, code);
   }
 
-  return response;
+  throw (
+    lastError ||
+    new OpenRouterError(
+      'All OpenRouter models failed to respond',
+      502,
+      'UPSTREAM_ERROR'
+    )
+  );
 }

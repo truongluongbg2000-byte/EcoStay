@@ -26,15 +26,15 @@ export function getGeminiConfig(): GeminiConfig | null {
     return null;
   }
 
-  let rawModel = (process.env.GEMINI_MODEL || 'gemini-2.5-flash').trim();
+  let rawModel = (process.env.GEMINI_MODEL || 'gemini-1.5-flash').trim();
   // Strip any accidental 'models/' or 'google/' prefixes
   rawModel = rawModel.replace(/^models\//i, '').replace(/^google\//i, '');
 
-  // Google recommended gemini-3.8-flash when retiring 2.0-flash
+  // Auto-upgrade if deprecated 2.0-flash is set in env
   const model =
     rawModel === 'gemini-2.0-flash' || rawModel === 'gemini-2.0-flash-001'
-      ? 'gemini-3.8-flash'
-      : rawModel || 'gemini-3.8-flash';
+      ? 'gemini-1.5-flash'
+      : rawModel || 'gemini-1.5-flash';
 
   return { apiKey, model };
 }
@@ -59,13 +59,14 @@ export async function createGeminiStream(
     parts: [{ text: m.content }],
   }));
 
-  // Automatic model fallback list: try recommended model first, then fallbacks on 404/503/429
+  // Automatic model fallback list: proven stable 1.5-flash first, then alternatives
   const candidateModels = Array.from(
     new Set([
       config.model,
-      'gemini-3.8-flash',
-      'gemini-2.5-flash',
       'gemini-1.5-flash',
+      'gemini-2.5-flash',
+      'gemini-3.8-flash',
+      'gemini-1.5-pro',
     ])
   );
 
@@ -112,10 +113,10 @@ export async function createGeminiStream(
         // ignore json parse error
       }
 
-      // If 404 (model deprecated) or 503 (high demand) or 429 (rate limited on specific model), try next candidate!
+      // If 404 (model not found), 503 (high demand) or 429 (rate limited on model), try next candidate
       if (response.status === 404 || response.status === 503 || response.status === 429) {
         console.warn(
-          `[Gemini] Model ${modelName} returned ${response.status} (${errorDetail}). Trying next candidate...`
+          `[Gemini] Model ${modelName} returned ${response.status} (${errorDetail}). Trying fallback...`
         );
         lastError = new GeminiError(
           errorDetail,
@@ -127,7 +128,6 @@ export async function createGeminiStream(
 
       let code = 'UPSTREAM_ERROR';
       if (response.status === 400 || response.status === 403) code = 'INVALID_API_KEY';
-      else if (response.status === 429) code = 'RATE_LIMITED';
 
       throw new GeminiError(errorDetail, response.status, code);
     } catch (err) {
