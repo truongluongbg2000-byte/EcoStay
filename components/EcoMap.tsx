@@ -92,13 +92,14 @@ const REGION_TARGETS: RegionTarget[] = [
   },
 ];
 
+// Esri World Street Map: free, no API key required, clean cartography.
 const MAP_TILE_URL =
-  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
 const MAP_TILE_OPTIONS = {
   maxZoom: 19,
-  subdomains: 'abcd',
+  maxNativeZoom: 18,
   detectRetina: true,
-  attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+  attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, OpenStreetMap contributors',
 };
 
 // Monochrome line icons (24x24, stroke) used inside map pins
@@ -265,7 +266,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
       if (mapMode === 'satellite') {
         const satLayer = L.tileLayer(
           'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-          { maxZoom: 19 }
+          { maxZoom: 19, attribution: 'Tiles &copy; Esri' }
         );
         const labelsOverlay = L.tileLayer(
           'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
