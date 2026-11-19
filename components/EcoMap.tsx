@@ -512,7 +512,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
       {/* 2. Real Leaflet Map Viewport */}
       <div
         className={`relative w-full overflow-hidden rounded-2xl border border-slate-200 shadow-inner bg-slate-100 isolate z-0 transition-all duration-300 ${
-          isExpanded ? 'h-[420px]' : 'h-64'
+          isExpanded ? 'h-[420px] lg:h-[600px]' : 'h-64 lg:h-[440px]'
         }`}
       >
         <div ref={mapContainerRef} className="h-full w-full z-10" />

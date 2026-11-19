@@ -276,7 +276,7 @@ export const TabScanner: React.FC<TabScannerProps> = ({
   };
 
   return (
-    <div className="space-y-4 px-4 pt-3 pb-8 text-left">
+    <div className="space-y-4 px-4 pt-3 pb-8 text-left lg:mx-auto lg:max-w-2xl">
       <input
         ref={fileInputRef}
         type="file"

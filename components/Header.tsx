@@ -24,8 +24,8 @@ export const Header: React.FC<HeaderProps> = ({
   const displayRank = t.data.ranks[user.rank] || user.rank;
 
   return (
-    <header className="sticky top-0 z-30 bg-[#1E4D3E] px-4 pt-4 pb-3.5 text-white shadow-md">
-      <div className="flex items-center justify-between">
+    <header className="sticky top-0 z-30 bg-[#1E4D3E] px-4 pt-4 pb-3.5 text-white shadow-md lg:px-8 lg:py-4">
+      <div className="flex items-center justify-between lg:mx-auto lg:max-w-5xl">
         {/* User Info & Avatar */}
         <div
           onClick={onOpenProfile}

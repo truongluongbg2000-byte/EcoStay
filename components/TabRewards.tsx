@@ -180,7 +180,7 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
           </div>
 
           {/* Rewards List */}
-          <div className="space-y-3.5">
+          <div className="space-y-3.5 lg:grid lg:gap-4 lg:space-y-0 lg:items-start lg:grid-cols-2 2xl:grid-cols-3">
             {filteredRewards.map((reward) => {
               const canAfford = userPoints >= reward.points;
               const trans = t.data.rewards[reward.id];

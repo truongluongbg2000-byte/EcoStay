@@ -37,6 +37,8 @@ import { AIChatModal } from '@/components/AIChatModal';
 import { MissionQRModal } from '@/components/MissionQRModal';
 import { AuthModal } from '@/components/AuthModal';
 import { LoginScreen } from '@/components/LoginScreen';
+import { SideNav } from '@/components/SideNav';
+import { DesktopRail, DesktopBrandPanel } from '@/components/DesktopRail';
 import { triggerEcoConfetti } from '@/components/Confetti';
 import { Sparkles, CheckCircle2, UserCheck } from 'lucide-react';
 import { mockAccounts } from '@/data/mockData';
@@ -574,7 +576,8 @@ export default function EcoStayApp() {
   // If not logged in, show Login Screen first!
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-slate-900/5 sm:bg-slate-900/20 flex items-center justify-center p-0 sm:p-4">
+      <div className="min-h-screen bg-slate-900/5 sm:bg-slate-900/20 flex items-center justify-center p-0 sm:p-4 lg:grid lg:w-full lg:grid-cols-[1.1fr_1fr] lg:items-center lg:p-0 lg:bg-[#F1F5F2]">
+        <DesktopBrandPanel currentLang={currentLang} />
         <LoginScreen
           currentLang={currentLang}
           onChangeLang={setCurrentLang}
@@ -609,7 +612,16 @@ export default function EcoStayApp() {
   }
 
   return (
-    <div className="relative mx-auto w-full max-w-md min-h-screen bg-[#F8FAF8] text-[#1B3B2B] pb-24 shadow-2xl font-sans rounded-none sm:rounded-[40px] overflow-hidden border-0 sm:border-8 sm:border-slate-800 flex flex-col justify-between">
+    <div className="contents lg:flex lg:min-h-screen lg:w-full">
+    <SideNav
+      activeTab={activeTab}
+      onSelectTab={setActiveTab}
+      onOpenAIChat={() => setIsAIChatOpen(true)}
+      cartCount={vouchers.filter((v) => !v.isUsed).length}
+      currentLang={currentLang}
+      user={user}
+    />
+    <div className="relative mx-auto w-full max-w-md min-h-screen bg-[#F8FAF8] text-[#1B3B2B] pb-24 shadow-2xl font-sans rounded-none sm:rounded-[40px] overflow-hidden border-0 sm:border-8 sm:border-slate-800 flex flex-col justify-between lg:mx-0 lg:max-w-none lg:min-w-0 lg:flex-1 lg:justify-start lg:rounded-none lg:border-0 lg:shadow-none lg:pb-8 lg:overflow-visible">
       {/* Top Header */}
       <Header
         user={user}
@@ -620,7 +632,7 @@ export default function EcoStayApp() {
       />
 
       {/* Main Content Rendered by Tab */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto lg:overflow-visible lg:mx-auto lg:w-full lg:max-w-5xl lg:px-4 lg:pt-2">
         {activeTab === 'home' && (
           <TabHome
             user={user}
@@ -695,7 +707,7 @@ export default function EcoStayApp() {
 
       {/* Floating Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-2xl bg-slate-900/90 px-4 py-2.5 text-xs font-semibold text-white shadow-2xl backdrop-blur-md animate-fadeIn max-w-[90%] text-center">
+        <div className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-2xl bg-slate-900/90 px-4 py-2.5 text-xs font-semibold text-white shadow-2xl backdrop-blur-md animate-fadeIn max-w-[90%] text-center">
           {toastMessage.icon}
           <span>{toastMessage.text}</span>
         </div>
@@ -787,6 +799,13 @@ export default function EcoStayApp() {
         onClose={() => setIsAboutOpen(false)}
         currentLang={currentLang}
       />
+    </div>
+    <DesktopRail
+      user={user}
+      missions={missions}
+      currentLang={currentLang}
+      onNavigate={setActiveTab}
+    />
     </div>
   );
 }

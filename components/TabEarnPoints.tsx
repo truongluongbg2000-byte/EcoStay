@@ -125,7 +125,7 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
       </div>
 
       {/* 3. Detailed Mission List by Category (100% QR Scan Powered) */}
-      <div className="space-y-2.5">
+      <div className="space-y-2.5 lg:grid lg:gap-4 lg:space-y-0 lg:items-start lg:grid-cols-2">
         {filteredMissions.map((item) => {
           const isDone = item.completed;
           const trans = t.data.missions[item.id];

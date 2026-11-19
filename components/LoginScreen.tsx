@@ -143,7 +143,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   };
 
   return (
-    <div className="relative mx-auto w-full max-w-md min-h-screen bg-gradient-to-b from-[#E8F6EC] via-[#F2FAF4] to-[#E2F3E7] text-slate-800 shadow-2xl font-sans rounded-none sm:rounded-[40px] overflow-hidden border-0 sm:border-8 sm:border-slate-800 flex flex-col justify-between p-4 sm:p-5 text-left animate-fadeIn">
+    <div className="relative mx-auto w-full max-w-md min-h-screen lg:min-h-0 lg:my-10 lg:rounded-[32px] lg:border lg:border-emerald-100 lg:shadow-xl bg-gradient-to-b from-[#E8F6EC] via-[#F2FAF4] to-[#E2F3E7] text-slate-800 shadow-2xl font-sans rounded-none sm:rounded-[40px] overflow-hidden border-0 sm:border-8 sm:border-slate-800 flex flex-col justify-between p-4 sm:p-5 text-left animate-fadeIn">
       {/* Subtle Light-Green Ambient Blobs */}
       <div className="pointer-events-none absolute -top-16 -right-16 h-52 w-52 rounded-full bg-emerald-300/25 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-green-300/25 blur-3xl" />

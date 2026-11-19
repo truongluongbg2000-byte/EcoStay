@@ -62,7 +62,7 @@ export const TabMore: React.FC<TabMoreProps> = ({
   const displayRank = t.data.ranks[user.rank] || user.rank;
 
   return (
-    <div className="space-y-4 px-4 pt-3 pb-8 text-left">
+    <div className="space-y-4 px-4 pt-3 pb-8 text-left lg:mx-auto lg:max-w-2xl">
       {/* 1. Header Profile Card */}
       <div className="rounded-3xl bg-white p-4 shadow-sm border border-emerald-950/5 flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">

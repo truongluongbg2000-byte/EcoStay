@@ -227,7 +227,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
   return (
     <div className="space-y-3.5 px-4 pt-3 pb-24 text-left relative">
       {/* 1. CACBON POINT Card (Clean: NO 1đ=1000đ, NO 3 metric bars) */}
-      <div className="rounded-3xl bg-white p-4 shadow-sm border border-emerald-950/5 relative overflow-hidden">
+      <div className="rounded-3xl bg-white p-4 shadow-sm border border-emerald-950/5 relative overflow-hidden xl:hidden">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
@@ -337,9 +337,9 @@ export const TabHome: React.FC<TabHomeProps> = ({
       </div>
 
       {/* 5. Certified Green Venues List */}
-      <div className="space-y-3">
+      <div className="space-y-3 lg:grid lg:gap-4 lg:space-y-0 lg:items-start lg:grid-cols-2 2xl:grid-cols-3">
         {filtered.length === 0 ? (
-          <div className="rounded-3xl bg-white p-6 text-center border border-slate-100">
+          <div className="rounded-3xl bg-white p-6 text-center border border-slate-100 lg:col-span-full">
             <Compass size={28} className="mx-auto text-slate-300 mb-1.5" />
             <p className="text-xs font-semibold text-slate-700">
               {t.home.noVenuesFound}
@@ -440,7 +440,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
       </div>
 
       {/* 6. Prominent Floating AI Chatbot Avatar Button */}
-      <div className="fixed bottom-20 right-4 z-40 flex flex-col items-end">
+      <div className="fixed bottom-20 right-4 z-40 flex flex-col items-end lg:hidden">
         <button
           onClick={onOpenAIChat}
           className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-[#1E4D3E] via-[#2D6A56] to-emerald-500 shadow-xl ring-4 ring-white/90 hover:scale-105 active:scale-95 transition-all"

@@ -36,7 +36,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi">
-      <body className="min-h-screen bg-[#0F2820] flex items-center justify-center p-0 sm:p-4 md:p-6">
+      <body className="min-h-screen bg-[#0F2820] flex items-center justify-center p-0 sm:p-4 md:p-6 lg:block lg:p-0 lg:bg-[#F1F5F2]">
         {children}
       </body>
     </html>

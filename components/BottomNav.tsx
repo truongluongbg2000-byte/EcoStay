@@ -22,7 +22,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   const t = getDictionary(currentLang);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 mx-auto max-w-md">
+    <div className="fixed bottom-0 left-0 right-0 z-40 mx-auto max-w-md lg:hidden">
       <nav className="relative flex items-center justify-between border-t border-emerald-900/10 bg-white/95 px-2 py-1.5 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] backdrop-blur-md">
         {/* Tab 1: Home */}
         <button

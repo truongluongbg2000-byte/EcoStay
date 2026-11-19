@@ -82,6 +82,26 @@ export interface AppDictionary {
     earn: string;
     more: string;
   };
+  desktop: {
+    tagline: string;
+    ecoBot: string;
+    walletTitle: string;
+    expiresOn: string; // uses {date}
+    earnMore: string;
+    impactTitle: string;
+    networkTitle: string;
+    partners: string;
+    regions: string;
+    missions: string;
+    todayTitle: string;
+    todayProgress: string; // uses {done} {total}
+    howTitle: string;
+    steps: { title: string; desc: string }[];
+    phoneTitle: string;
+    phoneDesc: string;
+    loginHeadline: string;
+    loginSub: string;
+  };
   header: {
     hello: string;
     openProfile: string;
