@@ -258,10 +258,15 @@ export const ja: AppDictionary = {
     saveSettingsBtn: '設定を保存',
   },
   chat: {
-    subtitle: 'OpenRouter AI • エコ旅アシスタント',
+    subtitle: 'EcoBot – エコ旅アシスタント',
     newChatTitle: '新しい会話',
+    newChatBtn: '新しいチャット',
+    historyTitle: 'チャット履歴',
+    emptyHistory: 'チャット履歴はありません',
+    deleteChatConfirm: 'チャットを削除',
+    toggleSidebar: 'チャット履歴',
     welcomeText:
-      'こんにちは **{name}** さん！OpenRouter連携のAIエコ旅アシスタント **EcoBot** です。ベトナムの低炭素旅行プランや保有中の **{points} カーボンポイント(CB)** の活用法をご案内します。何でも聞いてください！',
+      'こんにちは {name} さん！EcoStay の AI エコ旅アシスタント EcoBot です。ベトナムの低炭素旅行プランや保有中の {points} カーボンポイント(CB) の活用法をご案内します。何でも聞いてください！',
     suggestions: [
       'ホイアン1泊2日のエコ旅行プランを作って',
       'ホテルでCBを貯める方法は？',
@@ -275,12 +280,12 @@ export const ja: AppDictionary = {
     stopTitle: '生成を停止',
     sendTitle: '送信',
     errMissingKey:
-      'OpenRouter APIキーが未設定です。`.env.local` の `OPENROUTER_API_KEY` にキーを設定して再起動してください。',
+      'AI APIキーが未設定です。`.env.local` の `GEMINI_API_KEY`（または `OPENROUTER_API_KEY`）を設定して再起動してください。',
     errInvalidKey:
-      '`OPENROUTER_API_KEY` が無効または期限切れです。openrouter.ai/keys をご確認ください。',
+      'APIキーが無効または期限切れです。設定をご確認ください。',
     errRateLimit:
-      '無料モデル(`inclusionai/ling-3.2-flash:free`)が混み合っています(429)。数秒後に再試行してください。',
-    errModelNotFound: '`OPENROUTER_MODEL` のモデルが見つかりません。',
+      'AIサービスが混み合っています。数秒後に再試行してください。',
+    errModelNotFound: '指定されたAIモデルが見つかりません。',
     errEmpty: '回答が空でした。もう一度お試しください。',
     errNetwork: 'EcoBot AIに接続できませんでした。再試行してください。',
   },

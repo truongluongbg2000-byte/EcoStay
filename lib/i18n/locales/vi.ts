@@ -264,10 +264,15 @@ export const vi: AppDictionary = {
     saveSettingsBtn: 'Lưu cài đặt',
   },
   chat: {
-    subtitle: 'OpenRouter AI • Trợ Lý Du Lịch Xanh',
+    subtitle: 'EcoBot – Trợ Lý Du Lịch Xanh',
     newChatTitle: 'Làm mới cuộc trò chuyện',
+    newChatBtn: 'Trò chuyện mới',
+    historyTitle: 'Lịch sử trò chuyện',
+    emptyHistory: 'Chưa có cuộc trò chuyện nào',
+    deleteChatConfirm: 'Xóa trò chuyện',
+    toggleSidebar: 'Lịch sử chat',
     welcomeText:
-      'Xin chào **{name}**! Mình là **EcoBot** – Trợ lý Du Lịch Xanh AI kết nối trực tiếp OpenRouter. Mình có thể giúp bạn lên lịch trình du lịch xanh và tư vấn tối ưu **{points} Điểm Cacbon (CB)** hiện có. Bạn cần hỗ trợ gì nào?',
+      'Xin chào {name}! Mình là EcoBot – Trợ lý Du Lịch Xanh của dự án EcoStay. Mình có thể giúp bạn lên lịch trình du lịch xanh và tư vấn tối ưu {points} Điểm Cacbon (CB) hiện có. Bạn cần hỗ trợ gì nào?',
     suggestions: [
       'Lên lịch trình 2N1Đ tại Hội An xanh',
       'Làm sao để tích điểm CB khi lưu trú?',
@@ -281,13 +286,13 @@ export const vi: AppDictionary = {
     stopTitle: 'Dừng trả lời',
     sendTitle: 'Gửi',
     errMissingKey:
-      'Chưa cấu hình khóa OpenRouter API. Bạn hãy dán API Key vào biến `OPENROUTER_API_KEY` trong file `.env.local` rồi khởi động lại `npm run dev` nhé!',
+      'Chưa cấu hình API Key. Bạn hãy dán khóa Google Gemini vào biến `GEMINI_API_KEY` (hoặc `OPENROUTER_API_KEY`) trong file `.env.local` rồi khởi động lại ứng dụng nhé!',
     errInvalidKey:
-      'Khóa `OPENROUTER_API_KEY` không hợp lệ hoặc đã hết hạn. Vui lòng kiểm tra lại tại openrouter.ai/keys.',
+      'Khóa API không hợp lệ hoặc đã hết hạn. Vui lòng kiểm tra lại tại aistudio.google.com/app/apikey hoặc openrouter.ai/keys.',
     errRateLimit:
-      'Model miễn phí (`inclusionai/ling-3.2-flash:free`) đang tạm quá tải (HTTP 429). Vui lòng đợi vài giây rồi bấm Thử lại nhé!',
+      'Hệ thống AI đang tạm quá tải hoặc chạm giới hạn lượt hỏi (HTTP 429). Vui lòng đợi vài giây rồi bấm Thử lại nhé!',
     errModelNotFound:
-      'Không tìm thấy mã model trong `OPENROUTER_MODEL`. Vui lòng kiểm tra lại tên model trên OpenRouter.',
+      'Không tìm thấy mã model AI. Vui lòng kiểm tra cấu hình trong file `.env.local`.',
     errEmpty: 'Model không trả về nội dung. Bạn vui lòng bấm Thử lại nhé!',
     errNetwork: 'Không thể kết nối EcoBot AI. Vui lòng bấm Thử lại.',
   },

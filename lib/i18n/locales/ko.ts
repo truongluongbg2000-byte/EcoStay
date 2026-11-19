@@ -258,10 +258,15 @@ export const ko: AppDictionary = {
     saveSettingsBtn: '설정 저장',
   },
   chat: {
-    subtitle: 'OpenRouter AI • 친환경 여행 어시스턴트',
+    subtitle: 'EcoBot – 친환경 여행 어시스턴트',
     newChatTitle: '새 대화 시작',
+    newChatBtn: '새 대화',
+    historyTitle: '대화 기록',
+    emptyHistory: '대화 내역이 없습니다',
+    deleteChatConfirm: '대화 삭제',
+    toggleSidebar: '대화 기록',
     welcomeText:
-      '안녕하세요 **{name}**님! 저는 OpenRouter 기반 친환경 여행 AI 어시스턴트 **EcoBot**입니다. 베트남 저탄소 여행 일정 추천과 보유하신 **{points} 카본 포인트(CB)** 활용법을 안내해 드릴게요. 무엇을 도와드릴까요?',
+      '안녕하세요 {name}님! 저는 EcoStay 친환경 여행 AI 어시스턴트 EcoBot입니다. 베트남 저탄소 여행 일정 추천과 보유하신 {points} 카본 포인트(CB) 활용법을 안내해 드릴게요. 무엇을 도와드릴까요?',
     suggestions: [
       '호이안 1박 2일 친환경 여행 일정 추천해 줘',
       '호텔에서 CB 포인트를 어떻게 적립하나요?',
@@ -275,12 +280,12 @@ export const ko: AppDictionary = {
     stopTitle: '응답 중지',
     sendTitle: '보내기',
     errMissingKey:
-      'OpenRouter API 키가 아직 설정되지 않았습니다. `.env.local`의 `OPENROUTER_API_KEY`에 키를 입력하고 서버를 재시작해 주세요.',
+      'API 키가 설정되지 않았습니다. `.env.local`의 `GEMINI_API_KEY` (또는 `OPENROUTER_API_KEY`)에 키를 입력해 주세요.',
     errInvalidKey:
-      '`OPENROUTER_API_KEY`가 올바르지 않거나 만료되었습니다. openrouter.ai/keys에서 확인해 주세요.',
+      'API 키가 올바르지 않거나 만료되었습니다. 키 설정을 확인해 주세요.',
     errRateLimit:
-      '무료 모델(`inclusionai/ling-3.2-flash:free`) 요청이 일시적으로 몰렸습니다(429). 잠시 후 다시 시도해 주세요.',
-    errModelNotFound: '설정된 `OPENROUTER_MODEL`을 찾을 수 없습니다.',
+      'AI 서비스가 일시적으로 혼잡합니다. 잠시 후 다시 시도해 주세요.',
+    errModelNotFound: '설정된 AI 모델을 찾을 수 없습니다.',
     errEmpty: '응답이 비어 있습니다. 다시 시도해 주세요.',
     errNetwork: 'EcoBot AI에 연결할 수 없습니다. 다시 시도해 주세요.',
   },

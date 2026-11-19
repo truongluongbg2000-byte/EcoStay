@@ -6,6 +6,11 @@ import {
   OpenRouterError,
   OpenRouterMessage,
 } from '@/lib/ai/openrouter';
+import {
+  createGeminiStream,
+  getGeminiConfig,
+  GeminiError,
+} from '@/lib/ai/gemini';
 import { isValidLang, Lang } from '@/lib/i18n';
 
 export const runtime = 'nodejs';
@@ -29,7 +34,7 @@ export async function POST(req: NextRequest) {
     const rawMessages = Array.isArray(body.messages) ? body.messages : [];
 
     // Sanitize & keep last 12 turns for fast, focused multi-turn memory
-    const conversationMessages: OpenRouterMessage[] = rawMessages
+    const conversationMessages = rawMessages
       .filter(
         (m): m is IncomingChatMessage =>
           (m.role === 'user' || m.role === 'assistant') &&
@@ -73,22 +78,32 @@ export async function POST(req: NextRequest) {
       ragChunks,
     });
 
-    const fullMessages: OpenRouterMessage[] = [
-      { role: 'system', content: systemPrompt },
-      ...conversationMessages,
-    ];
+    // 3. Choose provider: Prefer direct Google Gemini 2.0 Flash if GEMINI_API_KEY is configured
+    const geminiConfig = getGeminiConfig();
+    let upstreamResponse: Response;
 
-    // 3. Call OpenRouter API (streaming SSE)
-    const upstreamResponse = await createOpenRouterStream(fullMessages, req.signal);
+    if (geminiConfig) {
+      upstreamResponse = await createGeminiStream(
+        conversationMessages,
+        systemPrompt,
+        req.signal
+      );
+    } else {
+      const fullMessages: OpenRouterMessage[] = [
+        { role: 'system', content: systemPrompt },
+        ...conversationMessages,
+      ];
+      upstreamResponse = await createOpenRouterStream(fullMessages, req.signal);
+    }
 
     if (!upstreamResponse.body) {
-      throw new OpenRouterError('Empty stream body from OpenRouter', 502, 'EMPTY_STREAM');
+      throw new Error('Empty stream body from AI upstream provider');
     }
 
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
 
-    // Parse OpenRouter SSE stream -> emit clean UTF-8 text chunks (filtering out <think> blocks)
+    // Parse SSE stream -> emit clean UTF-8 text chunks (filtering out <think> blocks)
     const readableStream = new ReadableStream({
       async start(controller) {
         const reader = upstreamResponse.body!.getReader();
@@ -156,7 +171,11 @@ export async function POST(req: NextRequest) {
 
               try {
                 const parsed = JSON.parse(dataStr);
-                const delta = parsed?.choices?.[0]?.delta?.content;
+                // Supports both OpenRouter and Google Gemini SSE chunks
+                const delta =
+                  parsed?.choices?.[0]?.delta?.content ??
+                  parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
+
                 if (typeof delta === 'string' && delta.length > 0) {
                   emitFilteredText(delta);
                 }
@@ -190,6 +209,16 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
+    if (error instanceof GeminiError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          code: error.code,
+        },
+        { status: error.status }
+      );
+    }
+
     if (error instanceof OpenRouterError) {
       return NextResponse.json(
         {

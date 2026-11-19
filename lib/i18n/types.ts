@@ -296,6 +296,11 @@ export interface AppDictionary {
   chat: {
     subtitle: string;
     newChatTitle: string;
+    newChatBtn: string;
+    historyTitle: string;
+    emptyHistory: string;
+    deleteChatConfirm: string;
+    toggleSidebar: string;
     welcomeText: string; // uses {name}, {points}
     suggestions: string[]; // uses {points} in 3rd item
     thinking: string;

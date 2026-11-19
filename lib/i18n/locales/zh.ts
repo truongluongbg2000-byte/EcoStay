@@ -255,10 +255,15 @@ export const zh: AppDictionary = {
     saveSettingsBtn: '保存设置',
   },
   chat: {
-    subtitle: 'OpenRouter 实时 AI • 绿色旅行助手',
+    subtitle: 'EcoBot – 绿色旅行助手',
     newChatTitle: '开启新对话',
+    newChatBtn: '新建对话',
+    historyTitle: '对话历史',
+    emptyHistory: '暂无历史对话',
+    deleteChatConfirm: '删除对话',
+    toggleSidebar: '历史记录',
     welcomeText:
-      '您好 **{name}**！我是接入 OpenRouter 的智能绿色旅行助手 **EcoBot**。我可以为您规划越南低碳行程，并帮您用好现有的 **{points} 碳积分 (CB)**。请问有什么可以帮您？',
+      '您好 {name}！我是 EcoStay 智能绿色旅行助手 EcoBot。我可以为您规划越南低碳行程，并帮您用好现有的 {points} 碳积分 (CB)。请问有什么可以帮您？',
     suggestions: [
       '规划会安 2天1晚 绿色生态行程',
       '入住酒店如何快速赚取 CB 积分？',
@@ -272,12 +277,12 @@ export const zh: AppDictionary = {
     stopTitle: '停止生成',
     sendTitle: '发送',
     errMissingKey:
-      '尚未配置 OpenRouter API 密钥，请在 `.env.local` 的 `OPENROUTER_API_KEY` 中填入密钥并重启服务。',
+      '尚未配置 AI API 密钥，请在 `.env.local` 的 `GEMINI_API_KEY`（或 `OPENROUTER_API_KEY`）中填入密钥并重启服务。',
     errInvalidKey:
-      '`OPENROUTER_API_KEY` 无效或已过期，请前往 openrouter.ai/keys 检查。',
+      'API 密钥无效或已过期，请检查 `.env.local` 配置。',
     errRateLimit:
-      '免费模型 (`inclusionai/ling-3.2-flash:free`) 当前请求繁忙 (429)，请稍等几秒后重试。',
-    errModelNotFound: '未找到 `OPENROUTER_MODEL` 配置的模型，请检查名称。',
+      'AI 服务当前请求繁忙，请稍等几秒后重试。',
+    errModelNotFound: '未找到配置的 AI 模型，请检查配置。',
     errEmpty: '模型返回内容为空，请点击重试。',
     errNetwork: '无法连接到 EcoBot AI，请点击重试。',
   },

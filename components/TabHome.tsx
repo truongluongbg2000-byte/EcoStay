@@ -466,7 +466,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
         </button>
 
         <span className="mt-1 rounded-full bg-slate-900/80 px-2 py-0.5 text-[9px] font-extrabold text-emerald-300 backdrop-blur-sm shadow pointer-events-none">
-          EcoBot AI
+          EcoBot
         </span>
       </div>
 

@@ -266,10 +266,15 @@ export const en: AppDictionary = {
     saveSettingsBtn: 'Save Settings',
   },
   chat: {
-    subtitle: 'OpenRouter Live AI • Green Travel Assistant',
+    subtitle: 'EcoBot – Green Travel Assistant',
     newChatTitle: 'New conversation',
+    newChatBtn: 'New Chat',
+    historyTitle: 'Chat History',
+    emptyHistory: 'No conversations yet',
+    deleteChatConfirm: 'Delete chat',
+    toggleSidebar: 'Chat history',
     welcomeText:
-      'Hello **{name}**! I am **EcoBot**, your AI Green Travel Assistant powered by OpenRouter. I can help you plan low-carbon trips in Vietnam and maximize your **{points} Carbon Points (CB)**. How can I help you today?',
+      'Hello {name}! I am EcoBot, your AI Green Travel Assistant for EcoStay. I can help you plan low-carbon trips in Vietnam and maximize your {points} Carbon Points (CB). How can I help you today?',
     suggestions: [
       'Plan a 2D1N green trip in Hoi An',
       'How do I earn CB at hotels?',
@@ -283,13 +288,13 @@ export const en: AppDictionary = {
     stopTitle: 'Stop generating',
     sendTitle: 'Send',
     errMissingKey:
-      'OpenRouter API key is not configured yet. Please paste your key into `OPENROUTER_API_KEY` inside `.env.local` and restart `npm run dev`.',
+      'AI API key is not configured yet. Please paste your Google Gemini key into `GEMINI_API_KEY` (or `OPENROUTER_API_KEY`) in `.env.local` and restart the application.',
     errInvalidKey:
-      'Your OpenRouter API key is invalid or expired. Please check `OPENROUTER_API_KEY` in `.env.local`.',
+      'Your AI API key is invalid or expired. Please check your key in `.env.local`.',
     errRateLimit:
-      'The free model (`inclusionai/ling-3.2-flash:free`) is currently rate-limited. Please wait a few seconds and tap Retry.',
+      'The AI service is currently busy or rate-limited. Please wait a few moments and tap Retry.',
     errModelNotFound:
-      'The configured OpenRouter model ID was not found. Please verify `OPENROUTER_MODEL` in `.env.local`.',
+      'The configured AI model was not found. Please verify your `.env.local` configuration.',
     errEmpty: 'The model returned an empty response. Please try again.',
     errNetwork: 'Unable to reach EcoBot AI. Please try again.',
   },
