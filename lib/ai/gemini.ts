@@ -30,11 +30,11 @@ export function getGeminiConfig(): GeminiConfig | null {
   // Strip any accidental 'models/' or 'google/' prefixes
   rawModel = rawModel.replace(/^models\//i, '').replace(/^google\//i, '');
 
-  // Google retired 2.0-flash in favor of 2.5-flash and 3.8-flash
+  // Google recommended gemini-3.8-flash when retiring 2.0-flash
   const model =
     rawModel === 'gemini-2.0-flash' || rawModel === 'gemini-2.0-flash-001'
-      ? 'gemini-2.5-flash'
-      : rawModel || 'gemini-2.5-flash';
+      ? 'gemini-3.8-flash'
+      : rawModel || 'gemini-3.8-flash';
 
   return { apiKey, model };
 }
@@ -59,12 +59,12 @@ export async function createGeminiStream(
     parts: [{ text: m.content }],
   }));
 
-  // Automatic model fallback list in case any model is sunset or not available
+  // Automatic model fallback list: try recommended model first, then fallbacks on 404/503/429
   const candidateModels = Array.from(
     new Set([
       config.model,
-      'gemini-2.5-flash',
       'gemini-3.8-flash',
+      'gemini-2.5-flash',
       'gemini-1.5-flash',
     ])
   );
@@ -112,12 +112,16 @@ export async function createGeminiStream(
         // ignore json parse error
       }
 
-      // If 404 (model deprecated or not found on this endpoint), try next candidate
-      if (response.status === 404) {
+      // If 404 (model deprecated) or 503 (high demand) or 429 (rate limited on specific model), try next candidate!
+      if (response.status === 404 || response.status === 503 || response.status === 429) {
         console.warn(
-          `[Gemini] Model ${modelName} returned 404 (${errorDetail}). Trying next candidate...`
+          `[Gemini] Model ${modelName} returned ${response.status} (${errorDetail}). Trying next candidate...`
         );
-        lastError = new GeminiError(errorDetail, response.status, 'MODEL_NOT_FOUND');
+        lastError = new GeminiError(
+          errorDetail,
+          response.status,
+          response.status === 404 ? 'MODEL_NOT_FOUND' : 'RATE_LIMITED'
+        );
         continue;
       }
 
@@ -127,7 +131,11 @@ export async function createGeminiStream(
 
       throw new GeminiError(errorDetail, response.status, code);
     } catch (err) {
-      if (err instanceof GeminiError && err.code !== 'MODEL_NOT_FOUND') {
+      if (
+        err instanceof GeminiError &&
+        err.code !== 'MODEL_NOT_FOUND' &&
+        err.code !== 'RATE_LIMITED'
+      ) {
         throw err;
       }
       lastError = err instanceof Error ? err : new Error(String(err));
