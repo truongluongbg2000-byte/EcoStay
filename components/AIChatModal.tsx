@@ -657,7 +657,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                               onClick={() => handleSendMessage(sug)}
                               className="rounded-full border border-emerald-300 bg-emerald-50/80 px-3 py-1.5 text-[11px] font-medium text-emerald-900 hover:bg-emerald-100 hover:border-emerald-400 transition-all text-left shadow-xs"
                             >
-                              💡 {sug}
+                              {sug}
                             </button>
                           ))}
                         </div>

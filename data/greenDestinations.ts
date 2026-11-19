@@ -25,7 +25,7 @@ const IMG = {
   shoppingPlant: 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?auto=format&fit=crop&w=800&q=80',
 };
 
-export const greenDestinations90: GreenDestination[] = [
+export const greenDestinations: GreenDestination[] = [
   // =========================================================================
   // 1. HỘI AN (Quảng Nam) — 15 cơ sở
   // =========================================================================
@@ -168,23 +168,6 @@ export const greenDestinations90: GreenDestination[] = [
     lat: 15.8855,
     lng: 108.3298,
   },
-  {
-    id: 'ha-t3',
-    name: 'Dịch Vụ Thuyền Năng Lượng Mặt Trời Sông Hoài',
-    category: 'transport',
-    categoryName: 'Di chuyển',
-    location: 'Hội An',
-    title: 'Du ngoạn sông Hoài buổi tối không tiếng ồn động cơ xăng dầu',
-    image: IMG.transportBoat,
-    description:
-      'Du ngoạn sông Hoài buổi tối không tiếng ồn động cơ xăng dầu; thuyền gỗ truyền thống gắn động cơ điện sạc bằng pin mặt trời, không làm ô nhiễm nguồn nước sông Thu Bồn.',
-    greenBadge: 'Solar Boat • Zero Water Pollution',
-    pointsReward: 60,
-    priceEstimate: '100.000đ/lượt',
-    address: 'Bến thuyền Bạch Đằng, Hội An, Quảng Nam',
-    lat: 15.8758,
-    lng: 108.3275,
-  },
   // 🎯 Vui chơi
   {
     id: 'ha-a1',
@@ -271,23 +254,6 @@ export const greenDestinations90: GreenDestination[] = [
     address: '45 Phan Châu Trinh, Hội An, Quảng Nam',
     lat: 15.8794,
     lng: 108.3256,
-  },
-  {
-    id: 'ha-s3',
-    name: 'Cửa Hàng Xà Phòng & Tinh Dầu Thảo Mộc Xanh',
-    category: 'shopping',
-    categoryName: 'Mua sắm',
-    location: 'Hội An',
-    title: 'Mỹ phẩm thiên nhiên không thử nghiệm trên động vật, không bao bì nhựa',
-    image: IMG.shoppingSoap,
-    description:
-      'Mỹ phẩm thiên nhiên không thử nghiệm trên động vật, không bao bì nhựa; xà phòng dầu dừa, tinh dầu sả chanh và bồ kết cô đặc đóng gói bằng giấy nến phân hủy sinh học.',
-    greenBadge: 'Zero Waste Cosmetics',
-    pointsReward: 45,
-    priceEstimate: 'Từ 65.000đ/sản phẩm',
-    address: '19 Lê Lợi, Minh An, Hội An, Quảng Nam',
-    lat: 15.8788,
-    lng: 108.3271,
   },
 
   // =========================================================================
@@ -380,23 +346,6 @@ export const greenDestinations90: GreenDestination[] = [
     lat: 11.8895,
     lng: 108.4302,
   },
-  {
-    id: 'dl-h3',
-    name: 'Légume Homestay Vườn Rau Hữu Cơ',
-    category: 'hotel',
-    categoryName: 'Khách sạn',
-    location: 'Đà Lạt',
-    title: 'Lưu trú nhà gỗ nhỏ xinh giữa nông trại rau hoa không thuốc trừ sâu',
-    image: IMG.hotelLodge,
-    description:
-      'Lưu trú nhà gỗ nhỏ xinh giữa nông trại rau hoa không thuốc trừ sâu; du khách được tự hái rau sạch tại vườn cho bữa ăn hàng ngày, phân loại rác tại nguồn 100%.',
-    greenBadge: 'Zero-Waste Stay',
-    pointsReward: 200,
-    priceEstimate: 'Từ 950.000đ/đêm',
-    address: '12B Bạch Đằng, Phường 7, Đà Lạt, Lâm Đồng',
-    lat: 11.9548,
-    lng: 108.4192,
-  },
   // 🚲 Di chuyển
   {
     id: 'dl-t1',
@@ -483,23 +432,6 @@ export const greenDestinations90: GreenDestination[] = [
     address: 'Bến thuyền Hồ Tuyền Lâm, Đà Lạt, Lâm Đồng',
     lat: 11.8948,
     lng: 108.4418,
-  },
-  {
-    id: 'dl-a3',
-    name: 'Workshop Làm Tinh Dầu Thông Đỏ & Nến Sáp Ong',
-    category: 'activity',
-    categoryName: 'Vui chơi',
-    location: 'Đà Lạt',
-    title: 'Trải nghiệm chiết xuất hương liệu thiên nhiên từ nguyên liệu rừng bền vững',
-    image: IMG.activityCraft,
-    description:
-      'Trải nghiệm chiết xuất hương liệu thiên nhiên từ nguyên liệu rừng bền vững; sử dụng lá thông rụng tự nhiên và sáp ong địa phương để tự tay làm nến thơm không hóa chất.',
-    greenBadge: 'Natural Ingredients',
-    pointsReward: 110,
-    priceEstimate: '180.000đ/vé',
-    address: '48 Khe Sanh, Phường 10, Đà Lạt, Lâm Đồng',
-    lat: 11.9332,
-    lng: 108.4585,
   },
   // 🛍️ Mua sắm
   {
@@ -591,23 +523,6 @@ export const greenDestinations90: GreenDestination[] = [
     address: 'Thôn Bến Đang, Xã Cúc Phương, Nho Quan, Ninh Bình',
     lat: 20.2465,
     lng: 105.7248,
-  },
-  {
-    id: 'cp-f3',
-    name: 'Tiệm Trà Thảo Mộc Rừng Cúc Phương',
-    category: 'food',
-    categoryName: 'Ăn uống',
-    location: 'Cúc Phương',
-    title: 'Thức uống giải nhiệt từ các loại lá thảo dược bản địa thu hái có kiểm soát',
-    image: IMG.foodTea,
-    description:
-      'Thức uống giải nhiệt từ các loại lá thảo dược bản địa thu hái có kiểm soát; trà giảo cổ lam, trà hoa vàng và nước vối nấu ấm đất, phục vụ bằng cốc tre tái sử dụng.',
-    greenBadge: 'Sustainable Herbal Harvest',
-    pointsReward: 35,
-    priceEstimate: 'Từ 30.000đ/ly',
-    address: 'Khu Hồ Mạc, VQG Cúc Phương, Nho Quan, Ninh Bình',
-    lat: 20.2648,
-    lng: 105.6982,
   },
   // 🏨 Khách sạn
   {
@@ -800,23 +715,6 @@ export const greenDestinations90: GreenDestination[] = [
     lat: 20.2385,
     lng: 105.7362,
   },
-  {
-    id: 'cp-s3',
-    name: 'Bộ Ấn Phẩm & Bình Nước Giữ Nhiệt "Bảo Vệ Voọc Mông Trắng"',
-    category: 'shopping',
-    categoryName: 'Mua sắm',
-    location: 'Cúc Phương',
-    title: 'Quà tặng tuyên truyền bảo tồn các loài linh trưởng quý hiếm',
-    image: IMG.shoppingPlant,
-    description:
-      'Quà tặng tuyên truyền bảo tồn các loài linh trưởng quý hiếm; bình nước inox khắc hình voọc Cúc Phương giúp du khách hạn chế dùng chai nhựa dùng một lần trong suốt chuyến đi.',
-    greenBadge: '100% Fund for Conservation',
-    pointsReward: 50,
-    priceEstimate: 'Từ 95.000đ/sản phẩm',
-    address: 'Trung tâm Giáo dục Môi trường Cúc Phương, Ninh Bình',
-    lat: 20.2554,
-    lng: 105.7088,
-  },
 
   // =========================================================================
   // 4. NINH BÌNH (Tràng An - Tam Cốc - Vân Long) — 15 cơ sở
@@ -908,23 +806,6 @@ export const greenDestinations90: GreenDestination[] = [
     lat: 20.2192,
     lng: 105.9395,
   },
-  {
-    id: 'nb-h3',
-    name: 'Chezbeo Homestay Thung Lũng Sen',
-    category: 'hotel',
-    categoryName: 'Khách sạn',
-    location: 'Ninh Bình',
-    title: 'Nhà chòi lá tre nứa mộc mạc nép mình dưới chân núi đá vôi',
-    image: IMG.hotelLodge,
-    description:
-      'Nhà chòi lá tre nứa mộc mạc nép mình dưới chân núi đá vôi; vật liệu xây dựng hoàn toàn từ tre, nứa, lá cọ địa phương, hạn chế bê tông hóa cảnh quan thiên nhiên.',
-    greenBadge: 'Low-Impact Architecture',
-    pointsReward: 180,
-    priceEstimate: 'Từ 650.000đ/đêm',
-    address: 'Làng Khả Lương, Xã Ninh Thắng, Hoa Lư, Ninh Bình',
-    lat: 20.2285,
-    lng: 105.9278,
-  },
   // 🚲 Di chuyển
   {
     id: 'nb-t1',
@@ -959,23 +840,6 @@ export const greenDestinations90: GreenDestination[] = [
     address: 'Bến thuyền Tam Cốc, Ninh Hải, Hoa Lư, Ninh Bình',
     lat: 20.2148,
     lng: 105.9324,
-  },
-  {
-    id: 'nb-t3',
-    name: 'Thuyền Nan Chèo Tay Khu Bảo Tồn Vân Long',
-    category: 'transport',
-    categoryName: 'Di chuyển',
-    location: 'Ninh Bình',
-    title: 'Du ngoạn vùng đất ngập nước không sóng động cơ làm kinh động chim trời',
-    image: IMG.transportBoat,
-    description:
-      'Du ngoạn vùng đất ngập nước không sóng động cơ làm kinh động chim trời; người lái đò chèo tay nhẹ nhàng đưa du khách ngắm núi Mèo Cào và đàn cò trắng bay về tổ lúc hoàng hôn.',
-    greenBadge: 'Wetland Protection',
-    pointsReward: 45,
-    priceEstimate: '100.000đ/vé',
-    address: 'Bến thuyền Vân Long, Gia Vân, Gia Viễn, Ninh Bình',
-    lat: 20.3588,
-    lng: 105.8685,
   },
   // 🎯 Vui chơi
   {
@@ -1120,23 +984,6 @@ export const greenDestinations90: GreenDestination[] = [
     lat: 11.3842,
     lng: 107.3695,
   },
-  {
-    id: 'nct-f3',
-    name: 'Cà Phê Vườn Ca Cao Hữu Cơ Nam Cát Tiên',
-    category: 'food',
-    categoryName: 'Ăn uống',
-    location: 'Nam Cát Tiên',
-    title: 'Thưởng thức ca cao nguyên chất trồng xen canh dưới tán cây ăn trái',
-    image: IMG.foodCoffee,
-    description:
-      'Thưởng thức ca cao nguyên chất trồng xen canh dưới tán cây ăn trái; ca cao chế biến thủ công tại vườn không phụ gia, phục vụ kèm ống hút cỏ bàng tự nhiên.',
-    greenBadge: 'Agroforestry Produce',
-    pointsReward: 35,
-    priceEstimate: 'Từ 35.000đ/ly',
-    address: 'Ấp 1, Xã Nam Cát Tiên, Tân Phú, Đồng Nai',
-    lat: 11.4148,
-    lng: 107.4368,
-  },
   // 🏨 Khách sạn
   {
     id: 'nct-h1',
@@ -1275,23 +1122,6 @@ export const greenDestinations90: GreenDestination[] = [
     address: 'Đảo Tiên, VQG Nam Cát Tiên, Tân Phú, Đồng Nai',
     lat: 11.4288,
     lng: 107.4345,
-  },
-  {
-    id: 'nct-a3',
-    name: 'Tour Ngắm Chim Sớm Bình Minh Tại Trảng Cỏ & Bầu Sấu',
-    category: 'activity',
-    categoryName: 'Vui chơi',
-    location: 'Nam Cát Tiên',
-    title: 'Trải nghiệm quan sát hơn 350 loài chim nhiệt đới trong tự nhiên',
-    image: IMG.activityForest,
-    description:
-      'Trải nghiệm quan sát hơn 350 loài chim nhiệt đới trong tự nhiên; sử dụng ống nhòm chuyên dụng cùng hướng dẫn viên sinh học, tuân thủ quy tắc giữ khoảng cách và không gây tiếng động lớn.',
-    greenBadge: 'Responsible Birdwatching',
-    pointsReward: 160,
-    priceEstimate: '250.000đ/người',
-    address: 'Khu Ramsar Bầu Sấu, VQG Nam Cát Tiên, Đồng Nai',
-    lat: 11.4598,
-    lng: 107.3442,
   },
   // 🛍️ Mua sắm
   {
@@ -1488,23 +1318,6 @@ export const greenDestinations90: GreenDestination[] = [
     lat: 22.3358,
     lng: 103.8428,
   },
-  {
-    id: 'sp-t3',
-    name: 'Tour Xe Đạp Địa Hình Khám Phá Thung Lũng Mường Hoa',
-    category: 'transport',
-    categoryName: 'Di chuyển',
-    location: 'Sa Pa',
-    title: 'Chinh phục cung đường đèo núi bằng xe đạp chuyên dụng thân thiện môi trường',
-    image: IMG.transportBike,
-    description:
-      'Chinh phục cung đường đèo núi bằng xe đạp chuyên dụng thân thiện môi trường; đạp xe qua các bản Tả Van, Giàng Tả Chải, dừng chân tìm hiểu văn hóa bản địa mà không gây tiếng ồn động cơ.',
-    greenBadge: 'Zero Emission Adventure',
-    pointsReward: 55,
-    priceEstimate: '180.000đ/ngày',
-    address: '24 Fansipan, Thị xã Sapa, Lào Cai',
-    lat: 22.3328,
-    lng: 103.8405,
-  },
   // 🎯 Vui chơi
   {
     id: 'sp-a1',
@@ -1591,22 +1404,5 @@ export const greenDestinations90: GreenDestination[] = [
     address: '018 Fansipan, Thị xã Sapa, Lào Cai',
     lat: 22.3335,
     lng: 103.8412,
-  },
-  {
-    id: 'sp-s3',
-    name: 'Quầy Nông Sản Bản Địa & Mật Ong Rừng Hoàng Liên',
-    category: 'shopping',
-    categoryName: 'Mua sắm',
-    location: 'Sa Pa',
-    title: 'Đặc sản vùng cao canh tác thuận tự nhiên không hóa chất',
-    image: IMG.shoppingCraft,
-    description:
-      'Đặc sản vùng cao canh tác thuận tự nhiên không hóa chất; nấm hương rừng khô, gạo nếp nương, mận hậu sấy dẻo và mật ong hoa rừng đựng trong hũ thủy tinh thân thiện môi trường.',
-    greenBadge: 'Direct From Farmers',
-    pointsReward: 45,
-    priceEstimate: 'Từ 65.000đ/sản phẩm',
-    address: 'Chợ Văn Hóa Sapa (Gian hàng Hợp tác xã bản địa), Sapa, Lào Cai',
-    lat: 22.3412,
-    lng: 103.8475,
   },
 ];

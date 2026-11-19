@@ -11,7 +11,7 @@ import {
   Minimize2,
 } from 'lucide-react';
 import { DestinationCategory, GreenDestination } from '@/data/types';
-import { formatText, getDictionary, Lang } from '@/lib/i18n';
+import { formatText, getDictionary, localizePrice, Lang } from '@/lib/i18n';
 import 'leaflet/dist/leaflet.css';
 
 interface EcoMapProps {
@@ -31,7 +31,6 @@ interface RegionTarget {
   lat: number;
   lng: number;
   zoom: number;
-  icon: string;
 }
 
 const REGION_TARGETS: RegionTarget[] = [
@@ -42,7 +41,6 @@ const REGION_TARGETS: RegionTarget[] = [
     lat: 16.3,
     lng: 107.2,
     zoom: 5,
-    icon: '🌐',
   },
   {
     id: 'hoi-an',
@@ -51,7 +49,6 @@ const REGION_TARGETS: RegionTarget[] = [
     lat: 15.886,
     lng: 108.342,
     zoom: 13,
-    icon: '🏮',
   },
   {
     id: 'da-lat',
@@ -60,7 +57,6 @@ const REGION_TARGETS: RegionTarget[] = [
     lat: 11.942,
     lng: 108.442,
     zoom: 12,
-    icon: '🌸',
   },
   {
     id: 'cuc-phuong',
@@ -69,7 +65,6 @@ const REGION_TARGETS: RegionTarget[] = [
     lat: 20.275,
     lng: 105.685,
     zoom: 12,
-    icon: '🌲',
   },
   {
     id: 'ninh-binh',
@@ -78,7 +73,6 @@ const REGION_TARGETS: RegionTarget[] = [
     lat: 20.255,
     lng: 105.925,
     zoom: 11,
-    icon: '🪷',
   },
   {
     id: 'nam-cat-tien',
@@ -87,7 +81,6 @@ const REGION_TARGETS: RegionTarget[] = [
     lat: 11.415,
     lng: 107.405,
     zoom: 12,
-    icon: '🦜',
   },
   {
     id: 'sa-pa',
@@ -96,7 +89,6 @@ const REGION_TARGETS: RegionTarget[] = [
     lat: 22.332,
     lng: 103.852,
     zoom: 12,
-    icon: '⛰️',
   },
 ];
 
@@ -121,13 +113,13 @@ const CATEGORY_ICON_SVG: Record<string, string> = {
 
 const CATEGORY_STYLE: Record<
   Exclude<DestinationCategory, 'all'>,
-  { color: string; emoji: string }
+  { color: string }
 > = {
-  food: { color: '#EA580C', emoji: '🍽️' },
-  hotel: { color: '#E11D48', emoji: '🏨' },
-  transport: { color: '#0284C7', emoji: '🚲' },
-  activity: { color: '#16A34A', emoji: '🎯' },
-  shopping: { color: '#9333EA', emoji: '🛍️' },
+  food: { color: '#EA580C' },
+  hotel: { color: '#E11D48' },
+  transport: { color: '#0284C7' },
+  activity: { color: '#16A34A' },
+  shopping: { color: '#9333EA' },
 };
 
 export const EcoMap: React.FC<EcoMapProps> = ({
@@ -349,7 +341,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
         const style =
           dest.category !== 'all'
             ? CATEGORY_STYLE[dest.category]
-            : { color: '#10B981', emoji: '🌱' };
+            : { color: '#10B981' };
 
         const isSelectedPin = activeVenue?.id === dest.id;
 
@@ -394,7 +386,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
             <span class="rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 text-[10px] font-black shrink-0">
               +${dest.pointsReward} CB
             </span>
-            <span class="text-[10px] font-bold text-slate-700 truncate">${dest.priceEstimate || ''}</span>
+            <span class="text-[10px] font-bold text-slate-700 truncate">${localizePrice(dest.priceEstimate, currentLang === 'vi') || ''}</span>
           </div>
         `;
 
@@ -612,7 +604,6 @@ export const EcoMap: React.FC<EcoMapProps> = ({
                   : 'bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-emerald-900 border border-slate-200/60'
               }`}
             >
-              <span>{reg.icon}</span>
               <span>
                 {reg.id === 'all'
                   ? t.map.allVietnam
@@ -692,7 +683,7 @@ export const EcoMap: React.FC<EcoMapProps> = ({
                   </h4>
                   {activeVenue.priceEstimate && (
                     <p className="text-[10px] font-semibold text-emerald-700 truncate">
-                      {activeVenue.priceEstimate}
+                      {localizePrice(activeVenue.priceEstimate, currentLang === 'vi')}
                     </p>
                   )}
                 </div>

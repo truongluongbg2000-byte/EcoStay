@@ -523,7 +523,7 @@ export const MissionQRModal: React.FC<MissionQRModalProps> = ({
 
             {/* Location Guidance */}
             <p className="mt-2.5 text-center text-[11px] text-slate-600 leading-relaxed px-1">
-              📍 {displayQrInstruction || t.missionModal.defaultInstruction}
+              {displayQrInstruction || t.missionModal.defaultInstruction}
             </p>
 
             {/* Real QR Image Upload Fallback */}

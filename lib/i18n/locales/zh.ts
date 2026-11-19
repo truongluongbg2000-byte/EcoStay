@@ -86,8 +86,8 @@ export const zh: AppDictionary = {
   map: {
     title: '越南绿色目的地地图',
     subtitle: '真实街道地图与绿色认证合作伙伴',
-    streetMode: '🗺️ 街道图',
-    satelliteMode: '🛰️ 卫星图',
+    streetMode: '街道图',
+    satelliteMode: '卫星图',
     recenterTitle: '返回越南全景',
     zoomInTitle: '放大',
     zoomOutTitle: '缩小',

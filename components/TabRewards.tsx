@@ -48,14 +48,14 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
   const t = getDictionary(currentLang);
   const langMeta = getLanguageMeta(currentLang);
 
-  const categories: { id: CategoryType; label: string; icon: string }[] = [
-    { id: 'all', label: t.rewards.categories.all, icon: '🌿' },
-    { id: 'tree', label: t.rewards.categories.tree, icon: '🌲' },
-    { id: 'food', label: t.rewards.categories.food, icon: '🥗' },
-    { id: 'fashion', label: t.rewards.categories.fashion, icon: '👜' },
-    { id: 'hotdeal', label: t.rewards.categories.hotdeal, icon: '🔥' },
-    { id: 'service', label: t.rewards.categories.service, icon: '💆' },
-    { id: 'other', label: t.rewards.categories.other, icon: '🎁' },
+  const categories: { id: CategoryType; label: string }[] = [
+    { id: 'all', label: t.rewards.categories.all },
+    { id: 'tree', label: t.rewards.categories.tree },
+    { id: 'food', label: t.rewards.categories.food },
+    { id: 'fashion', label: t.rewards.categories.fashion },
+    { id: 'hotdeal', label: t.rewards.categories.hotdeal },
+    { id: 'service', label: t.rewards.categories.service },
+    { id: 'other', label: t.rewards.categories.other },
   ];
 
   const filteredRewards = rewards.filter((item) => {
@@ -94,7 +94,7 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          🎁 {t.rewards.storeTab}
+          {t.rewards.storeTab}
         </button>
         <button
           onClick={() => setActiveSubTab('cart')}
@@ -104,7 +104,7 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <span>🛒 {t.rewards.cartTab}</span>
+          <span>{t.rewards.cartTab}</span>
           {activeVouchers.length > 0 && (
             <span className="rounded-full bg-[#D97736] px-1.5 py-0.2 text-[10px] font-extrabold text-white">
               {activeVouchers.length}
@@ -174,7 +174,6 @@ export const TabRewards: React.FC<TabRewardsProps> = ({
                     : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
                 }`}
               >
-                <span>{cat.icon}</span>
                 <span>{cat.label}</span>
               </button>
             ))}

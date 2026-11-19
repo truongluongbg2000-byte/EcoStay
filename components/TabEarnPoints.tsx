@@ -182,7 +182,6 @@ export const TabEarnPoints: React.FC<TabEarnPointsProps> = ({
 
                     {displayQrInstruction && (
                       <p className="mt-1 text-[10px] text-emerald-700 font-medium flex items-center gap-1">
-                        <span>📍</span>
                         <span>{displayQrInstruction}</span>
                       </p>
                     )}

@@ -88,8 +88,8 @@ export const ja: AppDictionary = {
   map: {
     title: 'ベトナム・エコ旅マップ',
     subtitle: '実際の道路地図 & エコ認証パートナー',
-    streetMode: '🗺️ 地図',
-    satelliteMode: '🛰️ 衛星写真',
+    streetMode: '地図',
+    satelliteMode: '衛星写真',
     recenterTitle: 'ベトナム全体を表示',
     zoomInTitle: '拡大',
     zoomOutTitle: '縮小',

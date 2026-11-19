@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { UserProfile, GreenDestination, DestinationCategory } from '@/data/types';
 import { triggerEcoConfetti } from './Confetti';
-import { getDictionary, formatText, Lang } from '@/lib/i18n';
+import { getDictionary, formatText, localizePrice, Lang } from '@/lib/i18n';
 import { EcoMap } from './EcoMap';
 
 interface TabHomeProps {
@@ -423,7 +423,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
                 <div className="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
                   <span className="text-[11px] font-bold text-emerald-800 truncate flex items-center gap-1">
                     <ShieldCheck size={12} className="text-emerald-700 shrink-0" />
-                    <span className="truncate">{item.priceEstimate || t.home.greenBadge100}</span>
+                    <span className="truncate">{localizePrice(item.priceEstimate, currentLang === 'vi') || t.home.greenBadge100}</span>
                   </span>
 
                   <button
@@ -533,7 +533,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
 
                 <div className="rounded-2xl bg-emerald-50/80 p-3 border border-emerald-100 space-y-1.5">
                   <p className="text-[11px] font-bold text-[#1E4D3E]">
-                    🌿 {modalBadge}
+                    {modalBadge}
                   </p>
                   <p className="text-[11px] text-slate-700">
                     • {formatText(t.home.earnRewardNote, { points: viewingDestination.pointsReward })}
@@ -541,7 +541,7 @@ export const TabHome: React.FC<TabHomeProps> = ({
                   {viewingDestination.priceEstimate && (
                     <p className="text-[11px] text-slate-700">
                       • {t.home.priceEstimateLabel}{' '}
-                      <strong>{viewingDestination.priceEstimate}</strong>
+                      <strong>{localizePrice(viewingDestination.priceEstimate, currentLang === 'vi')}</strong>
                     </p>
                   )}
                 </div>

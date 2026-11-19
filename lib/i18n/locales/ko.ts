@@ -88,8 +88,8 @@ export const ko: AppDictionary = {
   map: {
     title: '베트남 친환경 여행지 지도',
     subtitle: '실제 도로 지도 및 친환경 인증 파트너',
-    streetMode: '🗺️ 일반 지도',
-    satelliteMode: '🛰️ 위성 지도',
+    streetMode: '일반 지도',
+    satelliteMode: '위성 지도',
     recenterTitle: '베트남 전체 보기',
     zoomInTitle: '확대',
     zoomOutTitle: '축소',

@@ -1,5 +1,5 @@
 import { UserProfile, RewardItem, Voucher, ImpactLog, GreenDestination, DetailedMission, MockAccount, AppNotification } from './types';
-import { greenDestinations90 } from './greenDestinations';
+import { greenDestinations } from './greenDestinations';
 
 export const initialUserProfile: UserProfile = {
   name: 'Trương Thế Lương',
@@ -16,7 +16,7 @@ export const initialUserProfile: UserProfile = {
   memberCode: 'ECO-TL-883921',
 };
 
-export const initialDestinations: GreenDestination[] = greenDestinations90;
+export const initialDestinations: GreenDestination[] = greenDestinations;
 
 export const initialMissions: DetailedMission[] = [
   // 1. Trong phòng

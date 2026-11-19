@@ -91,8 +91,8 @@ export const en: AppDictionary = {
   map: {
     title: 'Interactive Vietnam Eco-Map',
     subtitle: 'Real street view & certified green partners',
-    streetMode: '🗺️ Street',
-    satelliteMode: '🛰️ Satellite',
+    streetMode: 'Street',
+    satelliteMode: 'Satellite',
     recenterTitle: 'Recenter to Vietnam',
     zoomInTitle: 'Zoom in',
     zoomOutTitle: 'Zoom out',

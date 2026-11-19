@@ -91,8 +91,8 @@ export const vi: AppDictionary = {
   map: {
     title: 'Bản đồ Điểm đến Xanh Việt Nam',
     subtitle: 'Đường phố thực tế & đối tác chuẩn Xanh',
-    streetMode: '🗺️ Đường phố',
-    satelliteMode: '🛰️ Vệ tinh',
+    streetMode: 'Đường phố',
+    satelliteMode: 'Vệ tinh',
     recenterTitle: 'Về toàn cảnh Việt Nam',
     zoomInTitle: 'Phóng to',
     zoomOutTitle: 'Thu nhỏ',
