@@ -279,7 +279,7 @@ export const en: AppDictionary = {
     displayLanguage: 'Display Language',
     signOut: 'Sign Out / Switch User',
     resetDemoData: 'Reset Initial Demo Data',
-    developedBy: 'Developed by MVP Team',
+    developedBy: 'Developed by TheLuong',
     selectLangTitle: 'Select Language',
     selectLangDesc:
       'Choose your preferred display language. The entire interface and content will update immediately.',

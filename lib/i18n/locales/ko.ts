@@ -272,7 +272,7 @@ export const ko: AppDictionary = {
     displayLanguage: '표시 언어',
     signOut: '로그아웃',
     resetDemoData: '초기 데모 데이터 재설정',
-    developedBy: 'MVP 팀 개발',
+    developedBy: 'TheLuong 개발',
     selectLangTitle: '언어 선택',
     selectLangDesc: '원하는 언어를 선택하면 웹 전체 인터페이스와 내용이 즉시 변경됩니다.',
     settingsNotifTitle: '포인트 적립 알림',

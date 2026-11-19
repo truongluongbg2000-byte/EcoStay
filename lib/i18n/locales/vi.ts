@@ -277,7 +277,7 @@ export const vi: AppDictionary = {
     displayLanguage: 'Ngôn ngữ hiển thị',
     signOut: 'Đăng xuất tài khoản',
     resetDemoData: 'Đặt lại dữ liệu Demo ban đầu',
-    developedBy: 'Phát triển bởi Nhóm MVP',
+    developedBy: 'Phát triển bởi TheLuong',
     selectLangTitle: 'Chọn ngôn ngữ',
     selectLangDesc:
       'Lựa chọn ngôn ngữ hiển thị. Toàn bộ tính năng và giao diện sẽ tự động cập nhật ngay lập tức.',

@@ -272,7 +272,7 @@ export const ja: AppDictionary = {
     displayLanguage: '表示言語',
     signOut: 'ログアウト',
     resetDemoData: 'デモデータを初期化',
-    developedBy: 'MVPチーム開発',
+    developedBy: 'TheLuong 開発',
     selectLangTitle: '言語を選択',
     selectLangDesc: 'ご希望の言語を選ぶと、アプリ全体の表示と内容が即座に切り替わります。',
     settingsNotifTitle: 'ポイント獲得通知',

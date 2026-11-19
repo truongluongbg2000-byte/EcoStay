@@ -269,7 +269,7 @@ export const zh: AppDictionary = {
     displayLanguage: '显示语言',
     signOut: '退出登录',
     resetDemoData: '重置初始示例数据',
-    developedBy: '由 MVP 团队开发',
+    developedBy: '由 TheLuong 开发',
     selectLangTitle: '选择语言',
     selectLangDesc: '选择您的偏好语言，整个网页界面与内容将立即切换。',
     settingsNotifTitle: '积分到账提醒',
