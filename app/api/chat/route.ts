@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { retrieveRagContext } from '@/lib/ai/ragStub';
 import { buildSystemPrompt, ChatUserContext } from '@/lib/ai/contextBuilder';
 import {
   createOpenAIStream,
@@ -62,28 +61,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const userMessages = conversationMessages.filter((m) => m.role === 'user');
-    const lastUserMessage = userMessages[userMessages.length - 1]?.content || '';
-    const prevUserMessage = userMessages[userMessages.length - 2]?.content || '';
+    // Build the system prompt (static app facts + this user's profile)
+    const systemPrompt = buildSystemPrompt({ lang, userContext: body.userContext });
 
-    // If the latest user message is a short follow-up (e.g. "chi tiết hơn", "KPI thì sao?"),
-    // combine it with the previous user message so Local RAG retains topic context.
-    const ragQuery =
-      lastUserMessage.length < 35 && prevUserMessage
-        ? `${prevUserMessage} ${lastUserMessage}`
-        : lastUserMessage;
-
-    // 1. Fast In-Memory Local RAG over the EcoStay team's official project document (< 1ms)
-    const ragChunks = await retrieveRagContext(ragQuery, { lang, topK: 3 });
-
-    // 2. Build dynamic system prompt (User profile + EcoStay rules + Future RAG chunks)
-    const systemPrompt = buildSystemPrompt({
-      lang,
-      userContext: body.userContext,
-      ragChunks,
-    });
-
-    // 3. Stream from OpenAI (key is read server-side only)
+    // Stream from OpenAI (key is read server-side only)
     const fullMessages: OpenAIMessage[] = [
       { role: 'system', content: systemPrompt },
       ...conversationMessages,

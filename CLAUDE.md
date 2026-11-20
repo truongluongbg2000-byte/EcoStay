@@ -31,10 +31,9 @@ There is no test suite.
 
 **AI chat (EcoBot).** `components/AIChatModal.tsx` sends a POST to `app/api/chat/route.ts`, which:
 1. Keeps the last 12 turns.
-2. Runs a local keyword RAG (`lib/ai/ragStub.ts`) over the hardcoded `lib/ai/knowledgeBase.ts`, which normalizes away diacritics. It merges short follow-up questions with the previous question.
-3. Builds the system prompt with `lib/ai/contextBuilder.ts`, which injects the user's profile and the RAG chunks.
-4. Streams from OpenAI chat completions (`lib/ai/openai.ts`, server-only). The key is read only from `OPENAI_API_KEY`, validated (must be an `sk-` key, not OpenRouter's `sk-or-`), sent only in the `Authorization` header, and never logged or returned. Upstream errors are mapped to generic codes (`INVALID_API_KEY`, `RATE_LIMITED`, `MODEL_NOT_FOUND`, ...) that the client translates.
-5. Re-parses the upstream SSE into plain UTF-8 text and strips `<think>…</think>` blocks.
+2. Builds the system prompt with `lib/ai/contextBuilder.ts`: a static, cacheable prefix (app rules, mission list and a compact partner-venue list generated from `data/`), then the reply language and the user's sanitized profile. There is no retrieval step, so a venue or mission change in `data/` shows up in the prompt automatically.
+3. Streams from OpenAI chat completions (`lib/ai/openai.ts`, server-only). The key is read only from `OPENAI_API_KEY`, validated (must be an `sk-` key, not OpenRouter's `sk-or-`), sent only in the `Authorization` header, and never logged or returned. Upstream errors are mapped to generic codes (`INVALID_API_KEY`, `RATE_LIMITED`, `MODEL_NOT_FOUND`, ...) that the client translates.
+4. Re-parses the upstream SSE into plain UTF-8 text and strips `<think>…</think>` blocks.
 
 `GET /api/chat` only reports whether a valid key is configured.
 
